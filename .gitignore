@@ -35,9 +35,7 @@ efbundle.exe
 # ---------------------------------------------------------------------
 **/wwwroot/_framework/
 **/wwwroot/_content/
-# Aus den Design Tokens generierte Dateien (Quelle: shared/design-tokens/tokens.json)
-**/wwwroot/css/tokens.generated.css
-**/*.generated.css
+# Note: Web.Client/wwwroot/css/tokens.css is generated from shared/design-tokens/tokens.json but committed on purpose (LP-008).
 # Vendored JS libraries are committed on purpose (no CDNs, AGENTS.md §9).
 # Overrides global ignore rules such as [Ll]ib/ from Visual Studio templates.
 !**/wwwroot/lib/

@@ -102,7 +102,7 @@ Web/
 ├─ ViewModels/<Module>/        MVVM view models for pages with logic
 ├─ Mvvm/                       MvvmComponentBase<TViewModel>
 ├─ Resources/                  German UI strings (.resx)
-└─ wwwroot/                    static files, generated tokens CSS
+└─ wwwroot/                    app.css (base styles from the tokens), manifest, service worker, icons
 ```
 
 ### Web.Client (children – Interactive WebAssembly, PWA)
@@ -120,7 +120,8 @@ Web.Client/
 │  ├─ Speech/                  read-aloud (Web Speech API via JS interop)
 │  └─ DragDrop/                SortableJS wrapper
 ├─ Resources/                  German UI strings
-└─ wwwroot/                    js/ (interop modules), lib/ (vendored JS libraries, e.g. SortableJS – no CDNs)
+└─ wwwroot/                    css/tokens.css (generated, committed), css/fonts.css, fonts/andika/,
+                               js/ (interop modules), lib/ (vendored JS libraries, e.g. SortableJS – no CDNs)
 ```
 
 ### Service (API)

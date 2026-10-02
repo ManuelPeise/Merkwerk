@@ -1,0 +1,28 @@
+# Normalise line endings for everyone
+* text=auto
+
+# Scripts keep the line endings their shell expects
+*.sh   text eol=lf
+*.ps1  text eol=crlf
+*.cmd  text eol=crlf
+*.bat  text eol=crlf
+
+# Solution and project files
+*.sln   text eol=crlf
+*.slnx  text eol=crlf
+*.csproj text eol=crlf
+*.props text eol=crlf
+
+# Binary files
+*.png  binary
+*.jpg  binary
+*.jpeg binary
+*.gif  binary
+*.ico  binary
+*.webp binary
+*.woff binary
+*.woff2 binary
+*.ttf  binary
+*.mp3  binary
+*.wav  binary
+*.pdf  binary

@@ -1,0 +1,17 @@
+<Project>
+  <!-- Shared build settings for every project under sources/ -->
+  <PropertyGroup>
+    <LangVersion>latest</LangVersion>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <EnforceCodeStyleInBuild>true</EnforceCodeStyleInBuild>
+    <GenerateDocumentationFile>false</GenerateDocumentationFile>
+    <TreatWarningsAsErrors Condition="'$(Configuration)' == 'Release'">true</TreatWarningsAsErrors>
+
+    <Authors>Manuel Peise</Authors>
+    <Product>Merkwerk</Product>
+    <Copyright>Copyright (c) 2026 Manuel Peise</Copyright>
+    <RepositoryUrl>https://github.com/ManuelPeise/Merkwerk</RepositoryUrl>
+    <PackageLicenseExpression>MIT</PackageLicenseExpression>
+  </PropertyGroup>
+</Project>

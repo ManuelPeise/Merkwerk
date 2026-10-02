@@ -199,3 +199,8 @@ $RECYCLE.BIN/
 *.swp
 *.orig
 *.rej
+
+# ---------------------------------------------------------------------
+# Claude Code (shared skills/settings are committed, personal ones not)
+# ---------------------------------------------------------------------
+.claude/settings.local.json

@@ -31,11 +31,31 @@ dotnet run --project sources/Web --launch-profile lan
 Allow the Windows firewall prompt for **private** networks. Find the PC's IP with `ipconfig` (IPv4 address).
 On the phone/tablet (same Wi-Fi) open `http://<PC-IP>:5138/ueben/spike`.
 
-### Full check with HTTPS (PWA install, load times)
+### Installing the app (PWA) on Android during development
+
+Android Chrome does **not** install the app from `https://<PC-IP>:8443` with Caddy's self-signed root certificate,
+even when that certificate is installed on the device (it only offers "create shortcut"). What works:
+
+1. Run with the `lan` launch profile – it sets `Pwa__EnableServiceWorker=true`, so the service worker is registered
+   in Development too (it is off for the other profiles, see `App.razor`).
+2. On the device open `chrome://flags/#unsafely-treat-insecure-origin-as-secure`, enter `http://<PC-IP>:5138`,
+   set it to *Enabled* and relaunch Chrome.
+3. Open `http://<PC-IP>:5138/ueben` → menu ⋮ → *Install app*.
+
+### HTTPS via proxy-dev (optional)
 
 Same as LP-005 "On the tablet": `DEV_HOST=<PC-IP>` in `deploy/.env`, start `proxy-dev`, install the root
 certificate on the device (Android: Settings → Security → Encryption & credentials → Install a certificate →
-CA certificate), open `https://<PC-IP>:8443/ueben/spike`, then install the app from the Chrome menu.
+CA certificate), open `https://<PC-IP>:8443/ueben/spike`.
+
+### Troubleshooting (found in LP-007)
+
+| Symptom | Cause | Fix |
+| --- | --- | --- |
+| Device: "site can't be reached" | Windows network is *Public*, inbound blocked | Admin PowerShell: `Set-NetConnectionProfile -InterfaceAlias "WLAN" -NetworkCategory Private` and `New-NetFirewallRule -DisplayName "Merkwerk dev" -Direction Inbound -Protocol TCP -LocalPort 5138,8443 -Action Allow -Profile Private` |
+| `https://<PC-IP>:8443` shows a blank "not secure" page / certificate name mismatch | `DEV_HOST` missing in `deploy/.env` (files created before LP-005), proxy runs as `localhost` | Add `DEV_HOST=<PC-IP>`, then `docker compose -f deploy/docker-compose.yml --profile dev up -d --force-recreate proxy-dev`; check with `... exec proxy-dev printenv DEV_HOST` |
+| Chrome only offers "create shortcut" | Service worker not registered (not `lan` profile) or self-signed HTTPS (see above) | Use the `lan` profile and the Chrome flag over HTTP |
+| Not installable although service worker is registered | Empty ("no-op") fetch handler is ignored by Chrome | Fixed: `service-worker.js` now responds with `fetch(event.request)` |
 
 ### Checks
 
@@ -76,8 +96,14 @@ CA certificate), open `https://<PC-IP>:8443/ueben/spike`, then install the app f
   read-aloud sound good with no noticeable delay. No numbers recorded.
 - The Blazor pattern (SortableJS move undone in JS, model updated in .NET, re-render with `@key`) works without
   DOM glitches.
-- **Still open:** Android tablet (the children's device) via HTTPS with the installed app (checks 6–9) and the
-  `/ueben` load times from LP-005.
+- **Android smartphone, installed app (02.10.2026):** the app is installable over HTTP with the Chrome flag;
+  Chrome on the PC shows no installability errors (only the hint to add screenshots for the richer install UI).
+- **Not installable with the self-signed certificate:** over `https://<PC-IP>:8443` (Caddy `tls internal`, root
+  certificate installed on the phone) Android Chrome only offers a shortcut. Consequence for the Pi (LP-160): the
+  Caddy root certificate on the tablets is not enough for installing the app – we need a host name with a
+  certificate Android trusts out of the box (e.g. own domain + Let's Encrypt via DNS challenge). Decide in LP-160.
+- **Still open:** load times of `/ueben` (first start / cached), read-aloud in flight mode, and the check on the
+  children's tablet.
 - Known limitations to keep in mind: voices load asynchronously (list can be empty for a moment); which voices
   exist depends on the device's speech engine (Android: Settings → System → Languages → Text-to-speech output);
   "(online)" voices need the internet and would send text to the speech provider – Merkwerk must prefer local voices.

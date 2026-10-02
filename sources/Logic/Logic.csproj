@@ -1,8 +1,9 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <ItemGroup>
-    <ProjectReference Include="..\Data.Database\Data.Database.csproj" />
+    <ProjectReference Include="..\Logic.Shared\Logic.Shared.csproj" />
     <ProjectReference Include="..\Shared\Shared.csproj" />
+    <ProjectReference Include="..\Data.Accessor\Data.Accessor.csproj" />
   </ItemGroup>
 
   <PropertyGroup>

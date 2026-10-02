@@ -1,0 +1,75 @@
+# Merkwerk – runtime stack (ADR 009)
+# Local development:  docker compose -f deploy/docker-compose.yml up -d db
+# Raspberry Pi:       docker compose pull && docker compose run --rm migrate && docker compose up -d
+
+name: merkwerk
+
+services:
+  proxy:
+    image: caddy:2
+    restart: unless-stopped
+    ports:
+      - "443:443"
+      - "80:80"
+    environment:
+      MERKWERK_HOST: ${MERKWERK_HOST}
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy-data:/data
+      - caddy-config:/config
+    depends_on:
+      - app
+
+  app:
+    image: ghcr.io/${GHCR_OWNER}/merkwerk:${APP_VERSION:-latest}
+    restart: unless-stopped
+    environment:
+      ASPNETCORE_ENVIRONMENT: Production
+      ASPNETCORE_HTTP_PORTS: "8080"
+      ConnectionStrings__Default: "Server=db;Port=3306;Database=${DB_NAME};User=${DB_USER};Password=${DB_PASSWORD}"
+      Auth__Jwt__SigningKey: ${JWT_SIGNING_KEY}
+      Media__Path: /data/media
+    volumes:
+      - media:/data/media
+    depends_on:
+      db:
+        condition: service_healthy
+
+  # One-shot: applies EF Core migrations (run before starting a new app version)
+  migrate:
+    image: ghcr.io/${GHCR_OWNER}/merkwerk-migrations:${APP_VERSION:-latest}
+    profiles: ["migrate"]
+    environment:
+      ConnectionStrings__Default: "Server=db;Port=3306;Database=${DB_NAME};User=${DB_USER};Password=${DB_PASSWORD}"
+    depends_on:
+      db:
+        condition: service_healthy
+
+  db:
+    image: mysql:8.4
+    restart: unless-stopped
+    command:
+      - --character-set-server=utf8mb4
+      - --collation-server=utf8mb4_0900_ai_ci
+      - --innodb-buffer-pool-size=${DB_BUFFER_POOL:-512M}
+    environment:
+      MYSQL_DATABASE: ${DB_NAME}
+      MYSQL_USER: ${DB_USER}
+      MYSQL_PASSWORD: ${DB_PASSWORD}
+      MYSQL_ROOT_PASSWORD: ${DB_ROOT_PASSWORD}
+    ports:
+      # Only bound to localhost so the app can reach it during development. Remove on the Pi if not needed.
+      - "127.0.0.1:3306:3306"
+    volumes:
+      - db-data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-p${DB_ROOT_PASSWORD}"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+
+volumes:
+  db-data:
+  media:
+  caddy-data:
+  caddy-config:

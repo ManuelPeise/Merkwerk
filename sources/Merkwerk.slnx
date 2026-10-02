@@ -1,8 +1,28 @@
 <Solution>
-  <Folder Name="/01 Web/" />
-  <Folder Name="/02 Service/" />
-  <Folder Name="/03 Logic/" />
-  <Folder Name="/04 Data/" />
-  <Folder Name="/05 Shared/" />
-  <Folder Name="/06 Tests/" />
+  <Folder Name="/01 Web/">
+    <Project Path="Web.Client/Web.Client.csproj" />
+    <Project Path="Web/Web.csproj" />
+  </Folder>
+  <Folder Name="/02 Service/">
+    <Project Path="Service/Service.csproj" />
+  </Folder>
+  <Folder Name="/03 Logic/">
+    <Project Path="Logic.Shared/Logic.Shared.csproj" />
+    <Project Path="Logic/Logic.csproj" />
+  </Folder>
+  <Folder Name="/04 Data/">
+    <Project Path="Data.Accessor/Data.Accessor.csproj" Id="d3a57e06-784d-4c1c-a964-c06f6448f5fb" />
+    <Project Path="Data.Database/Data.Database.csproj" Id="ea55c5dc-f81a-400a-8220-f2744105c90d" />
+  </Folder>
+  <Folder Name="/05 Shared/">
+    <Project Path="Shared/Shared.csproj" />
+  </Folder>
+  <Folder Name="/06 Tests/">
+    <Project Path="Architecture.Tests/Architecture.Tests.csproj" />
+    <Project Path="Data.IntegrationTests/Data.IntegrationTests.csproj" />
+    <Project Path="Logic.Shared.Tests/Logic.Shared.Tests.csproj" />
+    <Project Path="Logic.Tests/Logic.Tests.csproj" />
+    <Project Path="Service.IntegrationTests/Service.IntegrationTests.csproj" />
+    <Project Path="Web.Tests/Web.Tests.csproj" />
+  </Folder>
 </Solution>

@@ -1,89 +1,73 @@
 # =====================================================================
-#  Merkwerk – Projektmappe anlegen (LP-001)
-#  Ausfuehren in PowerShell:  cd D:\WorkBench\Merkwerk\sources
-#                             .\create-solution.ps1
-#  Voraussetzung: .NET 10 SDK  (dotnet --version  ->  10.x)
-#  Die vorhandene, leere Merkwerk.slnx wird befuellt.
+#  Merkwerk – create the remaining projects of the solution (LP-001)
+#  Run in PowerShell:   cd D:\WorkBench\Merkwerk\sources
+#                       .\create-solution.ps1
+#  Requires the .NET 10 SDK.  Data.Database and Data.Accessor already exist
+#  and are only wired up, not recreated.
+#  Project names have no "Merkwerk." prefix (decision 02.10.2026).
 # =====================================================================
 $ErrorActionPreference = "Stop"
 $sln = "Merkwerk.slnx"
 
-# ---------- 01 Web ----------------------------------------------------
-# Blazor Web App mit Server- UND WebAssembly-Teil (Rendermodus je Seite)
-dotnet new blazor -n Merkwerk.Web --interactivity Auto --empty
-#   -> erzeugt Merkwerk.Web (Host, Erwachsene) und Merkwerk.Web.Client (Kinder, WASM)
+function Invoke-Dotnet {
+    & dotnet @args
+    if ($LASTEXITCODE -ne 0) { throw "dotnet $($args -join ' ') failed (exit code $LASTEXITCODE)" }
+}
 
-# ---------- 02 Service ------------------------------------------------
-# Klassenbibliothek mit API-Controllern; wird von Merkwerk.Web gehostet
-dotnet new classlib -n Merkwerk.Service
+# ---------- 01 Web -----------------------------------------------------
+# Blazor Web App with server AND WebAssembly part (render mode per page).
+# Generated into a temp folder first because the template nests its output.
+Invoke-Dotnet new blazor -n Web --interactivity Auto --empty -o _tmp_web
+Move-Item _tmp_web\Web        .\Web
+Move-Item _tmp_web\Web.Client .\Web.Client
+Remove-Item _tmp_web -Recurse -Force
 
-# ---------- 03 Logic --------------------------------------------------
-dotnet new classlib -n Merkwerk.Logic
-dotnet new classlib -n Merkwerk.Logic.Shared      # Pruefregeln, Generatoren (auch WASM)
+# ---------- 02 Service -------------------------------------------------
+Invoke-Dotnet new classlib -n Service
 
-# ---------- 04 Data ---------------------------------------------------
-dotnet new classlib -n Merkwerk.Data.Context     # Entities, DbContext, Migrationen
-dotnet new classlib -n Merkwerk.Data.Accessor    # Repositories, Unit of Work
+# ---------- 03 Logic ---------------------------------------------------
+Invoke-Dotnet new classlib -n Logic
+Invoke-Dotnet new classlib -n Logic.Shared
 
-# ---------- 05 Shared -------------------------------------------------
-dotnet new classlib -n Merkwerk.Shared            # DTOs, Enums, Konstanten
+# ---------- 05 Shared --------------------------------------------------
+Invoke-Dotnet new classlib -n Shared
 
-# ---------- 06 Tests --------------------------------------------------
-dotnet new xunit -n Merkwerk.Logic.Tests
-dotnet new xunit -n Merkwerk.Logic.Shared.Tests
-dotnet new xunit -n Merkwerk.Web.Tests
-dotnet new xunit -n Merkwerk.Data.IntegrationTests
-dotnet new xunit -n Merkwerk.Service.IntegrationTests
-dotnet new xunit -n Merkwerk.Architecture.Tests
+# ---------- 06 Tests ---------------------------------------------------
+foreach ($t in "Logic.Tests", "Logic.Shared.Tests", "Web.Tests", "Data.IntegrationTests", "Service.IntegrationTests", "Architecture.Tests") {
+    Invoke-Dotnet new xunit -n $t
+}
 
-# ---------- Projekte in Projektmappen-Ordner haengen -----------------
-dotnet sln $sln add --solution-folder "01 Web"     Merkwerk.Web/Merkwerk.Web.csproj Merkwerk.Web.Client/Merkwerk.Web.Client.csproj
-dotnet sln $sln add --solution-folder "02 Service" Merkwerk.Service/Merkwerk.Service.csproj
-dotnet sln $sln add --solution-folder "03 Logic"   Merkwerk.Logic/Merkwerk.Logic.csproj Merkwerk.Logic.Shared/Merkwerk.Logic.Shared.csproj
-dotnet sln $sln add --solution-folder "04 Data"    Merkwerk.Data.Context/Merkwerk.Data.Context.csproj Merkwerk.Data.Accessor/Merkwerk.Data.Accessor.csproj
-dotnet sln $sln add --solution-folder "05 Shared"  Merkwerk.Shared/Merkwerk.Shared.csproj
-dotnet sln $sln add --solution-folder "06 Tests"   `
-    Merkwerk.Logic.Tests/Merkwerk.Logic.Tests.csproj `
-    Merkwerk.Logic.Shared.Tests/Merkwerk.Logic.Shared.Tests.csproj `
-    Merkwerk.Web.Tests/Merkwerk.Web.Tests.csproj `
-    Merkwerk.Data.IntegrationTests/Merkwerk.Data.IntegrationTests.csproj `
-    Merkwerk.Service.IntegrationTests/Merkwerk.Service.IntegrationTests.csproj `
-    Merkwerk.Architecture.Tests/Merkwerk.Architecture.Tests.csproj
+# ---------- Add projects to solution folders ---------------------------
+Invoke-Dotnet sln $sln add --solution-folder "01 Web"     Web/Web.csproj Web.Client/Web.Client.csproj
+Invoke-Dotnet sln $sln add --solution-folder "02 Service" Service/Service.csproj
+Invoke-Dotnet sln $sln add --solution-folder "03 Logic"   Logic/Logic.csproj Logic.Shared/Logic.Shared.csproj
+Invoke-Dotnet sln $sln add --solution-folder "05 Shared"  Shared/Shared.csproj
+Invoke-Dotnet sln $sln add --solution-folder "06 Tests" `
+    Logic.Tests/Logic.Tests.csproj Logic.Shared.Tests/Logic.Shared.Tests.csproj Web.Tests/Web.Tests.csproj `
+    Data.IntegrationTests/Data.IntegrationTests.csproj Service.IntegrationTests/Service.IntegrationTests.csproj `
+    Architecture.Tests/Architecture.Tests.csproj
+# Data.Database and Data.Accessor are already in "04 Data".
 
-# ---------- Projektverweise (Abhaengigkeitsregeln, ADR 010) ----------
-# Shared            -> (nichts)
-# Logic.Shared      -> Shared
-dotnet add Merkwerk.Logic.Shared reference Merkwerk.Shared
-# Data.Context      -> Shared
-dotnet add Merkwerk.Data.Context reference Merkwerk.Shared
-# Data.Accessor     -> Data.Context, Shared
-dotnet add Merkwerk.Data.Accessor reference Merkwerk.Data.Context Merkwerk.Shared
-# Logic             -> Logic.Shared, Shared, Data.Accessor   (NIE direkt Data.Context)
-dotnet add Merkwerk.Logic reference Merkwerk.Logic.Shared Merkwerk.Shared Merkwerk.Data.Accessor
-# Service           -> Logic, Shared
-dotnet add Merkwerk.Service reference Merkwerk.Logic Merkwerk.Shared
-# Web.Client (WASM) -> Logic.Shared, Shared   (NIE Logic oder Data.*!)
-dotnet add Merkwerk.Web.Client reference Merkwerk.Logic.Shared Merkwerk.Shared
-# Web (Host)        -> Web.Client (vom Template gesetzt), Service, Logic, Data.Accessor + Data.Context (nur DI)
-dotnet add Merkwerk.Web reference Merkwerk.Service Merkwerk.Logic Merkwerk.Data.Accessor Merkwerk.Data.Context
+# ---------- Project references (dependency rules, AGENTS.md §3) --------
+Invoke-Dotnet add Logic.Shared  reference Shared
+Invoke-Dotnet add Data.Database reference Shared
+Invoke-Dotnet add Data.Accessor reference Data.Database Shared
+Invoke-Dotnet add Logic         reference Logic.Shared Shared Data.Accessor      # never Data.Database directly
+Invoke-Dotnet add Service       reference Logic Shared
+Invoke-Dotnet add Web.Client    reference Logic.Shared Shared                    # never Logic or Data.*
+Invoke-Dotnet add Web           reference Service Logic Data.Accessor Data.Database   # Data.* for DI only
 
-# Tests
-dotnet add Merkwerk.Logic.Tests reference Merkwerk.Logic
-dotnet add Merkwerk.Logic.Shared.Tests reference Merkwerk.Logic.Shared
-dotnet add Merkwerk.Web.Tests reference Merkwerk.Web Merkwerk.Web.Client
-dotnet add Merkwerk.Data.IntegrationTests reference Merkwerk.Data.Accessor Merkwerk.Data.Context
-dotnet add Merkwerk.Service.IntegrationTests reference Merkwerk.Web
-dotnet add Merkwerk.Architecture.Tests reference Merkwerk.Web Merkwerk.Web.Client Merkwerk.Service Merkwerk.Logic Merkwerk.Logic.Shared Merkwerk.Data.Context Merkwerk.Data.Accessor Merkwerk.Shared
+Invoke-Dotnet add Logic.Tests              reference Logic
+Invoke-Dotnet add Logic.Shared.Tests       reference Logic.Shared
+Invoke-Dotnet add Web.Tests                reference Web Web.Client
+Invoke-Dotnet add Data.IntegrationTests    reference Data.Accessor Data.Database
+Invoke-Dotnet add Service.IntegrationTests reference Web
+Invoke-Dotnet add Architecture.Tests       reference Web Web.Client Service Logic Logic.Shared Data.Database Data.Accessor Shared
 
-# ---------- Service braucht ASP.NET Core (Controller) ----------------
-# In Merkwerk.Service.csproj von Hand ergaenzen:
-#   <ItemGroup>
-#     <FrameworkReference Include="Microsoft.AspNetCore.App" />
-#   </ItemGroup>
-
-# ---------- Leere Class1.cs entfernen ---------------------------------
+# ---------- Clean up empty template classes ---------------------------
 Get-ChildItem -Recurse -Filter Class1.cs | Remove-Item
 
-# ---------- Pruefen ---------------------------------------------------
-dotnet build $sln
-Write-Host "Fertig. Merkwerk.slnx in Visual Studio neu laden." -ForegroundColor Green
+# ---------- Build -----------------------------------------------------
+Invoke-Dotnet build $sln
+Write-Host "Done. Reload Merkwerk.slnx in Visual Studio." -ForegroundColor Green
+Write-Host "Manual step: add <FrameworkReference Include=""Microsoft.AspNetCore.App"" /> to Service/Service.csproj." -ForegroundColor Yellow

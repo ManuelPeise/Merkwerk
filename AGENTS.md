@@ -36,38 +36,38 @@ Ask before adding any NuGet package; versions are managed centrally in `Director
 
 ```
 sources/Merkwerk.slnx
-  01 Web     Merkwerk.Web            Host process, Blazor Server (adults), adult view models
-             Merkwerk.Web.Client     Blazor WebAssembly (children, PWA), children's view models
-  02 Service Merkwerk.Service        API controllers, JWT, OpenAPI
-  03 Logic   Merkwerk.Logic          Business logic, one folder per module
-             Merkwerk.Logic.Shared   Graders (IGrader), generators – also runs in the browser
-  04 Data    Merkwerk.Data.Context   Entities, DbContext, configurations, interceptors, migrations
-             Merkwerk.Data.Accessor  Repositories and unit of work – the only way to reach the database
-  05 Shared  Merkwerk.Shared         DTOs, enums, constants
-  06 Tests   Merkwerk.*.Tests
+  01 Web     Web            Host process, Blazor Server (adults), adult view models
+             Web.Client     Blazor WebAssembly (children, PWA), children's view models
+  02 Service Service        API controllers, JWT, OpenAPI
+  03 Logic   Logic          Business logic, one folder per module
+             Logic.Shared   Graders (IGrader), generators – also runs in the browser
+  04 Data    Data.Database   Entities, DbContext, configurations, interceptors, migrations
+             Data.Accessor  Repositories and unit of work – the only way to reach the database
+  05 Shared  Shared         DTOs, enums, constants
+  06 Tests   *.Tests
 ```
 
 | Project | May reference |
 | --- | --- |
 | Shared | – |
 | Logic.Shared | Shared |
-| Data.Context | Shared |
-| Data.Accessor | Data.Context, Shared |
+| Data.Database | Shared |
+| Data.Accessor | Data.Database, Shared |
 | Logic | Logic.Shared, Shared, Data.Accessor |
 | Service | Logic, Shared |
 | Web.Client | Logic.Shared, Shared |
-| Web | Web.Client, Service, Logic, Data.Accessor, Data.Context (both for DI registration only) |
+| Web | Web.Client, Service, Logic, Data.Accessor, Data.Database (both for DI registration only) |
 
-**Hard rules** (enforced by `Merkwerk.Architecture.Tests`):
+**Hard rules** (enforced by `Architecture.Tests`):
 
 - `Web.Client` **never** references `Logic` or any `Data.*` project (otherwise EF Core ends up in the children's download).
-- `Logic` references **only** `Data.Accessor`, never `Data.Context` directly. Logic may use entity types and EF Core's async query
+- `Logic` references **only** `Data.Accessor`, never `Data.Database` directly. Logic may use entity types and EF Core's async query
   extensions (`ToListAsync`, `AnyAsync`, …) but never `MerkwerkDbContext`, `DbSet<T>` or `DbContextOptions`.
 - `Logic.Shared` has **no** dependency on EF Core, ASP.NET Core or I/O – pure logic only.
-- **Entities never leave the server.** Only DTOs from `Merkwerk.Shared` go over the wire.
+- **Entities never leave the server.** Only DTOs from `Shared` go over the wire.
 - View models and controllers talk to **services**, never directly to repositories or the DbContext.
 
-## 4. Modules (folders in `Merkwerk.Logic`)
+## 4. Modules (folders in `Logic`)
 
 `Organizations`, `Learners`, `Exercises`, `Assignments`, `Practice` (attempts, answers, learning state),
 `Progress`, `WordLists`, later `Sharing`, `Administration`.
@@ -80,8 +80,8 @@ Per module: `I<Name>Service` + implementation, validators (FluentValidation), mo
 - **Never set audit fields by hand** – the `AuditSaveChangesInterceptor` does that.
 - Time is always **UTC** and always comes from `TimeProvider`; never call `DateTime.Now`/`UtcNow` directly.
 - IDs: `long` (AUTO_INCREMENT). `Attempt` and `Answer` additionally have a unique `Guid ClientId` for idempotency/offline use.
-- Split: `Merkwerk.Data.Context` owns the EF model (entities, `MerkwerkDbContext`, configurations, interceptors, converters, migrations);
-  `Merkwerk.Data.Accessor` owns `IRepository<T>`, specialised repositories, `IUnitOfWork` and `IUnitOfWorkFactory`.
+- Split: `Data.Database` owns the EF model (entities, `MerkwerkDbContext`, configurations, interceptors, converters, migrations);
+  `Data.Accessor` owns `IRepository<T>`, specialised repositories, `IUnitOfWork` and `IUnitOfWorkFactory`.
 - Access data only through an `IUnitOfWork` from `IUnitOfWorkFactory`; **one unit of work per business operation**
   (`await using var uow = _uowFactory.Create();`). Never hold a DbContext in Blazor components or long-lived services.
 - Read queries: `Query()` + `AsNoTracking()` + `Select(...)` into DTOs. Don't load whole entity graphs just to build DTOs.
@@ -89,13 +89,13 @@ Per module: `I<Name>Service` + implementation, validators (FluentValidation), mo
   (IDs are sequential and guessable). Use `IgnoreQueryFilters()` only in the `Administration` module, with a comment explaining why.
 - Exercise content (`Question.Payload`, `Question.Solution`, generator parameters) is stored in JSON columns with polymorphic types
   (`System.Text.Json`, type discriminator). A new question type = a new class, **no** migration.
-- Migrations: `dotnet ef migrations add <Name> -p Merkwerk.Data.Context -s Merkwerk.Web`. Names in English, PascalCase.
+- Migrations: `dotnet ef migrations add <Name> -p Data.Database -s Web`. Names in English, PascalCase.
   MySQL does not run DDL transactionally → keep migrations small, never mix schema and data changes.
 - Character set `utf8mb4`, collation `utf8mb4_0900_ai_ci`.
 
 ## 6. Graders, generators, learning state
 
-- Every question type has exactly one `IGrader` in `Merkwerk.Logic.Shared` and one Razor component in the children's client.
+- Every question type has exactly one `IGrader` in `Logic.Shared` and one Razor component in the children's client.
 - The client grades for instant feedback; **the server's grading is authoritative**. Solutions are never sent to the client –
   only the grading rules the grader needs.
 - Generators (`IExerciseGenerator`) are **deterministic**: same seed → same exercises. No `Random.Shared`.
@@ -118,7 +118,7 @@ Per module: `I<Name>Service` + implementation, validators (FluentValidation), mo
 
 ## 8. API
 
-- Controllers live in `Merkwerk.Service`, route `api/v1/[controller]`, and stay thin: validate → call service → return DTO.
+- Controllers live in `Service`, route `api/v1/[controller]`, and stay thin: validate → call service → return DTO.
 - Errors as `ProblemDetails`; never leak exception details.
 - Submitting an answer is an idempotent `PUT`. Every endpoint has `[Authorize]` with a matching policy
   (`Learner`, `Member`, `OrgAdmin`, `InstanceAdmin`), except login and device pairing.
@@ -162,8 +162,8 @@ Test names: `Method_State_ExpectedResult`. Structure tests as Arrange/Act/Assert
 cd sources
 dotnet build Merkwerk.slnx
 dotnet test Merkwerk.slnx
-dotnet run --project Merkwerk.Web
-dotnet ef migrations add <Name> -p Merkwerk.Data.Context -s Merkwerk.Web
+dotnet run --project Web
+dotnet ef migrations add <Name> -p Data.Database -s Web
 docker compose -f ../deploy/docker-compose.yml up -d db
 ```
 
@@ -171,7 +171,8 @@ docker compose -f ../deploy/docker-compose.yml up -d db
 
 Full guide with commands: [`docs/git.README.md`](docs/git.README.md). The essentials:
 
-- Branches: `Master` (releases), `Development` (integration), work in `feature/LP-xxx-short-description`.
+- Branches: `Master` (releases), `Development` (integration), work in `feature/LP-xxx-…`, `fix/LP-xxx-…` or `hotfix/vX.Y.Z-…`.
+- **Every branch is created from `Development`** and merged back into `Development`. Never branch from `Master`.
 - Commit message: `LP-xxx: <what, imperative mood>` (e.g. `LP-131: Add arithmetic generator`).
 - Small commits; migrations in a commit of their own.
 - Never commit directly to `Master`.

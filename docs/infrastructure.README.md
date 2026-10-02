@@ -120,7 +120,7 @@ Web.Client/
 │  ├─ Speech/                  read-aloud (Web Speech API via JS interop)
 │  └─ DragDrop/                SortableJS wrapper
 ├─ Resources/                  German UI strings
-└─ wwwroot/                    manifest.webmanifest, service-worker.js, icons, js/
+└─ wwwroot/                    js/ (interop modules), lib/ (vendored JS libraries, e.g. SortableJS – no CDNs)
 ```
 
 ### Service (API)

@@ -1,0 +1,18 @@
+﻿@page "/admin"
+@rendermode InteractiveServer
+
+@* LP-005 spike: proves the adult area runs in Interactive Server mode. Temporary texts. *@
+<PageTitle>Erwachsene – Merkwerk</PageTitle>
+
+<h1>Erwachsenen-Bereich</h1>
+
+<p>Renderer: <strong>@RendererInfo.Name</strong> · interaktiv: <strong>@RendererInfo.IsInteractive</strong></p>
+<p>Erwartet: <code>Server</code> – jeder Klick läuft über die SignalR-Verbindung zum Server.</p>
+
+<button class="btn" @onclick="() => _clicks++">Klick (@_clicks)</button>
+
+<p><a href="ueben">Zum Kinder-Bereich</a> · <a href="/">Start</a></p>
+
+@code {
+    private int _clicks;
+}

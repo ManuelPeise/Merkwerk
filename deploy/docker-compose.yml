@@ -45,6 +45,22 @@ services:
       db:
         condition: service_healthy
 
+  # Development only: HTTPS in front of `dotnet run` (launch profile "lan"), so tablets on the
+  # home network can reach the app and install it as a PWA (needs a secure origin).
+  #   docker compose -f deploy/docker-compose.yml --profile dev up -d proxy-dev
+  proxy-dev:
+    image: caddy:2
+    profiles: ["dev"]
+    ports:
+      - "8443:443"
+    environment:
+      DEV_HOST: ${DEV_HOST:-localhost}
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    volumes:
+      - ./Caddyfile.dev:/etc/caddy/Caddyfile:ro
+      - caddy-dev-data:/data
+
   db:
     image: mysql:8.4
     restart: unless-stopped
@@ -73,3 +89,4 @@ volumes:
   media:
   caddy-data:
   caddy-config:
+  caddy-dev-data:

@@ -1,3 +1,12 @@
+/* Base from the design tokens (LP-008). Children's pages set var(--font-family-kids) on their root. */
+body {
+    margin: 0;
+    font-family: var(--font-family-adult);
+    font-size: var(--font-size-adult-body);
+    color: var(--color-text-primary);
+    background: var(--color-surface-background);
+}
+
 h1:focus {
     outline: none;
 }

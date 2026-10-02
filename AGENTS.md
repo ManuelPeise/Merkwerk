@@ -141,6 +141,8 @@ Per module: `I<Name>Service` + implementation, validators (FluentValidation), mo
 - `sealed` for classes not designed for inheritance; `record` for DTOs.
 - Primary constructors for DI are fine. No service locator, no static state.
 - No warnings in commits (`TreatWarningsAsErrors` in Release).
+- PowerShell scripts (`*.ps1`): ASCII only, or save as UTF-8 **with BOM**. Windows PowerShell 5.1 reads UTF-8 without BOM
+  as ANSI, and characters like `–` turn into quote marks that break the script.
 
 ## 11. Tests – Definition of Done
 

@@ -68,14 +68,14 @@ Prerequisites: [.NET 10 SDK](https://dotnet.microsoft.com/download), Docker Desk
 git clone <repo-url> Merkwerk
 cd Merkwerk
 
-# Start the database
-copy deploy\.env.example deploy\.env      # set your own passwords
-docker compose -f deploy/docker-compose.yml up -d db
+# Local environment: creates deploy\.env with random passwords, starts MySQL,
+# stores connection string and JWT key as user secrets (safe to run again)
+.\deploy\setup-local.ps1
 
 # Build, create the database, run
 cd sources
 dotnet build Merkwerk.slnx
-dotnet ef database update -p Data.Database -s Web
+dotnet ef database update -p Data.Database -s Web      # once migrations exist (LP-103)
 dotnet run --project Web
 ```
 

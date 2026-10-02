@@ -1,4 +1,5 @@
 ﻿@inject IWebHostEnvironment Environment
+@inject IConfiguration Configuration
 <!DOCTYPE html>
 <html lang="de">
 
@@ -26,9 +27,10 @@
     <ReconnectModal />
     <script src="@Assets["_framework/blazor.web.js"]"></script>
     <script src="@Assets["js/auth-spike.js"]"></script>
-    @if (!Environment.IsDevelopment())
+    @if (!Environment.IsDevelopment() || Configuration.GetValue<bool>("Pwa:EnableServiceWorker"))
     {
-        @* In Development a cached service worker can keep stale files and make the page hang (LP-005/LP-006). *@
+        @* Off in Development: a cached service worker can keep stale files and make the page hang (LP-005/LP-006).
+           On for the "lan" launch profile, so phones and tablets can install the app (LP-007). *@
         <script>
             if ('serviceWorker' in navigator) {
                 navigator.serviceWorker.register('/service-worker.js');

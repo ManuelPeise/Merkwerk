@@ -5,6 +5,7 @@
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
     <BlazorDisableThrowNavigationException>true</BlazorDisableThrowNavigationException>
+    <UserSecretsId>merkwerk-web-bfb089d1-2e28-4055-a8a6-9ed9be70cbdc</UserSecretsId>
   </PropertyGroup>
 
   <ItemGroup>

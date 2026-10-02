@@ -38,6 +38,9 @@ efbundle.exe
 # Aus den Design Tokens generierte Dateien (Quelle: shared/design-tokens/tokens.json)
 **/wwwroot/css/tokens.generated.css
 **/*.generated.css
+# Vendored JS libraries are committed on purpose (no CDNs, AGENTS.md §9).
+# Overrides global ignore rules such as [Ll]ib/ from Visual Studio templates.
+!**/wwwroot/lib/
 
 # ---------------------------------------------------------------------
 # Tests, Coverage, Playwright

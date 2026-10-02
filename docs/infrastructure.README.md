@@ -15,6 +15,7 @@ Merkwerk/
 │  ├─ Web.Client/           01 Web
 │  ├─ Service/              02 Service
 │  ├─ Logic/                03 Logic
+│  ├─ Logic.Authentication/ 03 Logic
 │  ├─ Logic.Shared/         03 Logic
 │  ├─ Data.Database/         04 Data
 │  ├─ Data.Accessor/        04 Data
@@ -51,10 +52,11 @@ flowchart TB
         Client["Web.Client<br/>Blazor WASM · children"]
     end
     subgraph S["02 Service"]
-        Service["Service<br/>API controllers · JWT"]
+        Service["Service<br/>API controllers · cookies · JWT validation"]
     end
     subgraph L["03 Logic"]
         Logic["Logic<br/>services per module"]
+        Auth["Logic.Authentication<br/>login · tokens · refresh rotation"]
         LShared["Logic.Shared<br/>graders · generators"]
     end
     subgraph D["04 Data"]
@@ -72,6 +74,7 @@ flowchart TB
     Client --> LShared
     Client --> Shared
     Service --> Logic
+    Service --> Auth
     Service --> Shared
     Logic --> LShared
     Logic --> Accessor
@@ -82,7 +85,7 @@ flowchart TB
     Context --> Shared
 ```
 
-`Web.Client` must never reach `Logic` or any `Data.*` project, and `Logic` reaches the database only through
+`Web.Client` must never reach `Logic`, `Logic.Authentication` or any `Data.*` project, and `Logic` reaches the database only through
 `Data.Accessor` – never `MerkwerkDbContext` or `DbSet<T>` directly. `Architecture.Tests` fails the build otherwise.
 
 ## 3. Inside each project
@@ -125,10 +128,12 @@ Web.Client/
 ```
 Service/
 ├─ Controllers/V1/             DevicesController, SessionsController, AssignmentsController, AttemptsController, …
-├─ Auth/                       JWT issuing/validation, cookie transport, refresh-token rotation, policies
+├─ Auth/                       AuthCookies (names, paths), later authorization policies
 ├─ OpenApi/                    OpenAPI configuration
-└─ ServiceCollectionExtensions.cs   AddMerkwerkApi(), MapMerkwerkApi()
+└─ ServiceCollectionExtensions.cs   AddMerkwerkApi() (controllers, JwtBearer, calls AddMerkwerkAuthentication), MapMerkwerkApi()
 ```
+
+Transport only: controllers translate HTTP (cookies, status codes, DTOs) into calls to `Logic.*` services. No business logic.
 
 ### Logic (business logic)
 
@@ -140,6 +145,21 @@ Logic/
 ├─ Common/                     ICurrentUser, authorization helpers, result types
 └─ ServiceCollectionExtensions.cs
 ```
+
+### Logic.Authentication (login and tokens)
+
+```
+Logic.Authentication/
+├─ IAuthSessionService.cs, AuthSessionService.cs   login, refresh (rotation), logout → AuthSession
+├─ AuthSession.cs              tokens + expiries + name/role (never sent as-is; Service turns it into cookies)
+├─ TokenService.cs             signed access tokens (HMAC-SHA256), random refresh tokens, signing key
+├─ InMemoryRefreshTokenStore.cs   LP-006 spike: hashed refresh tokens in memory → DB table in LP-104
+├─ JwtOptions.cs               section Auth:Jwt (key from user secrets / .env)
+├─ DemoUserOptions.cs          section Spike (Development only) → replaced by Identity in LP-104
+└─ ServiceCollectionExtensions.cs   AddMerkwerkAuthentication()
+```
+
+No ASP.NET Core reference – cookies and `HttpContext` stay in `Service`.
 
 ### Logic.Shared (also runs in the browser)
 

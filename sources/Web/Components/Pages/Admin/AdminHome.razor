@@ -1,18 +1,36 @@
 ﻿@page "/admin"
 @rendermode InteractiveServer
 
-@* LP-005 spike: proves the adult area runs in Interactive Server mode. Temporary texts. *@
+@* LP-005/LP-006 spike: adult area in Interactive Server mode, shows the signed-in user. Temporary texts. *@
 <PageTitle>Erwachsene – Merkwerk</PageTitle>
 
 <h1>Erwachsenen-Bereich</h1>
 
 <p>Renderer: <strong>@RendererInfo.Name</strong> · interaktiv: <strong>@RendererInfo.IsInteractive</strong></p>
-<p>Erwartet: <code>Server</code> – jeder Klick läuft über die SignalR-Verbindung zum Server.</p>
+
+<AuthorizeView>
+    <Authorized>
+        <p>Angemeldet als <strong>@context.User.Identity?.Name</strong> (Rolle @context.User.FindFirst("role")?.Value)</p>
+        <p>Access-Token dieser Verbindung gültig bis: <strong>@ExpiresAt(context.User)</strong></p>
+    </Authorized>
+    <NotAuthorized>
+        <p>Nicht angemeldet – <a href="/">zur Anmeldung</a></p>
+    </NotAuthorized>
+</AuthorizeView>
+
+<p>Verbindung aufgebaut um <strong>@_circuitStartedAt.ToString("HH:mm:ss")</strong></p>
 
 <button class="btn" @onclick="() => _clicks++">Klick (@_clicks)</button>
+<p><small>Test: mehr als 1 Minute warten, dann klicken – die Verbindung bleibt angemeldet. Danach Seite neu laden – dank Hintergrund-Refresh weiterhin angemeldet.</small></p>
 
 <p><a href="ueben">Zum Kinder-Bereich</a> · <a href="/">Start</a></p>
 
 @code {
+    private readonly DateTimeOffset _circuitStartedAt = DateTimeOffset.Now;
     private int _clicks;
+
+    private static string ExpiresAt(System.Security.Claims.ClaimsPrincipal user) =>
+        long.TryParse(user.FindFirst("exp")?.Value, out var seconds)
+            ? DateTimeOffset.FromUnixTimeSeconds(seconds).ToLocalTime().ToString("HH:mm:ss")
+            : "?";
 }

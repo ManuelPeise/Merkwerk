@@ -38,8 +38,9 @@ Ask before adding any NuGet package; versions are managed centrally in `Director
 sources/Merkwerk.slnx
   01 Web     Web            Host process, Blazor Server (adults), adult view models
              Web.Client     Blazor WebAssembly (children, PWA), children's view models
-  02 Service Service        API controllers, JWT, OpenAPI
+  02 Service Service        API controllers, auth cookies, JWT validation, OpenAPI – transport only, no business logic
   03 Logic   Logic          Business logic, one folder per module
+             Logic.Authentication  Login, token issuing, refresh-token rotation (no ASP.NET Core)
              Logic.Shared   Graders (IGrader), generators – also runs in the browser
   04 Data    Data.Database   Entities, DbContext, configurations, interceptors, migrations
              Data.Accessor  Repositories and unit of work – the only way to reach the database
@@ -54,16 +55,19 @@ sources/Merkwerk.slnx
 | Data.Database | Shared |
 | Data.Accessor | Data.Database, Shared |
 | Logic | Logic.Shared, Shared, Data.Accessor |
-| Service | Logic, Shared |
+| Logic.Authentication | Logic.Shared, Shared, Data.Accessor |
+| Service | Logic, Logic.Authentication, Shared |
 | Web.Client | Logic.Shared, Shared |
 | Web | Web.Client, Service, Logic, Data.Accessor, Data.Database (both for DI registration only) |
 
 **Hard rules** (enforced by `Architecture.Tests`):
 
-- `Web.Client` **never** references `Logic` or any `Data.*` project (otherwise EF Core ends up in the children's download).
-- `Logic` references **only** `Data.Accessor`, never `Data.Database` directly. Logic may use entity types and EF Core's async query
+- `Web.Client` **never** references `Logic`, `Logic.Authentication` or any `Data.*` project (otherwise EF Core ends up in the children's download).
+- `Logic` and `Logic.Authentication` reference **only** `Data.Accessor`, never `Data.Database` directly. Logic may use entity types and EF Core's async query
   extensions (`ToListAsync`, `AnyAsync`, …) but never `MerkwerkDbContext`, `DbSet<T>` or `DbContextOptions`.
 - `Logic.Shared` has **no** dependency on EF Core, ASP.NET Core or I/O – pure logic only.
+- `Service` contains **no business logic**: controllers, cookie transport and middleware setup only. Logic goes into a `Logic.*` project.
+- `Logic.*` projects do not reference ASP.NET Core (`Microsoft.AspNetCore.App`); cookies, `HttpContext` and JwtBearer stay in `Service`.
 - **Entities never leave the server.** Only DTOs from `Shared` go over the wire.
 - View models and controllers talk to **services**, never directly to repositories or the DbContext.
 
@@ -72,6 +76,8 @@ sources/Merkwerk.slnx
 `Organizations`, `Learners`, `Exercises`, `Assignments`, `Practice` (attempts, answers, learning state),
 `Progress`, `WordLists`, later `Sharing`, `Administration`.
 Per module: `I<Name>Service` + implementation, validators (FluentValidation), module-internal types.
+Authentication is its own project, `Logic.Authentication` (`IAuthSessionService`, `TokenService`, options), so it can
+grow (Identity, device pairing, refresh tokens in the DB – LP-104) without touching the other modules.
 
 ## 5. Data access (ADR 004, 007, 008, 011, 012)
 

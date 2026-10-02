@@ -7,6 +7,7 @@
     <Project Path="Service/Service.csproj" />
   </Folder>
   <Folder Name="/03 Logic/">
+    <Project Path="Logic.Authentication/Logic.Authentication.csproj" Id="8228cb98-e74e-4b27-9b03-e78fdd8c96d1" />
     <Project Path="Logic.Shared/Logic.Shared.csproj" />
     <Project Path="Logic/Logic.csproj" />
   </Folder>

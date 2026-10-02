@@ -15,7 +15,8 @@ public sealed class ProjectDependencyTests
         ["Data.Database"] = ["Shared"],
         ["Data.Accessor"] = ["Data.Database", "Shared"],
         ["Logic"] = ["Logic.Shared", "Shared", "Data.Accessor"],
-        ["Service"] = ["Logic", "Shared"],
+        ["Logic.Authentication"] = ["Logic.Shared", "Shared", "Data.Accessor"],
+        ["Service"] = ["Logic", "Logic.Authentication", "Shared"],
         ["Web.Client"] = ["Logic.Shared", "Shared"],
         ["Web"] = ["Web.Client", "Service", "Logic", "Data.Accessor", "Data.Database"],
     };
@@ -69,6 +70,7 @@ public sealed class ProjectDependencyTests
 
     [Theory]
     [InlineData("Web.Client", "Logic")]
+    [InlineData("Web.Client", "Logic.Authentication")]
     [InlineData("Web.Client", "Data.Accessor")]
     [InlineData("Web.Client", "Data.Database")]
     [InlineData("Logic.Shared", "Data.Database")]
@@ -80,10 +82,12 @@ public sealed class ProjectDependencyTests
         Assert.DoesNotContain(forbidden, reachable);
     }
 
-    [Fact]
-    public void Logic_DoesNotReferenceDataDatabaseDirectly()
+    [Theory]
+    [InlineData("Logic")]
+    [InlineData("Logic.Authentication")]
+    public void LogicProject_DoesNotReferenceDataDatabaseDirectly(string project)
     {
-        Assert.DoesNotContain("Data.Database", Solution.Projects["Logic"]);
+        Assert.DoesNotContain("Data.Database", Solution.Projects[project]);
     }
 
     private static bool IsTestProject(string name) =>

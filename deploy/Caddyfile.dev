@@ -1,0 +1,11 @@
+# Development reverse proxy (LP-005): HTTPS on the home network in front of `dotnet run --launch-profile lan`.
+# Root certificate for the tablets:
+#   docker compose -f deploy/docker-compose.yml cp proxy-dev:/data/caddy/pki/authorities/local/root.crt ./merkwerk-dev-root.crt
+{
+	default_sni {$DEV_HOST}
+}
+
+{$DEV_HOST} {
+	tls internal
+	reverse_proxy host.docker.internal:5138
+}

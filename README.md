@@ -1,5 +1,7 @@
 # Merkwerk
 
+[![CI](https://github.com/ManuelPeise/Merkwerk/actions/workflows/ci.yml/badge.svg?branch=Development)](https://github.com/ManuelPeise/Merkwerk/actions/workflows/ci.yml)
+
 **The open learning platform for practice – for children, parents and teachers.**
 
 Adults create exercises in German, English and maths and assign them to individual children or groups.

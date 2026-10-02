@@ -4,6 +4,6 @@ using System.Text;
 
 namespace Data.Database;
 
-public class MerkWerkContext
+public class MerkWerkDbContext
 {
 }

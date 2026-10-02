@@ -1,0 +1,41 @@
+name: CI
+
+on:
+  push:
+    branches: [ "Development", "Master", "feature/**", "fix/**", "hotfix/**" ]
+  pull_request:
+    branches: [ "Development", "Master" ]
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build-and-test:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up .NET (version from global.json)
+        uses: actions/setup-dotnet@v4
+        with:
+          global-json-file: global.json
+
+      - name: Restore
+        run: dotnet restore sources/Merkwerk.slnx
+
+      - name: Build (Release, warnings as errors)
+        run: dotnet build sources/Merkwerk.slnx -c Release --no-restore
+
+      # Unit, architecture and integration tests. Integration tests use Testcontainers (Docker is available on ubuntu-latest).
+      - name: Test
+        run: dotnet test sources/Merkwerk.slnx -c Release --no-build --logger "trx" --results-directory TestResults
+
+      - name: Upload test results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: test-results
+          path: TestResults
+          if-no-files-found: ignore

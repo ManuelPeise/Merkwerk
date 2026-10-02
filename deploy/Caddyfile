@@ -1,0 +1,8 @@
+# Merkwerk – reverse proxy with HTTPS on the home network.
+# `tls internal` creates a local certificate authority; install its root certificate on every tablet once:
+#   docker compose cp proxy:/data/caddy/pki/authorities/local/root.crt ./merkwerk-root.crt
+{$MERKWERK_HOST} {
+	tls internal
+	encode zstd gzip
+	reverse_proxy app:8080
+}

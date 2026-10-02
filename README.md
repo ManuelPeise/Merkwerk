@@ -39,13 +39,13 @@ The user interface is in German; more languages may follow.
 Merkwerk/
 ├─ sources/
 │  ├─ Merkwerk.slnx
-│  ├─ 01 Web      Merkwerk.Web (host, adults), Merkwerk.Web.Client (children, WASM)
-│  ├─ 02 Service  Merkwerk.Service (API controllers)
-│  ├─ 03 Logic    Merkwerk.Logic, Merkwerk.Logic.Shared (graders, generators)
-│  ├─ 04 Data     Merkwerk.Data.Context (entities, DbContext, migrations),
-│  │              Merkwerk.Data.Accessor (repositories, unit of work)
-│  ├─ 05 Shared   Merkwerk.Shared (DTOs, enums)
-│  └─ 06 Tests    Merkwerk.*.Tests
+│  ├─ 01 Web      Web (host, adults), Web.Client (children, WASM)
+│  ├─ 02 Service  Service (API controllers)
+│  ├─ 03 Logic    Logic, Logic.Shared (graders, generators)
+│  ├─ 04 Data     Data.Database (entities, DbContext, migrations),
+│  │              Data.Accessor (repositories, unit of work)
+│  ├─ 05 Shared   Shared (DTOs, enums)
+│  └─ 06 Tests    *.Tests
 ├─ shared/        grading-cases (grader test cases), design-tokens
 ├─ deploy/        docker-compose.yml, Caddyfile
 ├─ docs/         adr/ (architecture decisions), git.README.md, infrastructure.README.md
@@ -73,8 +73,8 @@ docker compose -f deploy/docker-compose.yml up -d db
 # Build, create the database, run
 cd sources
 dotnet build Merkwerk.slnx
-dotnet ef database update -p Merkwerk.Data.Context -s Merkwerk.Web
-dotnet run --project Merkwerk.Web
+dotnet ef database update -p Data.Database -s Web
+dotnet run --project Web
 ```
 
 Then open `https://localhost:<port>/admin` (adults) and `https://localhost:<port>/ueben` (children).

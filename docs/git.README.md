@@ -19,7 +19,9 @@ feature/LP-131-…●           ●  feature/LP-142-…
 | `Development` | Integration. Must always build and pass all tests. | Squash merges of feature/fix branches only |
 | `feature/LP-xxx-short-description` | Work on one ticket | You |
 | `fix/LP-xxx-short-description` | Bug fix found during development | You |
-| `hotfix/vX.Y.Z-short-description` | Urgent fix for a released version, branched from `Master` | You |
+| `hotfix/vX.Y.Z-short-description` | Urgent fix for a released version | You |
+
+**Every branch is created from `Development`** – features, fixes and hotfixes alike. Nothing is ever branched from `Master`.
 
 Branch names: lower case, words separated by `-`, ticket number first, at most ~50 characters.
 Example: `feature/LP-131-arithmetic-generator`.
@@ -90,7 +92,7 @@ The `.gitignore` covers these cases. If you accidentally committed a secret: **r
 
 ## 5. Pull requests
 
-1. Target branch: `Development` (hotfixes: `Master`, see §7).
+1. Target branch: always `Development` (hotfixes too, see §7).
 2. Title: `LP-xxx: <ticket title>`.
 3. Description: link/summary of the ticket, what changed, how it was tested, what reviewers should look at
    (permissions, tenant isolation, token handling, migrations).
@@ -120,19 +122,26 @@ Pushing a tag `v*` makes CI build and publish the multi-arch Docker images.
 
 ## 7. Hotfixes
 
+Hotfixes follow the same path as every other change – branched from `Development`, merged into `Development` –
+and are then released right away as a patch version.
+
 ```powershell
-git switch Master
+git switch Development
 git pull --ff-only
 git switch -c hotfix/v0.3.1-fix-login-on-ipad
 # fix, test, commit
 git push -u origin hotfix/v0.3.1-fix-login-on-ipad
-# PR into Master → merge → tag v0.3.1
-# then bring the fix back into Development:
-git switch Development
+# PR into Development → squash and merge
+# then release immediately as a patch version (see §6):
+git switch Master
 git pull --ff-only
-git merge Master
-git push
+git merge --no-ff Development -m "Release v0.3.1"
+git tag -a v0.3.1 -m "v0.3.1 – fix login on iPad"
+git push origin Master --follow-tags
 ```
+
+If `Development` already contains unfinished work that must not be released yet, finish or disable it
+(feature flag) before the patch release – do **not** branch from `Master` instead.
 
 ## 8. EF Core migrations and conflicts
 
@@ -141,8 +150,8 @@ Do **not** merge the snapshot by hand:
 
 ```powershell
 # on your feature branch, after rebasing on Development
-dotnet ef migrations remove -p sources/Merkwerk.Data.Context -s sources/Merkwerk.Web    # removes YOUR last migration
-dotnet ef migrations add <SameName> -p sources/Merkwerk.Data.Context -s sources/Merkwerk.Web
+dotnet ef migrations remove -p sources/Data.Database -s sources/Web    # removes YOUR last migration
+dotnet ef migrations add <SameName> -p sources/Data.Database -s sources/Web
 ```
 
 Never change a migration that is already on `Development` or `Master` – add a new one instead.
@@ -162,23 +171,16 @@ Rule of thumb: rewrite history (`amend`, `rebase`, `reset`) **only** on your own
 
 ## 10. Line endings and settings
 
-Recommended one-time setup on Windows:
+Line endings use Git's defaults: Git for Windows checks files out with CRLF and stores them normalised
+(`core.autocrlf true`, set by the installer). There are no line-ending rules in `.gitattributes`;
+it only marks binary files.
+
+Optional one-time settings on Windows:
 
 ```powershell
-git config --global core.autocrlf true
-git config --global pull.ff only
+git config --global pull.ff only               # a pull never creates a hidden merge commit
+git config --global push.autoSetupRemote true  # first push links the branch to origin
 git config --global init.defaultBranch Master
-git config --global push.autoSetupRemote true
-```
-
-A `.gitattributes` in the repo root normalises line endings for everyone:
-
-```
-* text=auto
-*.sh  text eol=lf
-*.ps1 text eol=crlf
-*.png binary
-*.jpg binary
 ```
 
 ## 11. Rules for AI assistants

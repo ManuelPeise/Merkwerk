@@ -11,15 +11,15 @@ Merkwerk/
 │  ├─ Merkwerk.slnx                  solution (solution folders 01–06)
 │  ├─ Directory.Packages.props       central NuGet versions
 │  ├─ Directory.Build.props          shared build settings (nullable, warnings, LangVersion)
-│  ├─ Merkwerk.Web/                  01 Web
-│  ├─ Merkwerk.Web.Client/           01 Web
-│  ├─ Merkwerk.Service/              02 Service
-│  ├─ Merkwerk.Logic/                03 Logic
-│  ├─ Merkwerk.Logic.Shared/         03 Logic
-│  ├─ Merkwerk.Data.Context/         04 Data
-│  ├─ Merkwerk.Data.Accessor/        04 Data
-│  ├─ Merkwerk.Shared/               05 Shared
-│  └─ Merkwerk.*.Tests/              06 Tests
+│  ├─ Web/                  01 Web
+│  ├─ Web.Client/           01 Web
+│  ├─ Service/              02 Service
+│  ├─ Logic/                03 Logic
+│  ├─ Logic.Shared/         03 Logic
+│  ├─ Data.Database/         04 Data
+│  ├─ Data.Accessor/        04 Data
+│  ├─ Shared/               05 Shared
+│  └─ *.Tests/              06 Tests
 ├─ shared/
 │  ├─ grading-cases/<type>/*.json    test cases for graders (used by Logic.Shared.Tests)
 │  └─ design-tokens/tokens.json      colours, fonts, spacing – single source for all UIs
@@ -34,7 +34,9 @@ Merkwerk/
 │  └─ self-hosting.md                (planned) running Merkwerk at home or in a school
 ├─ .claude/skills/                   AI workflows (implement-ticket, add-entity, …)
 ├─ .github/workflows/                CI (build, test, multi-arch images)
-├─ AGENTS.md  CLAUDE.md  README.md  LICENSE  .gitignore  .gitattributes
+├─ AGENTS.md  CLAUDE.md  README.md  LICENSE
+├─ .gitignore  .gitattributes  .editorconfig
+└─ global.json                       pins the .NET 10 SDK (roll forward within 10.0.x)
 ```
 
 Physical folders under `sources/` are flat (one folder per project, no spaces). The numbers `01 Web` … `06 Tests`
@@ -45,22 +47,22 @@ exist only as solution folders in `Merkwerk.slnx`.
 ```mermaid
 flowchart TB
     subgraph W["01 Web"]
-        Web["Merkwerk.Web<br/>host · Blazor Server · adults"]
-        Client["Merkwerk.Web.Client<br/>Blazor WASM · children"]
+        Web["Web<br/>host · Blazor Server · adults"]
+        Client["Web.Client<br/>Blazor WASM · children"]
     end
     subgraph S["02 Service"]
-        Service["Merkwerk.Service<br/>API controllers · JWT"]
+        Service["Service<br/>API controllers · JWT"]
     end
     subgraph L["03 Logic"]
-        Logic["Merkwerk.Logic<br/>services per module"]
-        LShared["Merkwerk.Logic.Shared<br/>graders · generators"]
+        Logic["Logic<br/>services per module"]
+        LShared["Logic.Shared<br/>graders · generators"]
     end
     subgraph D["04 Data"]
-        Accessor["Merkwerk.Data.Accessor<br/>repositories · unit of work"]
-        Context["Merkwerk.Data.Context<br/>entities · DbContext · migrations"]
+        Accessor["Data.Accessor<br/>repositories · unit of work"]
+        Context["Data.Database<br/>entities · DbContext · migrations"]
     end
     subgraph SH["05 Shared"]
-        Shared["Merkwerk.Shared<br/>DTOs · enums"]
+        Shared["Shared<br/>DTOs · enums"]
     end
     Web --> Client
     Web --> Service
@@ -80,15 +82,15 @@ flowchart TB
     Context --> Shared
 ```
 
-`Merkwerk.Web.Client` must never reach `Logic` or any `Data.*` project, and `Merkwerk.Logic` reaches the database only through
-`Merkwerk.Data.Accessor` – never `MerkwerkDbContext` or `DbSet<T>` directly. `Merkwerk.Architecture.Tests` fails the build otherwise.
+`Web.Client` must never reach `Logic` or any `Data.*` project, and `Logic` reaches the database only through
+`Data.Accessor` – never `MerkwerkDbContext` or `DbSet<T>` directly. `Architecture.Tests` fails the build otherwise.
 
 ## 3. Inside each project
 
-### Merkwerk.Web (host, adults – Interactive Server)
+### Web (host, adults – Interactive Server)
 
 ```
-Merkwerk.Web/
+Web/
 ├─ Program.cs                  composition root: DI, auth, render modes, endpoints
 ├─ Components/
 │  ├─ App.razor, Routes.razor
@@ -100,10 +102,10 @@ Merkwerk.Web/
 └─ wwwroot/                    static files, generated tokens CSS
 ```
 
-### Merkwerk.Web.Client (children – Interactive WebAssembly, PWA)
+### Web.Client (children – Interactive WebAssembly, PWA)
 
 ```
-Merkwerk.Web.Client/
+Web.Client/
 ├─ Pages/Ueben/                /ueben/... (profile selection, my tasks, player, flashcards)
 ├─ Practice/
 │  ├─ Questions/               one component per question type (<Type>Question.razor)
@@ -118,20 +120,20 @@ Merkwerk.Web.Client/
 └─ wwwroot/                    manifest.webmanifest, service-worker.js, icons, js/
 ```
 
-### Merkwerk.Service (API)
+### Service (API)
 
 ```
-Merkwerk.Service/
+Service/
 ├─ Controllers/V1/             DevicesController, SessionsController, AssignmentsController, AttemptsController, …
 ├─ Auth/                       JWT issuing/validation, cookie transport, refresh-token rotation, policies
 ├─ OpenApi/                    OpenAPI configuration
 └─ ServiceCollectionExtensions.cs   AddMerkwerkApi(), MapMerkwerkApi()
 ```
 
-### Merkwerk.Logic (business logic)
+### Logic (business logic)
 
 ```
-Merkwerk.Logic/
+Logic/
 ├─ Organizations/   Learners/   Exercises/   Assignments/
 ├─ Practice/        Progress/   WordLists/   (later: Sharing/, Administration/)
 │     each: I<Module>Service.cs, <Module>Service.cs, Validators/, internal types
@@ -139,10 +141,10 @@ Merkwerk.Logic/
 └─ ServiceCollectionExtensions.cs
 ```
 
-### Merkwerk.Logic.Shared (also runs in the browser)
+### Logic.Shared (also runs in the browser)
 
 ```
-Merkwerk.Logic.Shared/
+Logic.Shared/
 ├─ Grading/                    IGrader, GraderRegistry, <Type>Grader
 ├─ Generators/                 IExerciseGenerator, ArithmeticGenerator, TimesTableGenerator
 ├─ Learning/                   Leitner rules (box transitions, due dates)
@@ -151,15 +153,15 @@ Merkwerk.Logic.Shared/
 
 No EF Core, no ASP.NET Core, no I/O, no `DateTime.Now`, no `Random.Shared`.
 
-### Merkwerk.Data.Context (EF model and database)
+### Data.Database (EF model and database)
 
 ```
-Merkwerk.Data.Context/
+Data.Database/
 ├─ Entities/                   AEntityBase, AOrganizationEntityBase, all entities
 ├─ Configurations/             IEntityTypeConfiguration<T> per entity
 ├─ Interceptors/               AuditSaveChangesInterceptor
 ├─ Converters/                 UTC DateTime, JSON value converters
-├─ Migrations/                 EF Core migrations (generated) – migration target: -p Merkwerk.Data.Context
+├─ Migrations/                 EF Core migrations (generated) – migration target: -p Data.Database
 ├─ MerkwerkDbContext.cs        incl. global query filter per organization
 ├─ DesignTimeDbContextFactory.cs   for `dotnet ef` without starting the web host (optional)
 └─ ServiceCollectionExtensions.cs  AddMerkwerkDbContext()  – registers IDbContextFactory<MerkwerkDbContext>
@@ -167,22 +169,22 @@ Merkwerk.Data.Context/
 
 Packages: `MySql.EntityFrameworkCore`, `Microsoft.EntityFrameworkCore.Design` (private assets).
 
-### Merkwerk.Data.Accessor (repositories and unit of work)
+### Data.Accessor (repositories and unit of work)
 
 ```
-Merkwerk.Data.Accessor/
+Data.Accessor/
 ├─ Repositories/               IRepository<T>, Repository<T>, specialised repositories (IExerciseRepository, …)
 ├─ UnitOfWork/                 IUnitOfWork, UnitOfWork, IUnitOfWorkFactory, UnitOfWorkFactory
 └─ ServiceCollectionExtensions.cs  AddMerkwerkDataAccess()
 ```
 
 The unit of work creates its own `MerkwerkDbContext` from `IDbContextFactory` and disposes it at the end of the
-business operation. This is the only project (besides `Merkwerk.Data.Context` itself) that touches `MerkwerkDbContext`.
+business operation. This is the only project (besides `Data.Database` itself) that touches `MerkwerkDbContext`.
 
-### Merkwerk.Shared (contracts)
+### Shared (contracts)
 
 ```
-Merkwerk.Shared/
+Shared/
 ├─ Api/<Module>/               request/response DTOs (records)
 ├─ QuestionTypes/              payload/solution types with JSON discriminators
 ├─ Enums/
@@ -193,12 +195,12 @@ Merkwerk.Shared/
 
 | Project | Covers | Tools |
 | --- | --- | --- |
-| Merkwerk.Logic.Shared.Tests | graders against `shared/grading-cases`, generators (determinism) | xUnit |
-| Merkwerk.Logic.Tests | services incl. permissions, mocked `IUnitOfWork` | xUnit, NSubstitute |
-| Merkwerk.Web.Tests | view models; Razor components | xUnit, bUnit |
-| Merkwerk.Data.IntegrationTests | repositories, unit of work, audit interceptor, query filters, migrations | xUnit, Testcontainers (MySQL) |
-| Merkwerk.Service.IntegrationTests | controllers, auth, end-to-end API behaviour | WebApplicationFactory, Testcontainers (MySQL) |
-| Merkwerk.Architecture.Tests | dependency rules | NetArchTest |
+| Logic.Shared.Tests | graders against `shared/grading-cases`, generators (determinism) | xUnit |
+| Logic.Tests | services incl. permissions, mocked `IUnitOfWork` | xUnit, NSubstitute |
+| Web.Tests | view models; Razor components | xUnit, bUnit |
+| Data.IntegrationTests | repositories, unit of work, audit interceptor, query filters, migrations | xUnit, Testcontainers (MySQL) |
+| Service.IntegrationTests | controllers, auth, end-to-end API behaviour | WebApplicationFactory, Testcontainers (MySQL) |
+| Architecture.Tests | dependency rules | NetArchTest |
 
 ## 4. Runtime infrastructure
 
@@ -248,7 +250,7 @@ Precedence (last wins): `appsettings.json` → `appsettings.{Environment}.json` 
 
 ```powershell
 # local secrets (once per machine)
-cd sources/Merkwerk.Web
+cd sources/Web
 dotnet user-secrets init
 dotnet user-secrets set "ConnectionStrings:Default" "Server=localhost;Database=merkwerk;User=app;Password=..."
 dotnet user-secrets set "Auth:Jwt:SigningKey" "<at least 32 random characters>"
@@ -265,8 +267,8 @@ dotnet user-secrets set "Auth:Jwt:SigningKey" "<at least 32 random characters>"
 
 | Thing | Pattern | Example |
 | --- | --- | --- |
-| Project | `Merkwerk.<Layer>[.<Part>]` | `Merkwerk.Logic.Shared` |
-| Namespace | project + folder | `Merkwerk.Logic.Exercises` |
+| Project | `<Layer>[.<Part>]` | `Logic.Shared` |
+| Namespace | project + folder | `Logic.Exercises` |
 | Service | `I<Module>Service` / `<Module>Service` | `IAssignmentService` |
 | Entity | singular noun | `WordEntry` |
 | DTO | `<Thing>Dto`, `<Action>Request`, `<Action>Response` | `StartAttemptRequest` |

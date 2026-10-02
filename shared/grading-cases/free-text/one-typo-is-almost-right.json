@@ -1,0 +1,8 @@
+{
+  "description": "One typo within tolerance counts as wrong but returns the 'almost-right' hint",
+  "questionType": "free-text",
+  "payload": { "prompt": "Translate: Katze" },
+  "solution": { "accepted": ["cat"], "caseSensitive": false, "typoTolerance": 1 },
+  "response": { "text": "cta" },
+  "expected": { "isCorrect": false, "points": 0, "maxPoints": 1, "hint": "almost-right" }
+}

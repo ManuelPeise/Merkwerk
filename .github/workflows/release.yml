@@ -1,0 +1,55 @@
+name: Release images
+
+on:
+  push:
+    tags: [ "v*" ]
+
+permissions:
+  contents: read
+  packages: write
+
+jobs:
+  images:
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    env:
+      OWNER: ${{ github.repository_owner }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Lower-case owner for GHCR
+        run: echo "OWNER_LC=${OWNER,,}" >> "$GITHUB_ENV"
+
+      - uses: docker/setup-qemu-action@v3
+      - uses: docker/setup-buildx-action@v3
+
+      - name: Log in to GitHub Container Registry
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: App image (amd64 + arm64)
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          file: deploy/Dockerfile
+          target: runtime
+          platforms: linux/amd64,linux/arm64
+          push: true
+          tags: |
+            ghcr.io/${{ env.OWNER_LC }}/merkwerk:${{ github.ref_name }}
+            ghcr.io/${{ env.OWNER_LC }}/merkwerk:latest
+
+      - name: Migration bundle image (amd64 + arm64)
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          file: deploy/Dockerfile
+          target: migrations
+          platforms: linux/amd64,linux/arm64
+          push: true
+          tags: |
+            ghcr.io/${{ env.OWNER_LC }}/merkwerk-migrations:${{ github.ref_name }}
+            ghcr.io/${{ env.OWNER_LC }}/merkwerk-migrations:latest

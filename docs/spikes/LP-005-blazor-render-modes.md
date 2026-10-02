@@ -55,5 +55,8 @@ dotnet run --project Web --launch-profile https
 
 ## Findings and decision
 
+- PC (Chrome/Edge): `/admin` renders as Server, `/ueben` as WebAssembly, no EF Core/Logic/Data.* in the browser, installable as app.
+- In Development a cached service worker could make the page hang – it is now only registered outside Development.
+- Load times and the tablet test are recorded together with LP-007.
 - …
 - Decision: keep ADR 003 as is / adjust because …

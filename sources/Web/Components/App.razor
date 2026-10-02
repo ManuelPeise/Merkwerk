@@ -1,4 +1,5 @@
-﻿<!DOCTYPE html>
+﻿@inject IWebHostEnvironment Environment
+<!DOCTYPE html>
 <html lang="de">
 
 <head>
@@ -21,11 +22,16 @@
     <Routes />
     <ReconnectModal />
     <script src="@Assets["_framework/blazor.web.js"]"></script>
-    <script>
-        if ('serviceWorker' in navigator) {
-            navigator.serviceWorker.register('/service-worker.js');
-        }
-    </script>
+    <script src="@Assets["js/auth-spike.js"]"></script>
+    @if (!Environment.IsDevelopment())
+    {
+        @* In Development a cached service worker can keep stale files and make the page hang (LP-005/LP-006). *@
+        <script>
+            if ('serviceWorker' in navigator) {
+                navigator.serviceWorker.register('/service-worker.js');
+            }
+        </script>
+    }
 </body>
 
 </html>

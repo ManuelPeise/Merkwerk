@@ -3,6 +3,7 @@ using Data.Database.Abstractions;
 using Data.Database.Converters;
 using Data.Database.Entities.Base;
 using Data.Database.Entities.Organizations;
+using Data.Database.Entities.Subjects;
 using Microsoft.EntityFrameworkCore;
 
 namespace Data.Database;
@@ -30,6 +31,8 @@ public class MerkwerkDbContext : DbContext
     }
 
     public DbSet<Organization> Organizations => Set<Organization>();
+
+    public DbSet<Subject> Subjects => Set<Subject>();
 
     /// <summary>Read by the query filter on every query (EF parameterizes context members).</summary>
     protected long? CurrentOrganizationId => _currentUser.OrganizationId;

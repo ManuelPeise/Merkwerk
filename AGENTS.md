@@ -95,8 +95,12 @@ Per module: `I<Name>Service` + implementation, validators, module-internal types
   (IDs are sequential and guessable). Use `IgnoreQueryFilters()` only in the `Administration` module, with a comment explaining why.
 - Exercise content (`Question.Payload`, `Question.Solution`, generator parameters) is stored in JSON columns with polymorphic types
   (`System.Text.Json`, type discriminator). A new question type = a new class, **no** migration.
-- Migrations: `dotnet ef migrations add <Name> -p Data.Database -s Web.Core`. Names in English, PascalCase.
+- Migrations: `dotnet ef migrations add <Name> -p Data.Database -s Web.Core` (run `dotnet tool restore` once – dotnet-ef is
+  pinned in `.config/dotnet-tools.json`). Names in English, PascalCase. Never edit a generated migration by hand without review.
   MySQL does not run DDL transactionally → keep migrations small, never mix schema and data changes.
+  Only exception: the first migration (`InitializeDatabase`) seeds the standard subjects (`HasData` in `SubjectConfiguration`, fixed values).
+- Production applies migrations with the bundle image (`docker compose run --rm migrate`) before the new app version starts;
+  the app itself never migrates at startup. CI fails if the model has changes without a migration.
 - Character set `utf8mb4`, collation `utf8mb4_0900_ai_ci`.
 
 ## 6. Graders, generators, learning state
@@ -171,7 +175,9 @@ cd sources
 dotnet build Merkwerk.slnx
 dotnet test Merkwerk.slnx
 dotnet run --project Web.Core --launch-profile http          # http://localhost:5138, Swagger at /swagger
+dotnet tool restore                                            # once: dotnet-ef from .config/dotnet-tools.json
 dotnet ef migrations add <Name> -p Data.Database -s Web.Core
+dotnet ef database update -p Data.Database -s Web.Core         # local DB (connection string from user secrets)
 docker compose -f ../deploy/docker-compose.yml up -d db
 docker compose -f ../deploy/docker-compose.yml --profile dev up -d mailpit   # after LP-162, UI at http://localhost:8025
 

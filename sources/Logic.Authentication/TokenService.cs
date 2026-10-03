@@ -16,7 +16,8 @@ public sealed class TokenService(IOptions<JwtOptions> options, TimeProvider time
         string userId,
         string name,
         string role,
-        bool mustChangePassword = false)
+        bool mustChangePassword = false,
+        long? organizationId = null)
     {
         var settings = options.Value;
         var now = timeProvider.GetUtcNow();
@@ -28,6 +29,12 @@ public sealed class TokenService(IOptions<JwtOptions> options, TimeProvider time
             new(AuthClaims.Name, name),
             new(AuthClaims.Role, role),
         };
+
+        if (organizationId is { } organization)
+        {
+            claims.Add(new Claim(
+                AuthClaims.OrganizationId, organization.ToString(System.Globalization.CultureInfo.InvariantCulture)));
+        }
 
         if (mustChangePassword)
         {

@@ -1,0 +1,297 @@
+using System.Security.Cryptography;
+using System.Text;
+using Data.Accessor.Abstractions;
+using Data.Database.Entities.Identity;
+using Data.Database.Entities.Organizations;
+using Logic.Authentication;
+using Logic.Authentication.Accounts;
+using Logic.Notifications;
+using Logic.Notifications.Formatting;
+using Logic.Notifications.Links;
+using Logic.Organizations.Members;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
+
+namespace Logic.Organizations.Invitations;
+
+internal sealed partial class InvitationService(
+    IUnitOfWorkFactory unitOfWorkFactory,
+    IAccountService accounts,
+    IAuthSessionService sessions,
+    IMemberService members,
+    IMailService mailService,
+    IPublicLinkBuilder links,
+    IMailDateFormatter dates,
+    TimeProvider timeProvider,
+    ILogger<InvitationService> logger) : IInvitationService
+{
+    public static readonly TimeSpan Lifetime = TimeSpan.FromDays(7);
+
+    public async Task<CreateInvitationResult> CreateAsync(
+        long organizationId,
+        long actingUserId,
+        string email,
+        OrganizationRole role,
+        string language,
+        CancellationToken cancellationToken)
+    {
+        if (!await members.IsAdminAsync(organizationId, actingUserId, cancellationToken))
+        {
+            return new CreateInvitationResult(CreateInvitationStatus.Forbidden);
+        }
+
+        var normalizedEmail = email.Trim();
+        if (await accounts.FindUserIdByEmailAsync(normalizedEmail, cancellationToken) is { } existingUserId
+            && await members.IsMemberAsync(organizationId, existingUserId, cancellationToken))
+        {
+            return new CreateInvitationResult(CreateInvitationStatus.AlreadyMember);
+        }
+
+        var inviter = (await accounts.GetAccountsAsync([actingUserId], cancellationToken)).Single();
+        var token = Convert.ToBase64String(RandomNumberGenerator.GetBytes(32)).TrimEnd('=').Replace('+', '-').Replace('/', '_');
+        var now = timeProvider.GetUtcNow();
+        var expiresAt = now.Add(Lifetime);
+
+        await using var unitOfWork = unitOfWorkFactory.Create();
+        var organization = await unitOfWork.Organizations.GetByIdAsync(organizationId, cancellationToken)
+            ?? throw new InvalidOperationException($"Organization {organizationId} does not exist.");
+
+        // A new invitation for the same address replaces the open one.
+        var open = await unitOfWork.Invitations.QueryTracked()
+            .Where(i => i.OrganizationId == organizationId && i.Email == normalizedEmail
+                && i.AcceptedAt == null && i.RevokedAt == null)
+            .ToListAsync(cancellationToken);
+        foreach (var replaced in open)
+        {
+            replaced.RevokedAt = now.UtcDateTime;
+        }
+
+        var invitation = new Invitation
+        {
+            OrganizationId = organizationId,
+            Email = normalizedEmail,
+            Role = role,
+            TokenHash = Hash(token),
+            ExpiresAt = expiresAt.UtcDateTime,
+            InvitedByUserId = actingUserId,
+            InvitedByName = inviter.DisplayName,
+        };
+        unitOfWork.Invitations.Add(invitation);
+        await unitOfWork.SaveChangesAsync(cancellationToken);
+
+        try
+        {
+            await mailService.SendAsync(
+                new MailMessageRequest(normalizedEmail, normalizedEmail, MailTemplate.Invitation, language,
+                    new Dictionary<string, string>
+                    {
+                        ["Name"] = normalizedEmail,
+                        ["InvitedBy"] = inviter.DisplayName,
+                        ["OrganizationName"] = organization.Name,
+                        ["Link"] = links.Build("/invitation", ("token", token)),
+                        ["ExpiresAt"] = dates.Format(expiresAt, language),
+                    }),
+                cancellationToken);
+        }
+        catch (MailDeliveryException)
+        {
+            // The invitation stays; the admin sees it in the list and can invite again.
+            LogMailFailed(invitation.Id);
+        }
+
+        return new CreateInvitationResult(CreateInvitationStatus.Created, ToInfo(invitation, now));
+    }
+
+    public async Task<IReadOnlyList<InvitationInfo>> ListAsync(long organizationId, CancellationToken cancellationToken)
+    {
+        var now = timeProvider.GetUtcNow();
+
+        await using var unitOfWork = unitOfWorkFactory.Create();
+        var open = await unitOfWork.Invitations.Query()
+            .Where(i => i.OrganizationId == organizationId && i.AcceptedAt == null && i.RevokedAt == null)
+            .OrderByDescending(i => i.Id)
+            .ToListAsync(cancellationToken);
+
+        return open.Select(i => ToInfo(i, now)).ToList();
+    }
+
+    public async Task<bool> RevokeAsync(
+        long organizationId,
+        long actingUserId,
+        long invitationId,
+        CancellationToken cancellationToken)
+    {
+        if (!await members.IsAdminAsync(organizationId, actingUserId, cancellationToken))
+        {
+            return false;
+        }
+
+        await using var unitOfWork = unitOfWorkFactory.Create();
+        var invitation = await unitOfWork.Invitations.GetByIdAsync(invitationId, cancellationToken);
+
+        // Explicit tenant check in addition to the query filter (ADR 007).
+        if (invitation is null || invitation.OrganizationId != organizationId || invitation.AcceptedAt is not null)
+        {
+            return false;
+        }
+
+        invitation.RevokedAt ??= timeProvider.GetUtcNow().UtcDateTime;
+        await unitOfWork.SaveChangesAsync(cancellationToken);
+        return true;
+    }
+
+    public async Task<InvitationDetailsResult> GetDetailsAsync(string token, CancellationToken cancellationToken)
+    {
+        await using var unitOfWork = unitOfWorkFactory.Create();
+        var invitation = await unitOfWork.Invitations.FindByTokenHashAsync(Hash(token), cancellationToken);
+
+        if (invitation is null)
+        {
+            return new InvitationDetailsResult(InvitationLookupStatus.NotFound);
+        }
+
+        if (!IsUsable(invitation))
+        {
+            return new InvitationDetailsResult(InvitationLookupStatus.Gone);
+        }
+
+        var organization = await unitOfWork.Organizations.GetByIdAsync(invitation.OrganizationId, cancellationToken);
+
+        return new InvitationDetailsResult(
+            InvitationLookupStatus.Found,
+            new InvitationDetails(
+                organization?.Name ?? string.Empty,
+                invitation.Email,
+                invitation.InvitedByName,
+                new DateTimeOffset(invitation.ExpiresAt, TimeSpan.Zero)));
+    }
+
+    public async Task<AcceptInvitationResult> AcceptAsync(
+        AcceptInvitationRequest request,
+        long? currentUserId,
+        CancellationToken cancellationToken)
+    {
+        await using var unitOfWork = unitOfWorkFactory.Create();
+        var invitation = await unitOfWork.Invitations.FindByTokenHashAsync(Hash(request.Token), cancellationToken);
+
+        if (invitation is null)
+        {
+            return new AcceptInvitationResult(AcceptInvitationStatus.NotFound);
+        }
+
+        if (!IsUsable(invitation))
+        {
+            return new AcceptInvitationResult(AcceptInvitationStatus.Gone);
+        }
+
+        long userId;
+        if (currentUserId is { } signedIn)
+        {
+            var account = (await accounts.GetAccountsAsync([signedIn], cancellationToken)).SingleOrDefault();
+            if (account is null || !string.Equals(account.Email, invitation.Email, StringComparison.OrdinalIgnoreCase))
+            {
+                return new AcceptInvitationResult(AcceptInvitationStatus.EmailMismatch);
+            }
+
+            userId = signedIn;
+        }
+        else
+        {
+            if (await accounts.FindUserIdByEmailAsync(invitation.Email, cancellationToken) is not null)
+            {
+                return new AcceptInvitationResult(AcceptInvitationStatus.AccountExists);
+            }
+
+            var errors = ValidateNewAccount(request);
+            if (errors.Count > 0)
+            {
+                return new AcceptInvitationResult(AcceptInvitationStatus.Invalid, errors);
+            }
+
+            // The link reached this address, so it counts as confirmed.
+            var created = await accounts.CreateAccountAsync(
+                new NewAccount(invitation.Email, request.DisplayName!.Trim(), request.Password!, EmailConfirmed: true,
+                    PrivacyPolicy.CurrentVersion),
+                cancellationToken);
+
+            if (created.UserId is not { } newUserId)
+            {
+                return new AcceptInvitationResult(AcceptInvitationStatus.Invalid, new Dictionary<string, string[]>
+                {
+                    ["password"] = created.Errors.ToArray(),
+                });
+            }
+
+            userId = newUserId;
+        }
+
+        if (await unitOfWork.Memberships.FindAsync(invitation.OrganizationId, userId, cancellationToken) is null)
+        {
+            unitOfWork.Memberships.Add(new Membership
+            {
+                OrganizationId = invitation.OrganizationId,
+                UserId = userId,
+                Role = invitation.Role,
+            });
+        }
+
+        invitation.AcceptedAt = timeProvider.GetUtcNow().UtcDateTime;
+
+        try
+        {
+            await unitOfWork.SaveChangesAsync(cancellationToken);
+        }
+        catch (DbUpdateException)
+        {
+            // Accepted twice at the same moment: the unique membership index stops the second one.
+            return new AcceptInvitationResult(AcceptInvitationStatus.Gone);
+        }
+
+        LogAccepted(invitation.Id, userId);
+        return new AcceptInvitationResult(
+            AcceptInvitationStatus.Success,
+            Session: await sessions.SignInAsync(userId, cancellationToken));
+    }
+
+    private bool IsUsable(Invitation invitation) =>
+        invitation.AcceptedAt is null
+        && invitation.RevokedAt is null
+        && invitation.ExpiresAt > timeProvider.GetUtcNow().UtcDateTime;
+
+    private static InvitationInfo ToInfo(Invitation invitation, DateTimeOffset now) => new(
+        invitation.Id,
+        invitation.Email,
+        invitation.Role,
+        new DateTimeOffset(invitation.ExpiresAt, TimeSpan.Zero),
+        invitation.ExpiresAt > now.UtcDateTime ? InvitationState.Pending : InvitationState.Expired);
+
+    private static Dictionary<string, string[]> ValidateNewAccount(AcceptInvitationRequest request)
+    {
+        var errors = new Dictionary<string, string[]>();
+
+        if (string.IsNullOrWhiteSpace(request.DisplayName) || request.DisplayName.Trim().Length > User.DisplayNameMaxLength)
+        {
+            errors["displayName"] = [$"Required, at most {User.DisplayNameMaxLength} characters."];
+        }
+
+        if (string.IsNullOrEmpty(request.Password))
+        {
+            errors["password"] = ["Required."];
+        }
+
+        if (!request.PrivacyAccepted)
+        {
+            errors["privacyAccepted"] = ["The privacy notice must be accepted."];
+        }
+
+        return errors;
+    }
+
+    private static string Hash(string token) => Convert.ToHexString(SHA256.HashData(Encoding.UTF8.GetBytes(token)));
+
+    [LoggerMessage(Level = LogLevel.Information, Message = "Invitation {InvitationId} accepted by user {UserId}.")]
+    private partial void LogAccepted(long invitationId, long userId);
+
+    [LoggerMessage(Level = LogLevel.Warning, Message = "Mail for invitation {InvitationId} could not be delivered.")]
+    private partial void LogMailFailed(long invitationId);
+}

@@ -6,6 +6,7 @@ using Logic.Notifications;
 using Logic.Notifications.Formatting;
 using Logic.Notifications.Links;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 
 namespace Logic.Authentication.Accounts;
@@ -193,6 +194,41 @@ internal sealed partial class AccountService(
         LogStartPasswordIssued(user.Id);
         return AccountResult.Success();
     }
+
+    public async Task<AccountResult> CreateAccountAsync(NewAccount account, CancellationToken cancellationToken)
+    {
+        var user = new User
+        {
+            UserName = account.Email,
+            Email = account.Email,
+            EmailConfirmed = account.EmailConfirmed,
+            DisplayName = account.DisplayName,
+            PrivacyPolicyVersion = account.PrivacyPolicyVersion,
+            PrivacyAcceptedAt = timeProvider.GetUtcNow().UtcDateTime,
+        };
+
+        var result = await userManager.CreateAsync(user, account.Password);
+        return result.Succeeded ? AccountResult.Created(user.Id) : ToFailure(result);
+    }
+
+    public async Task DeleteAccountAsync(long userId, CancellationToken cancellationToken)
+    {
+        if (await FindAsync(userId) is { } user)
+        {
+            await userManager.DeleteAsync(user);
+        }
+    }
+
+    public async Task<long?> FindUserIdByEmailAsync(string email, CancellationToken cancellationToken) =>
+        (await userManager.FindByEmailAsync(email))?.Id;
+
+    public async Task<IReadOnlyList<AccountInfo>> GetAccountsAsync(
+        IReadOnlyCollection<long> userIds,
+        CancellationToken cancellationToken) =>
+        await userManager.Users
+            .Where(u => userIds.Contains(u.Id))
+            .Select(u => new AccountInfo(u.Id, u.DisplayName, u.Email ?? string.Empty))
+            .ToListAsync(cancellationToken);
 
     private Task<User?> FindAsync(long userId) => userManager.FindByIdAsync(userId.ToString(CultureInfo.InvariantCulture));
 

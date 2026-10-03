@@ -37,6 +37,11 @@ export interface IChangePasswordRequest {
     newPassword: string;
 }
 
+/** An admin sends a start password to an adult of the same family (LP-105). */
+export interface IAdminResetPasswordRequest {
+    userId: number;
+}
+
 export interface IConfirmEmailRequest {
     userId: string;
     token: string;

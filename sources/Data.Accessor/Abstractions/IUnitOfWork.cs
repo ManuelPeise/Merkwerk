@@ -10,6 +10,10 @@ public interface IUnitOfWork : IAsyncDisposable
 {
     IOrganizationRepository Organizations { get; }
 
+    IMembershipRepository Memberships { get; }
+
+    IInvitationRepository Invitations { get; }
+
     /// <summary>Repository for <typeparamref name="T"/>; returns the specialized one if it exists (e.g. <see cref="Organizations"/>).</summary>
     IRepository<T> Repository<T>()
         where T : AEntityBase;

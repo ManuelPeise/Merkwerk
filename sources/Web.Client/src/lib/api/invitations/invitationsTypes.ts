@@ -1,3 +1,5 @@
+import type { OrganizationRole } from 'src/lib/api/members/membersTypes';
+
 /** Mirrors the C# DTOs of InvitationsController (Web.Core). */
 export interface IInvitationDetails {
     familyName: string;
@@ -16,4 +18,23 @@ export interface IInvitationAcceptRequest {
     displayName?: string;
     password?: string;
     privacyAccepted?: boolean;
+}
+
+/** An open invitation as admins see it. */
+export interface IInvitation {
+    id: number;
+    email: string;
+    role: OrganizationRole;
+    /** ISO date-time. */
+    expiresAt: string;
+    state: 'Pending' | 'Expired';
+}
+
+export interface ICreateInvitationRequest {
+    email: string;
+    role: OrganizationRole;
+}
+
+export interface IRevokeInvitationRequest {
+    id: number;
 }

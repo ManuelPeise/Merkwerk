@@ -11,6 +11,7 @@ import { routes } from 'src/navigation/routes';
 import AdminPage from 'src/pages/adminPage/AdminPage';
 import ConfirmEmailPage from 'src/pages/authentication/confirmEmailPage/ConfirmEmailPage';
 import ErrorPage from 'src/pages/errorPage/ErrorPage';
+import FamilyPage from 'src/pages/familyPage/FamilyPage';
 import ForgotPasswordPage from 'src/pages/authentication/forgotPasswordPage/ForgotPasswordPage';
 import InvitationPage from 'src/pages/authentication/invitationPage/InvitationPage';
 import LandingPage from 'src/pages/landingPage/LandingPage';
@@ -64,7 +65,10 @@ export const router = createBrowserRouter([
                         children: [
                             {
                                 element: <AdminLayout />,
-                                children: [{ path: routes.admin, element: <AdminPage /> }],
+                                children: [
+                                    { path: routes.admin, element: <AdminPage /> },
+                                    { path: routes.family, element: <FamilyPage /> },
+                                ],
                             },
                         ],
                     },

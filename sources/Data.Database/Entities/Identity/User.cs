@@ -10,6 +10,7 @@ namespace Data.Database.Entities.Identity;
 public sealed class User : IdentityUser<long>
 {
     public const int DisplayNameMaxLength = 100;
+    public const int PrivacyPolicyVersionMaxLength = 20;
 
     public string DisplayName { get; set; } = string.Empty;
 
@@ -18,4 +19,10 @@ public sealed class User : IdentityUser<long>
 
     /// <summary>UTC. The start password is only valid until then (24 hours).</summary>
     public DateTime? StartPasswordExpiresAt { get; set; }
+
+    /// <summary>Version of the privacy notice the user agreed to (LP-105).</summary>
+    public string? PrivacyPolicyVersion { get; set; }
+
+    /// <summary>UTC time of the consent.</summary>
+    public DateTime? PrivacyAcceptedAt { get; set; }
 }

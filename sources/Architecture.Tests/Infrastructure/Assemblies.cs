@@ -11,12 +11,14 @@ internal static class Assemblies
 
     public static readonly Assembly LogicNotifications = typeof(Logic.Notifications.IMailService).Assembly;
 
+    public static readonly Assembly LogicOrganizations = typeof(Logic.Organizations.PrivacyPolicy).Assembly;
+
     public static readonly Assembly LogicShared = typeof(Logic.Shared.DI.ServiceRegistrationExtensions).Assembly;
 
     public static readonly Assembly DataAccessor = typeof(Data.Accessor.Abstractions.IUnitOfWork).Assembly;
 
     /// <summary>All Logic.* assemblies. Add new Logic projects here (the project rule test reminds you).</summary>
-    public static readonly IReadOnlyList<Assembly> Logic = [LogicAuthentication, LogicNotifications, LogicShared];
+    public static readonly IReadOnlyList<Assembly> Logic = [LogicAuthentication, LogicNotifications, LogicOrganizations, LogicShared];
 
     public static IEnumerable<string> ReferencedNames(Assembly assembly) =>
         assembly.GetReferencedAssemblies().Select(a => a.Name ?? string.Empty);

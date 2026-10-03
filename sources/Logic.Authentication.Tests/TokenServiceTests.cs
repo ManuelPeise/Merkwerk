@@ -25,6 +25,21 @@ public sealed class TokenServiceTests
     }
 
     [Fact]
+    public async Task CreateAccessToken_MustChangePassword_AddsClaimOnlyWhenSet()
+    {
+        var service = new TokenService(TestSettings.Jwt(), new ManualTimeProvider(TestSettings.Start));
+        var parameters = CreateValidationParameters(TestSettings.SigningKey);
+
+        var (pending, _) = service.CreateAccessToken("user-7", "Anna", AuthRoles.Member, mustChangePassword: true);
+        var (normal, _) = service.CreateAccessToken("user-7", "Anna", AuthRoles.Member);
+
+        Assert.Equal("true", (await _handler.ValidateTokenAsync(pending, parameters)).ClaimsIdentity
+            .FindFirst(AuthClaims.MustChangePassword)?.Value);
+        Assert.Null((await _handler.ValidateTokenAsync(normal, parameters)).ClaimsIdentity
+            .FindFirst(AuthClaims.MustChangePassword));
+    }
+
+    [Fact]
     public void CreateAccessToken_ConfiguredLifetime_ExpiresAfterAccessTokenMinutes()
     {
         var service = new TokenService(TestSettings.Jwt(), new ManualTimeProvider(TestSettings.Start));

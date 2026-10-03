@@ -34,6 +34,10 @@ public static class ServiceCollectionExtensions
                 .AddInterceptors(serviceProvider.GetRequiredService<AuditSaveChangesInterceptor>()),
             ServiceLifetime.Scoped);
 
+        // Identity's UserManager needs the context itself as a scoped service (one per request, from the same factory).
+        services.TryAddScoped(serviceProvider =>
+            serviceProvider.GetRequiredService<IDbContextFactory<MerkwerkDbContext>>().CreateDbContext());
+
         return services;
     }
 }

@@ -13,10 +13,18 @@
     <PackageReference Include="xunit" />
     <PackageReference Include="xunit.runner.visualstudio" />
     <PackageReference Include="coverlet.collector" />
+    <!-- Login, refresh and account flows against a real MySQL 8.4 (needs Docker). -->
+    <PackageReference Include="Testcontainers.MySql" />
   </ItemGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\Logic.Authentication\Logic.Authentication.csproj" />
+    <!-- Only for AddMerkwerkIdentity: the tests use exactly the Identity rules of the app. -->
+    <ProjectReference Include="..\Web.Core\Web.Core.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <FrameworkReference Include="Microsoft.AspNetCore.App" />
   </ItemGroup>
 
   <ItemGroup>

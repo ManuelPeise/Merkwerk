@@ -56,7 +56,11 @@ const AuthenticationProvider: React.FC<IAuthenticationProviderProps> = (props) =
 
         setAuthenticationState({
             status: 'authenticated',
-            user: { name: result.data.name, role: result.data.role },
+            user: {
+                name: result.data.name,
+                role: result.data.role,
+                mustChangePassword: result.data.mustChangePassword,
+            },
         });
 
         return undefined;

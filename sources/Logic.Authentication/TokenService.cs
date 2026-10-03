@@ -12,11 +12,27 @@ public sealed class TokenService(IOptions<JwtOptions> options, TimeProvider time
 {
     private readonly JsonWebTokenHandler _handler = new();
 
-    public (string Token, DateTimeOffset ExpiresAt) CreateAccessToken(string userId, string name, string role)
+    public (string Token, DateTimeOffset ExpiresAt) CreateAccessToken(
+        string userId,
+        string name,
+        string role,
+        bool mustChangePassword = false)
     {
         var settings = options.Value;
         var now = timeProvider.GetUtcNow();
         var expiresAt = now.AddMinutes(settings.AccessTokenMinutes);
+
+        var claims = new List<Claim>
+        {
+            new(AuthClaims.Subject, userId),
+            new(AuthClaims.Name, name),
+            new(AuthClaims.Role, role),
+        };
+
+        if (mustChangePassword)
+        {
+            claims.Add(new Claim(AuthClaims.MustChangePassword, "true"));
+        }
 
         var descriptor = new SecurityTokenDescriptor
         {
@@ -25,12 +41,7 @@ public sealed class TokenService(IOptions<JwtOptions> options, TimeProvider time
             IssuedAt = now.UtcDateTime,
             NotBefore = now.UtcDateTime,
             Expires = expiresAt.UtcDateTime,
-            Subject = new ClaimsIdentity(new[]
-            {
-                new Claim(JwtRegisteredClaimNames.Sub, userId),
-                new Claim(JwtRegisteredClaimNames.Name, name),
-                new Claim("role", role),
-            }),
+            Subject = new ClaimsIdentity(claims),
             SigningCredentials = new SigningCredentials(CreateSigningKey(settings), SecurityAlgorithms.HmacSha256),
         };
 

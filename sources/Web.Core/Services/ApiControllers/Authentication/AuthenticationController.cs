@@ -1,18 +1,21 @@
-using System.Security.Claims;
 using Logic.Authentication;
+using Logic.Authentication.Accounts;
+using Logic.Authentication.Sessions;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Web.Core.Services.ApiControllers.Authentication.Dtos;
+using Web.Core.Services.Authorization;
 using Web.Core.Services.Cookies;
 
 namespace Web.Core.Services.ApiControllers.Authentication;
 
 /// <summary>
-/// Login, token refresh and logout (ADR 013). Tokens travel only in HttpOnly cookies; the session logic
-/// lives in Logic.Authentication, this controller does transport only.
+/// Login, token refresh, logout and account operations (ADR 013, LP-104). Tokens travel only in HttpOnly cookies;
+/// the logic lives in Logic.Authentication, this controller does transport only.
 /// </summary>
 public sealed class AuthenticationController(
     IAuthSessionService authSessionService,
+    IAccountService accountService,
     AuthCookieWriter cookieWriter) : ApiControllerBase
 {
     /// <summary>POST /api/v1/authentication/login – checks the credentials and sets the auth cookies.</summary>
@@ -21,18 +24,22 @@ public sealed class AuthenticationController(
     [ProducesResponseType<SessionDto>(StatusCodes.Status200OK)]
     [ProducesResponseType<ProblemDetails>(StatusCodes.Status400BadRequest)]
     [ProducesResponseType<ProblemDetails>(StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType<ProblemDetails>(StatusCodes.Status403Forbidden)]
     public async Task<ActionResult<SessionDto>> LoginAsync(LoginRequestDto request, CancellationToken cancellationToken)
     {
-        var session = await authSessionService.LoginAsync(request.Email, request.Password, cancellationToken);
+        var result = await authSessionService.LoginAsync(request.Email, request.Password, cancellationToken);
 
-        if (session is null)
+        switch (result.Status)
         {
-            // Same answer for unknown user and wrong password – don't reveal which one it was.
-            return Unauthorized();
+            case LoginStatus.Success:
+                cookieWriter.Write(Response, result.Session!);
+                return SessionDto.From(result.Session!);
+            case LoginStatus.EmailNotConfirmed:
+                return Problem(statusCode: StatusCodes.Status403Forbidden, title: "E-mail not confirmed");
+            default:
+                // Same answer for unknown user, wrong password and locked account – don't reveal which one it was.
+                return Problem(statusCode: StatusCodes.Status401Unauthorized, title: "Invalid credentials");
         }
-
-        cookieWriter.Write(Response, session);
-        return SessionDto.From(session);
     }
 
     /// <summary>
@@ -81,10 +88,88 @@ public sealed class AuthenticationController(
     }
 
     /// <summary>GET /api/v1/authentication/me – who is signed in? Lets the client restore its state after a reload.</summary>
-    [Authorize]
+    [Authorize(Policy = AuthorizationPolicies.PasswordChangeAllowed)]
     [HttpGet]
     [ProducesResponseType<CurrentUserDto>(StatusCodes.Status200OK)]
     [ProducesResponseType<ProblemDetails>(StatusCodes.Status401Unauthorized)]
-    public ActionResult<CurrentUserDto> Me() =>
-        new CurrentUserDto(User.Identity?.Name ?? string.Empty, User.FindFirstValue("role") ?? string.Empty);
+    public ActionResult<CurrentUserDto> Me() => new CurrentUserDto(
+        User.FindFirst(AuthClaims.Name)?.Value ?? string.Empty,
+        User.FindFirst(AuthClaims.Role)?.Value ?? string.Empty,
+        User.HasClaim(AuthClaims.MustChangePassword, "true"));
+
+    /// <summary>POST /api/v1/authentication/forgot-password – mails a reset link if the account exists. Always 204.</summary>
+    [AllowAnonymous]
+    [HttpPost]
+    [ProducesResponseType(StatusCodes.Status204NoContent)]
+    [ProducesResponseType<ProblemDetails>(StatusCodes.Status400BadRequest)]
+    public async Task<IActionResult> ForgotPasswordAsync(ForgotPasswordRequestDto request, CancellationToken cancellationToken)
+    {
+        await accountService.RequestPasswordResetAsync(request.Email, MailLanguage, cancellationToken);
+        return NoContent();
+    }
+
+    /// <summary>POST /api/v1/authentication/reset-password – sets the new password; ends all sessions of the user.</summary>
+    [AllowAnonymous]
+    [HttpPost]
+    [ProducesResponseType(StatusCodes.Status204NoContent)]
+    [ProducesResponseType<ValidationProblemDetails>(StatusCodes.Status400BadRequest)]
+    public async Task<IActionResult> ResetPasswordAsync(ResetPasswordRequestDto request, CancellationToken cancellationToken)
+    {
+        var result = await accountService.ResetPasswordAsync(request.Email, request.Token, request.NewPassword, cancellationToken);
+        return result.Succeeded ? NoContent() : FieldProblem(nameof(request.NewPassword), result);
+    }
+
+    /// <summary>POST /api/v1/authentication/confirm-email – confirms the address from the link.</summary>
+    [AllowAnonymous]
+    [HttpPost]
+    [ProducesResponseType(StatusCodes.Status204NoContent)]
+    [ProducesResponseType<ValidationProblemDetails>(StatusCodes.Status400BadRequest)]
+    public async Task<IActionResult> ConfirmEmailAsync(ConfirmEmailRequestDto request, CancellationToken cancellationToken)
+    {
+        var result = await accountService.ConfirmEmailAsync(request.UserId, request.Token, cancellationToken);
+        return result.Succeeded ? NoContent() : FieldProblem(nameof(request.Token), result);
+    }
+
+    /// <summary>
+    /// POST /api/v1/authentication/change-password – also allowed while a start password is active.
+    /// Ends all other sessions and sets new cookies for this one.
+    /// </summary>
+    [Authorize(Policy = AuthorizationPolicies.PasswordChangeAllowed)]
+    [HttpPost]
+    [ProducesResponseType<SessionDto>(StatusCodes.Status200OK)]
+    [ProducesResponseType<ValidationProblemDetails>(StatusCodes.Status400BadRequest)]
+    [ProducesResponseType<ProblemDetails>(StatusCodes.Status401Unauthorized)]
+    public async Task<ActionResult<SessionDto>> ChangePasswordAsync(
+        ChangePasswordRequestDto request,
+        CancellationToken cancellationToken)
+    {
+        if (CurrentUserId is not { } userId)
+        {
+            return Unauthorized();
+        }
+
+        var result = await accountService.ChangePasswordAsync(
+            userId, request.CurrentPassword, request.NewPassword, cancellationToken);
+
+        if (!result.Succeeded)
+        {
+            return FieldProblem(nameof(request.NewPassword), result);
+        }
+
+        cookieWriter.Write(Response, result.Session!);
+        return SessionDto.From(result.Session!);
+    }
+
+    /// <summary>400 with Identity's messages attached to one field (camelCase, like the automatic model validation).</summary>
+    private ActionResult FieldProblem(string field, AccountResult result)
+    {
+        var key = char.ToLowerInvariant(field[0]) + field[1..];
+
+        foreach (var error in result.Errors)
+        {
+            ModelState.AddModelError(key, error);
+        }
+
+        return ValidationProblem(ModelState);
+    }
 }

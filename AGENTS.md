@@ -86,6 +86,9 @@ Per module: `I<Name>Service` + implementation, validators, module-internal types
 
 - Every entity derives from `AEntityBase` (`long Id`, `CreatedAt`, `CreatedBy`, `UpdatedAt`, `UpdatedBy`);
   everything owned by a family/school derives from `AOrganizationEntityBase` (`long OrganizationId`).
+- Exception (LP-104): Identity types (`User : IdentityUser<long>`, claims, logins, tokens) have no audit fields, and
+  `Logic.Authentication` may use Identity's `UserManager<User>` (it reaches the DB through Identity's own store).
+  Refresh tokens still go through `IUnitOfWork`. Everything else follows ADR 012.
 - **Never set audit fields by hand** – the `AuditSaveChangesInterceptor` does that.
 - Time is always **UTC** and always comes from `TimeProvider`; never call `DateTime.Now`/`UtcNow` directly.
 - IDs: `long` (AUTO_INCREMENT). `Attempt` and `Answer` additionally have a unique `Guid ClientId` for idempotency/offline use.
@@ -134,6 +137,9 @@ touch targets ≥ 64×64 px, icons plus text and friendly feedback; no CDNs, no 
 - Submitting an answer is an idempotent `PUT`. Every endpoint has `[Authorize]` with a matching policy
   (`Learner`, `Member`, `OrgAdmin`, `InstanceAdmin`), except explicitly anonymous ones (login, setup, invitation, device pairing).
 - Auth cookies only via `AuthCookieWriter` (HttpOnly, SameSite=Strict, Secure outside development over HTTP).
+- The default policy also rejects tokens with `must_change_password` (start password, LP-104); only endpoints with
+  `[Authorize(Policy = AuthorizationPolicies.PasswordChangeAllowed)]` (me, change-password) accept them.
+- Mail language for an endpoint: `MailLanguage` from `ApiControllerBase` (Accept-Language, default `de`).
 
 ## 9. Security and privacy (non-negotiable)
 

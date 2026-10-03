@@ -3,7 +3,7 @@ using Data.Database.Entities.Base;
 namespace Data.Database.Entities.Devices;
 
 /// <summary>Six-digit code an adult creates to pair a device (LP-106). Single use, 10 minutes, stored hashed only.</summary>
-public sealed class PairingCode : AOrganizationEntityBase
+public sealed class PairingCodeEntity : AOrganizationEntityBase
 {
     public const int CodeHashLength = 64;
 

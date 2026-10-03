@@ -66,7 +66,7 @@ internal sealed partial class InvitationService(
             replaced.RevokedAt = now.UtcDateTime;
         }
 
-        var invitation = new Invitation
+        var invitation = new InvitationEntity
         {
             OrganizationId = organizationId,
             Email = normalizedEmail,
@@ -238,7 +238,7 @@ internal sealed partial class InvitationService(
 
         if (await unitOfWork.Memberships.FindAsync(invitation.OrganizationId, userId, cancellationToken) is null)
         {
-            unitOfWork.Memberships.Add(new Membership
+            unitOfWork.Memberships.Add(new MembershipEntity
             {
                 OrganizationId = invitation.OrganizationId,
                 UserId = userId,
@@ -279,12 +279,12 @@ internal sealed partial class InvitationService(
         }
     }
 
-    private bool IsUsable(Invitation invitation) =>
+    private bool IsUsable(InvitationEntity invitation) =>
         invitation.AcceptedAt is null
         && invitation.RevokedAt is null
         && invitation.ExpiresAt > timeProvider.GetUtcNow().UtcDateTime;
 
-    private static InvitationInfo ToInfo(Invitation invitation, DateTimeOffset now) => new(
+    private static InvitationInfo ToInfo(InvitationEntity invitation, DateTimeOffset now) => new(
         invitation.Id,
         invitation.Email,
         invitation.Role,
@@ -295,9 +295,9 @@ internal sealed partial class InvitationService(
     {
         var errors = new Dictionary<string, string[]>();
 
-        if (string.IsNullOrWhiteSpace(request.DisplayName) || request.DisplayName.Trim().Length > User.DisplayNameMaxLength)
+        if (string.IsNullOrWhiteSpace(request.DisplayName) || request.DisplayName.Trim().Length > UserEntity.DisplayNameMaxLength)
         {
-            errors["displayName"] = [$"Required, at most {User.DisplayNameMaxLength} characters."];
+            errors["displayName"] = [$"Required, at most {UserEntity.DisplayNameMaxLength} characters."];
         }
 
         if (string.IsNullOrEmpty(request.Password))

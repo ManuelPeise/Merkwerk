@@ -9,7 +9,7 @@ namespace Logic.Authentication;
 
 /// <summary>Login against ASP.NET Core Identity, JWT access tokens and refresh tokens in the database (LP-104).</summary>
 internal sealed class AuthSessionService(
-    UserManager<User> userManager,
+    UserManager<UserEntity> userManager,
     TokenService tokenService,
     RefreshTokenStore refreshTokens,
     IUnitOfWorkFactory unitOfWorkFactory,
@@ -82,13 +82,13 @@ internal sealed class AuthSessionService(
         refreshTokens.RevokeChainAsync(refreshToken, cancellationToken);
 
     /// <summary>New access token plus refresh token in the given chain (new chain = new login).</summary>
-    internal async Task<AuthSession> IssueSessionAsync(User user, Guid chainId, CancellationToken cancellationToken) =>
+    internal async Task<AuthSession> IssueSessionAsync(UserEntity user, Guid chainId, CancellationToken cancellationToken) =>
         await CreateSessionAsync(user, await refreshTokens.IssueAsync(user.Id, chainId, cancellationToken), cancellationToken);
 
     /// <summary>Role and organization come from the user's (oldest) membership – read on every login and refresh (LP-105).</summary>
-    private async Task<AuthSession> CreateSessionAsync(User user, IssuedRefreshToken refreshToken, CancellationToken cancellationToken)
+    private async Task<AuthSession> CreateSessionAsync(UserEntity user, IssuedRefreshToken refreshToken, CancellationToken cancellationToken)
     {
-        Membership? membership;
+        MembershipEntity? membership;
         await using (var unitOfWork = unitOfWorkFactory.Create())
         {
             membership = await unitOfWork.Memberships.FindPrimaryForUserAsync(user.Id, cancellationToken);
@@ -108,7 +108,7 @@ internal sealed class AuthSessionService(
             name, role, user.MustChangePassword, accessToken, accessExpiresAt, refreshToken.Token, refreshToken.ExpiresAt);
     }
 
-    private bool IsStartPasswordExpired(User user) =>
+    private bool IsStartPasswordExpired(UserEntity user) =>
         user.MustChangePassword
         && user.StartPasswordExpiresAt is { } expiresAt
         && expiresAt <= timeProvider.GetUtcNow().UtcDateTime;

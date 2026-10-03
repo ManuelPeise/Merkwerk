@@ -1,4 +1,4 @@
-namespace Web.Core.Bundels;
+namespace Web.Core.Bundles;
 
 /// <summary>Builds the app and configures the HTTP request pipeline, called once from Program.cs.</summary>
 public static class AppConfigurationExtensions

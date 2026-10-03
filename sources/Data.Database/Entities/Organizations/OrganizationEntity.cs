@@ -3,7 +3,7 @@ using Data.Database.Entities.Base;
 namespace Data.Database.Entities.Organizations;
 
 /// <summary>A family (later also a school). Root of tenant isolation – therefore not organization-scoped itself.</summary>
-public sealed class Organization : AEntityBase
+public sealed class OrganizationEntity : AEntityBase
 {
     public const int NameMaxLength = 100;
 

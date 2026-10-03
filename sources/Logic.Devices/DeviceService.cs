@@ -52,7 +52,7 @@ internal sealed class DeviceService(
         var expiresAt = now.Add(DeviceLifetimes.DeviceToken);
 
         pairingCode.UsedAt = now.UtcDateTime;
-        unitOfWork.Devices.Add(new Device
+        unitOfWork.Devices.Add(new DeviceEntity
         {
             OrganizationId = pairingCode.OrganizationId,
             Name = NormalizeName(deviceName),
@@ -160,7 +160,7 @@ internal sealed class DeviceService(
     }
 
     /// <summary>Device of the token, if it is neither unpaired nor expired (tracked).</summary>
-    internal async Task<Device?> FindActiveDeviceAsync(
+    internal async Task<DeviceEntity?> FindActiveDeviceAsync(
         IUnitOfWork unitOfWork,
         string deviceToken,
         CancellationToken cancellationToken)
@@ -201,7 +201,7 @@ internal sealed class DeviceService(
         var code = await CreateUnusedCodeAsync(unitOfWork, now.UtcDateTime, cancellationToken);
         var expiresAt = now.Add(DeviceLifetimes.PairingCode);
 
-        unitOfWork.PairingCodes.Add(new PairingCode
+        unitOfWork.PairingCodes.Add(new PairingCodeEntity
         {
             OrganizationId = organizationId,
             CodeHash = DeviceTokens.Hash(code),
@@ -238,6 +238,6 @@ internal sealed class DeviceService(
             return DefaultDeviceName;
         }
 
-        return trimmed.Length > Device.NameMaxLength ? trimmed[..Device.NameMaxLength] : trimmed;
+        return trimmed.Length > DeviceEntity.NameMaxLength ? trimmed[..DeviceEntity.NameMaxLength] : trimmed;
     }
 }

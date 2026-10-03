@@ -4,11 +4,11 @@ using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
 namespace Data.Database.Configurations;
 
-internal sealed class OrganizationConfiguration : IEntityTypeConfiguration<Organization>
+internal sealed class OrganizationConfiguration : IEntityTypeConfiguration<OrganizationEntity>
 {
-    public void Configure(EntityTypeBuilder<Organization> builder)
+    public void Configure(EntityTypeBuilder<OrganizationEntity> builder)
     {
         builder.ToTable("Organizations");
-        builder.Property(o => o.Name).HasMaxLength(Organization.NameMaxLength).IsRequired();
+        builder.Property(o => o.Name).HasMaxLength(OrganizationEntity.NameMaxLength).IsRequired();
     }
 }

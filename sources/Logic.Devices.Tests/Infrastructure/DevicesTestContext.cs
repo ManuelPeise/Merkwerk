@@ -13,7 +13,7 @@ using Logic.Notifications.DI;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using Web.Core.Bundels;
+using Web.Core.Bundles;
 
 namespace Logic.Devices.Tests.Infrastructure;
 
@@ -105,10 +105,10 @@ public sealed class DevicesTestContext
 
         await using var scope = Services.CreateAsyncScope();
         await using var unitOfWork = scope.ServiceProvider.GetRequiredService<IUnitOfWorkFactory>().Create();
-        var organization = new Organization { Name = name };
+        var organization = new OrganizationEntity { Name = name };
         unitOfWork.Organizations.Add(organization);
         await unitOfWork.SaveChangesAsync();
-        unitOfWork.Memberships.Add(new Membership
+        unitOfWork.Memberships.Add(new MembershipEntity
         {
             OrganizationId = organization.Id,
             UserId = ownerId,
@@ -125,7 +125,7 @@ public sealed class DevicesTestContext
     {
         await using var scope = Services.CreateAsyncScope();
         await using var unitOfWork = scope.ServiceProvider.GetRequiredService<IUnitOfWorkFactory>().Create();
-        unitOfWork.Memberships.Add(new Membership { OrganizationId = family.OrganizationId, UserId = userId, Role = role });
+        unitOfWork.Memberships.Add(new MembershipEntity { OrganizationId = family.OrganizationId, UserId = userId, Role = role });
         await unitOfWork.SaveChangesAsync();
     }
 
@@ -134,7 +134,7 @@ public sealed class DevicesTestContext
     {
         await using var scope = Services.CreateAsyncScope();
         await using var unitOfWork = scope.ServiceProvider.GetRequiredService<IUnitOfWorkFactory>().Create();
-        var learner = new Learner { OrganizationId = family.OrganizationId, DisplayName = displayName, Grade = 2, AvatarId = avatarId };
+        var learner = new LearnerEntity { OrganizationId = family.OrganizationId, DisplayName = displayName, Grade = 2, AvatarId = avatarId };
         unitOfWork.Learners.Add(learner);
         await unitOfWork.SaveChangesAsync();
         return learner.Id;

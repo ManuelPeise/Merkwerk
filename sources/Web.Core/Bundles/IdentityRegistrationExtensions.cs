@@ -4,7 +4,7 @@ using Logic.Authentication.Accounts;
 using Microsoft.AspNetCore.DataProtection;
 using Microsoft.AspNetCore.Identity;
 
-namespace Web.Core.Bundels;
+namespace Web.Core.Bundles;
 
 /// <summary>
 /// ASP.NET Core Identity for adult accounts (LP-104): UserManager with EF stores, password and lockout rules,
@@ -25,7 +25,7 @@ public static class IdentityRegistrationExtensions
             dataProtection.PersistKeysToFileSystem(new DirectoryInfo(keysPath));
         }
 
-        services.AddIdentityCore<User>(options =>
+        services.AddIdentityCore<UserEntity>(options =>
             {
                 // Length beats character classes (NIST 800-63B); same rule as the web client (validatePassword).
                 options.Password.RequiredLength = 10;

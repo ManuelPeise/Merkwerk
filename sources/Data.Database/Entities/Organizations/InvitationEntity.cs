@@ -3,7 +3,7 @@ using Data.Database.Entities.Base;
 namespace Data.Database.Entities.Organizations;
 
 /// <summary>Invitation of an adult into an organization (LP-105). Only the SHA-256 hash of the token is stored.</summary>
-public sealed class Invitation : AOrganizationEntityBase
+public sealed class InvitationEntity : AOrganizationEntityBase
 {
     public const int EmailMaxLength = 256;
     public const int TokenHashLength = 64;

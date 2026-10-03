@@ -7,7 +7,7 @@ namespace Data.Database.Entities.Devices;
 /// A child's session on a paired device (LP-106): ends 8 hours after the sign-in, when the child is switched, or when the
 /// device is unpaired. Only the SHA-256 hash of its refresh token is stored.
 /// </summary>
-public sealed class LearnerSession : AOrganizationEntityBase
+public sealed class LearnerSessionEntity : AOrganizationEntityBase
 {
     public const int TokenHashLength = 64;
 
@@ -24,7 +24,7 @@ public sealed class LearnerSession : AOrganizationEntityBase
     /// <summary>UTC; null = still usable.</summary>
     public DateTime? RevokedAt { get; set; }
 
-    public Device? Device { get; set; }
+    public DeviceEntity? Device { get; set; }
 
-    public Learner? Learner { get; set; }
+    public LearnerEntity? Learner { get; set; }
 }

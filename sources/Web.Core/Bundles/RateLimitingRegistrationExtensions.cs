@@ -1,7 +1,7 @@
 using System.Threading.RateLimiting;
 using Microsoft.AspNetCore.RateLimiting;
 
-namespace Web.Core.Bundels;
+namespace Web.Core.Bundles;
 
 /// <summary>
 /// Rate limits (ASP.NET Core built-in, no package). Device pairing: 5 attempts per minute and client address (LP-106),

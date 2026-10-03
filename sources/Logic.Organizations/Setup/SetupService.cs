@@ -75,9 +75,9 @@ internal sealed partial class SetupService(
     {
         // One save = one transaction: a family saved without its owner would block the setup for good.
         await using var unitOfWork = unitOfWorkFactory.Create();
-        var organization = new Organization { Name = familyName };
+        var organization = new OrganizationEntity { Name = familyName };
         unitOfWork.Organizations.Add(organization);
-        unitOfWork.Memberships.Add(new Membership
+        unitOfWork.Memberships.Add(new MembershipEntity
         {
             Organization = organization,
             UserId = ownerUserId,
@@ -91,14 +91,14 @@ internal sealed partial class SetupService(
     {
         var errors = new Dictionary<string, string[]>();
 
-        if (string.IsNullOrWhiteSpace(request.FamilyName) || request.FamilyName.Trim().Length > Organization.NameMaxLength)
+        if (string.IsNullOrWhiteSpace(request.FamilyName) || request.FamilyName.Trim().Length > OrganizationEntity.NameMaxLength)
         {
-            errors["familyName"] = [$"Required, at most {Organization.NameMaxLength} characters."];
+            errors["familyName"] = [$"Required, at most {OrganizationEntity.NameMaxLength} characters."];
         }
 
-        if (string.IsNullOrWhiteSpace(request.DisplayName) || request.DisplayName.Trim().Length > User.DisplayNameMaxLength)
+        if (string.IsNullOrWhiteSpace(request.DisplayName) || request.DisplayName.Trim().Length > UserEntity.DisplayNameMaxLength)
         {
-            errors["displayName"] = [$"Required, at most {User.DisplayNameMaxLength} characters."];
+            errors["displayName"] = [$"Required, at most {UserEntity.DisplayNameMaxLength} characters."];
         }
 
         if (!request.PrivacyAccepted)

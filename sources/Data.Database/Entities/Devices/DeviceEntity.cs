@@ -6,7 +6,7 @@ namespace Data.Database.Entities.Devices;
 /// A tablet or phone paired with a family (LP-106, ADR 006). Children sign in on it by tapping their picture.
 /// Only the SHA-256 hash of the device token is stored; the token itself lives in the HttpOnly cookie <c>mw_device</c>.
 /// </summary>
-public sealed class Device : AOrganizationEntityBase
+public sealed class DeviceEntity : AOrganizationEntityBase
 {
     public const int NameMaxLength = 50;
     public const int TokenHashLength = 64;

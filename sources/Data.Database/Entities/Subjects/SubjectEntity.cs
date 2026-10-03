@@ -6,7 +6,7 @@ namespace Data.Database.Entities.Subjects;
 /// A school subject (German, English, maths, later any other language). Instance-wide, not organization-scoped:
 /// shared and public exercises (LP-201) must mean the same subject in every family.
 /// </summary>
-public sealed class Subject : AEntityBase
+public sealed class SubjectEntity : AEntityBase
 {
     public const int NameMaxLength = 50;
     public const int LanguageCodeMaxLength = 10;

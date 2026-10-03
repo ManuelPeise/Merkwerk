@@ -6,7 +6,7 @@ using Microsoft.EntityFrameworkCore;
 namespace Data.Accessor.Repositories;
 
 internal sealed class OrganizationRepository(MerkwerkDbContext context)
-    : EntityRepository<Organization>(context), IOrganizationRepository
+    : EntityRepository<OrganizationEntity>(context), IOrganizationRepository
 {
     public Task<bool> AnyAsync(CancellationToken cancellationToken = default) => Set.AnyAsync(cancellationToken);
 }

@@ -1,4 +1,4 @@
-namespace Web.Core.Bundels;
+namespace Web.Core.Bundles;
 
 public class Constants
 {

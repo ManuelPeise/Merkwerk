@@ -17,7 +17,7 @@ namespace Data.Database;
 /// EF model of Merkwerk. Reached only through Data.Accessor (unit of work), never from Logic directly (ADR 012).
 /// Exception: ASP.NET Core Identity's UserManager uses this context through its own store (LP-104).
 /// </summary>
-public class MerkwerkDbContext : IdentityUserContext<User, long>
+public class MerkwerkDbContext : IdentityUserContext<UserEntity, long>
 {
     private const int ActorMaxLength = 64;
 
@@ -39,23 +39,23 @@ public class MerkwerkDbContext : IdentityUserContext<User, long>
         _currentUser = currentUser;
     }
 
-    public DbSet<Organization> Organizations => Set<Organization>();
+    public DbSet<OrganizationEntity> Organizations => Set<OrganizationEntity>();
 
-    public DbSet<Subject> Subjects => Set<Subject>();
+    public DbSet<SubjectEntity> Subjects => Set<SubjectEntity>();
 
-    public DbSet<RefreshToken> RefreshTokens => Set<RefreshToken>();
+    public DbSet<RefreshTokenEntity> RefreshTokens => Set<RefreshTokenEntity>();
 
-    public DbSet<Membership> Memberships => Set<Membership>();
+    public DbSet<MembershipEntity> Memberships => Set<MembershipEntity>();
 
-    public DbSet<Invitation> Invitations => Set<Invitation>();
+    public DbSet<InvitationEntity> Invitations => Set<InvitationEntity>();
 
-    public DbSet<Learner> Learners => Set<Learner>();
+    public DbSet<LearnerEntity> Learners => Set<LearnerEntity>();
 
-    public DbSet<Device> Devices => Set<Device>();
+    public DbSet<DeviceEntity> Devices => Set<DeviceEntity>();
 
-    public DbSet<PairingCode> PairingCodes => Set<PairingCode>();
+    public DbSet<PairingCodeEntity> PairingCodes => Set<PairingCodeEntity>();
 
-    public DbSet<LearnerSession> LearnerSessions => Set<LearnerSession>();
+    public DbSet<LearnerSessionEntity> LearnerSessions => Set<LearnerSessionEntity>();
 
     /// <summary>Read by the query filter on every query (EF parameterizes context members).</summary>
     protected long? CurrentOrganizationId => _currentUser.OrganizationId;
@@ -99,7 +99,7 @@ public class MerkwerkDbContext : IdentityUserContext<User, long>
     /// <summary>Short table names instead of AspNet*, and bounded key lengths for MySQL.</summary>
     private static void ConfigureIdentityTables(ModelBuilder modelBuilder)
     {
-        modelBuilder.Entity<User>().ToTable("Users");
+        modelBuilder.Entity<UserEntity>().ToTable("Users");
         modelBuilder.Entity<IdentityUserClaim<long>>().ToTable("UserClaims");
 
         modelBuilder.Entity<IdentityUserLogin<long>>(login =>

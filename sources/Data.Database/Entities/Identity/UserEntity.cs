@@ -7,7 +7,7 @@ namespace Data.Database.Entities.Identity;
 /// Exception to ADR 011: Identity dictates the base class, so there are no audit fields here.
 /// The role belongs to the membership in an organization (LP-105/LP-107), not to the user.
 /// </summary>
-public sealed class User : IdentityUser<long>
+public sealed class UserEntity : IdentityUser<long>
 {
     public const int DisplayNameMaxLength = 100;
     public const int PrivacyPolicyVersionMaxLength = 20;

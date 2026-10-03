@@ -49,7 +49,7 @@ internal sealed class RefreshTokenStore(
         var hash = TokenEncoding.Hash(token);
 
         await using var unitOfWork = unitOfWorkFactory.Create();
-        var tokens = unitOfWork.Repository<RefreshToken>();
+        var tokens = unitOfWork.Repository<RefreshTokenEntity>();
         var chainId = await tokens.Query()
             .Where(t => t.TokenHash == hash)
             .Select(t => (Guid?)t.ChainId)
@@ -67,7 +67,7 @@ internal sealed class RefreshTokenStore(
     {
         await using var unitOfWork = unitOfWorkFactory.Create();
         await RevokeWhereAsync(
-            unitOfWork.Repository<RefreshToken>(), t => t.ChainId == chainId, timeProvider.GetUtcNow().UtcDateTime, cancellationToken);
+            unitOfWork.Repository<RefreshTokenEntity>(), t => t.ChainId == chainId, timeProvider.GetUtcNow().UtcDateTime, cancellationToken);
         await unitOfWork.SaveChangesAsync(cancellationToken);
     }
 
@@ -76,7 +76,7 @@ internal sealed class RefreshTokenStore(
     {
         await using var unitOfWork = unitOfWorkFactory.Create();
         await RevokeWhereAsync(
-            unitOfWork.Repository<RefreshToken>(), t => t.UserId == userId, timeProvider.GetUtcNow().UtcDateTime, cancellationToken);
+            unitOfWork.Repository<RefreshTokenEntity>(), t => t.UserId == userId, timeProvider.GetUtcNow().UtcDateTime, cancellationToken);
         await unitOfWork.SaveChangesAsync(cancellationToken);
     }
 
@@ -85,7 +85,7 @@ internal sealed class RefreshTokenStore(
         var now = timeProvider.GetUtcNow().UtcDateTime;
 
         await using var unitOfWork = unitOfWorkFactory.Create();
-        var tokens = unitOfWork.Repository<RefreshToken>();
+        var tokens = unitOfWork.Repository<RefreshTokenEntity>();
         var stored = await tokens.QueryTracked().SingleOrDefaultAsync(t => t.TokenHash == hash, cancellationToken);
 
         if (stored is null || stored.ExpiresAt <= now)
@@ -117,7 +117,7 @@ internal sealed class RefreshTokenStore(
     /// revoke the whole chain, so their tokens never pass this check.
     /// </summary>
     private async Task<bool> IsParallelRefreshAsync(
-        IRepository<RefreshToken> tokens,
+        IRepository<RefreshTokenEntity> tokens,
         Guid chainId,
         DateTime revokedAt,
         DateTime now,
@@ -138,7 +138,7 @@ internal sealed class RefreshTokenStore(
         var token = TokenService.CreateRefreshToken();
         var expiresAt = timeProvider.GetUtcNow().AddDays(options.Value.RefreshTokenDays);
 
-        unitOfWork.Repository<RefreshToken>().Add(new RefreshToken
+        unitOfWork.Repository<RefreshTokenEntity>().Add(new RefreshTokenEntity
         {
             UserId = userId,
             TokenHash = TokenEncoding.Hash(token),
@@ -150,8 +150,8 @@ internal sealed class RefreshTokenStore(
     }
 
     private static async Task RevokeWhereAsync(
-        IRepository<RefreshToken> tokens,
-        Expression<Func<RefreshToken, bool>> predicate,
+        IRepository<RefreshTokenEntity> tokens,
+        Expression<Func<RefreshTokenEntity, bool>> predicate,
         DateTime now,
         CancellationToken cancellationToken)
     {

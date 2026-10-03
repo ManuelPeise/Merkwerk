@@ -15,7 +15,7 @@ using Web.Core.Services.Cookies;
 using Web.Core.Services.CurrentUser;
 using Web.Core.Services.Routing;
 
-namespace Web.Core.Bundels;
+namespace Web.Core.Bundles;
 
 /// <summary>Composition root: every service registration of the backend, called once from Program.cs.</summary>
 public static class ServiceRegistrationExtensions

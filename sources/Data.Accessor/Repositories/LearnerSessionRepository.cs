@@ -6,9 +6,9 @@ using Microsoft.EntityFrameworkCore;
 namespace Data.Accessor.Repositories;
 
 internal sealed class LearnerSessionRepository(MerkwerkDbContext context)
-    : EntityRepository<LearnerSession>(context), ILearnerSessionRepository
+    : EntityRepository<LearnerSessionEntity>(context), ILearnerSessionRepository
 {
-    public Task<LearnerSession?> FindByTokenHashAsync(string tokenHash, CancellationToken cancellationToken = default) =>
+    public Task<LearnerSessionEntity?> FindByTokenHashAsync(string tokenHash, CancellationToken cancellationToken = default) =>
         // IgnoreQueryFilters: a refresh has no valid access token, hence no organization (AGENTS.md §5, documented exception).
         Set.IgnoreQueryFilters()
             .Include(s => s.Device)

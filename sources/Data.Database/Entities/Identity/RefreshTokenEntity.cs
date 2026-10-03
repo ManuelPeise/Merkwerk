@@ -6,7 +6,7 @@ namespace Data.Database.Entities.Identity;
 /// One refresh token (ADR 013). Only the SHA-256 hash is stored. Every refresh revokes the token and issues a new one in
 /// the same chain; redeeming a revoked token revokes the whole chain (token theft).
 /// </summary>
-public sealed class RefreshToken : AEntityBase
+public sealed class RefreshTokenEntity : AEntityBase
 {
     public const int TokenHashLength = 64;
 

@@ -15,7 +15,7 @@ namespace Logic.Authentication.Accounts;
 /// Account operations with mails (LP-104). Logs never contain e-mail addresses or tokens – only user ids and outcomes.
 /// </summary>
 internal sealed partial class AccountService(
-    UserManager<User> userManager,
+    UserManager<UserEntity> userManager,
     AuthSessionService sessions,
     RefreshTokenStore refreshTokens,
     IMailService mailService,
@@ -197,7 +197,7 @@ internal sealed partial class AccountService(
 
     public async Task<AccountResult> CreateAccountAsync(NewAccount account, CancellationToken cancellationToken)
     {
-        var user = new User
+        var user = new UserEntity
         {
             UserName = account.Email,
             Email = account.Email,
@@ -230,11 +230,11 @@ internal sealed partial class AccountService(
             .Select(u => new AccountInfo(u.Id, u.DisplayName, u.Email ?? string.Empty))
             .ToListAsync(cancellationToken);
 
-    private Task<User?> FindAsync(long userId) => userManager.FindByIdAsync(userId.ToString(CultureInfo.InvariantCulture));
+    private Task<UserEntity?> FindAsync(long userId) => userManager.FindByIdAsync(userId.ToString(CultureInfo.InvariantCulture));
 
     /// <summary>A failed mail must not turn into an error the caller could use to probe for accounts.</summary>
     private async Task TrySendAsync(
-        User user,
+        UserEntity user,
         MailTemplate template,
         string language,
         IReadOnlyDictionary<string, string> values,

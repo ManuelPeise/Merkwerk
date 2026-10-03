@@ -6,9 +6,9 @@ using Microsoft.EntityFrameworkCore;
 namespace Data.Accessor.Repositories;
 
 internal sealed class InvitationRepository(MerkwerkDbContext context)
-    : EntityRepository<Invitation>(context), IInvitationRepository
+    : EntityRepository<InvitationEntity>(context), IInvitationRepository
 {
-    public Task<Invitation?> FindByTokenHashAsync(string tokenHash, CancellationToken cancellationToken = default) =>
+    public Task<InvitationEntity?> FindByTokenHashAsync(string tokenHash, CancellationToken cancellationToken = default) =>
         // IgnoreQueryFilters: the invited person is not part of the organization yet (AGENTS.md §5, documented exception).
         Set.IgnoreQueryFilters().FirstOrDefaultAsync(i => i.TokenHash == tokenHash, cancellationToken);
 }

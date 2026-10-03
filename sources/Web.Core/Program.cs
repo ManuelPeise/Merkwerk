@@ -1,4 +1,4 @@
-using Web.Core.Bundels;
+using Web.Core.Bundles;
 
 var builder = WebApplication.CreateBuilder(args);
 

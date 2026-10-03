@@ -13,19 +13,19 @@ internal sealed class UnitOfWork(MerkwerkDbContext context) : IUnitOfWork
     // One repository instance per entity type and unit of work.
     private readonly Dictionary<Type, object> _repositories = [];
 
-    public IOrganizationRepository Organizations => (IOrganizationRepository)Repository<Organization>();
+    public IOrganizationRepository Organizations => (IOrganizationRepository)Repository<OrganizationEntity>();
 
-    public IMembershipRepository Memberships => (IMembershipRepository)Repository<Membership>();
+    public IMembershipRepository Memberships => (IMembershipRepository)Repository<MembershipEntity>();
 
-    public IInvitationRepository Invitations => (IInvitationRepository)Repository<Invitation>();
+    public IInvitationRepository Invitations => (IInvitationRepository)Repository<InvitationEntity>();
 
-    public ILearnerRepository Learners => (ILearnerRepository)Repository<Learner>();
+    public ILearnerRepository Learners => (ILearnerRepository)Repository<LearnerEntity>();
 
-    public IDeviceRepository Devices => (IDeviceRepository)Repository<Device>();
+    public IDeviceRepository Devices => (IDeviceRepository)Repository<DeviceEntity>();
 
-    public IPairingCodeRepository PairingCodes => (IPairingCodeRepository)Repository<PairingCode>();
+    public IPairingCodeRepository PairingCodes => (IPairingCodeRepository)Repository<PairingCodeEntity>();
 
-    public ILearnerSessionRepository LearnerSessions => (ILearnerSessionRepository)Repository<LearnerSession>();
+    public ILearnerSessionRepository LearnerSessions => (ILearnerSessionRepository)Repository<LearnerSessionEntity>();
 
     public IRepository<T> Repository<T>()
         where T : AEntityBase
@@ -48,37 +48,37 @@ internal sealed class UnitOfWork(MerkwerkDbContext context) : IUnitOfWork
     private object CreateRepository<T>()
         where T : AEntityBase
     {
-        if (typeof(T) == typeof(Organization))
+        if (typeof(T) == typeof(OrganizationEntity))
         {
             return new OrganizationRepository(context);
         }
 
-        if (typeof(T) == typeof(Membership))
+        if (typeof(T) == typeof(MembershipEntity))
         {
             return new MembershipRepository(context);
         }
 
-        if (typeof(T) == typeof(Invitation))
+        if (typeof(T) == typeof(InvitationEntity))
         {
             return new InvitationRepository(context);
         }
 
-        if (typeof(T) == typeof(Learner))
+        if (typeof(T) == typeof(LearnerEntity))
         {
             return new LearnerRepository(context);
         }
 
-        if (typeof(T) == typeof(Device))
+        if (typeof(T) == typeof(DeviceEntity))
         {
             return new DeviceRepository(context);
         }
 
-        if (typeof(T) == typeof(PairingCode))
+        if (typeof(T) == typeof(PairingCodeEntity))
         {
             return new PairingCodeRepository(context);
         }
 
-        if (typeof(T) == typeof(LearnerSession))
+        if (typeof(T) == typeof(LearnerSessionEntity))
         {
             return new LearnerSessionRepository(context);
         }

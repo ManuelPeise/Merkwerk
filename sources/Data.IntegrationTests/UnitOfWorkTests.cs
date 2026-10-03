@@ -16,7 +16,7 @@ public sealed class UnitOfWorkTests(MySqlFixture database) : IClassFixture<MySql
         long id;
         await using (var uow = CreateUnitOfWork(new TestCurrentUser("user:1")))
         {
-            var organization = new Organization { Name = "Familie Repo" };
+            var organization = new OrganizationEntity { Name = "Familie Repo" };
             uow.Organizations.Add(organization);
 
             // Act
@@ -114,7 +114,7 @@ public sealed class UnitOfWorkTests(MySqlFixture database) : IClassFixture<MySql
     {
         // Arrange: the first unit of work adds but never saves.
         await using var first = CreateUnitOfWork(new TestCurrentUser());
-        first.Organizations.Add(new Organization { Name = "Familie Ungespeichert" });
+        first.Organizations.Add(new OrganizationEntity { Name = "Familie Ungespeichert" });
 
         // Act
         await using var second = CreateUnitOfWork(new TestCurrentUser());
@@ -130,7 +130,7 @@ public sealed class UnitOfWorkTests(MySqlFixture database) : IClassFixture<MySql
     {
         await using var uow = CreateUnitOfWork(new TestCurrentUser());
 
-        Assert.Same(uow.Organizations, uow.Repository<Organization>());
+        Assert.Same(uow.Organizations, uow.Repository<OrganizationEntity>());
         Assert.Same(uow.Repository<TestNote>(), uow.Repository<TestNote>());
     }
 
@@ -150,7 +150,7 @@ public sealed class UnitOfWorkTests(MySqlFixture database) : IClassFixture<MySql
     private async Task<long> CreateOrganizationAsync(string name)
     {
         await using var uow = CreateUnitOfWork(new TestCurrentUser());
-        var organization = new Organization { Name = name };
+        var organization = new OrganizationEntity { Name = name };
         uow.Organizations.Add(organization);
         await uow.SaveChangesAsync();
         return organization.Id;

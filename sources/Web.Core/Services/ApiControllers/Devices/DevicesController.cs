@@ -4,7 +4,7 @@ using Logic.Devices.Sessions;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.RateLimiting;
-using Web.Core.Bundels;
+using Web.Core.Bundles;
 using Web.Core.Services.ApiControllers.Authentication.Dtos;
 using Web.Core.Services.ApiControllers.Devices.Dtos;
 using Web.Core.Services.Authorization;

@@ -1,6 +1,6 @@
 using System.Net;
 using Microsoft.AspNetCore.Http;
-using Web.Core.Bundels;
+using Web.Core.Bundles;
 
 namespace Logic.Devices.Tests;
 

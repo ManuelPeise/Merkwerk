@@ -37,7 +37,7 @@ internal sealed class LearnerSessionService(
 
         var refreshToken = DeviceTokens.CreateToken();
         var sessionEndsAt = now.Add(DeviceLifetimes.LearnerSession);
-        unitOfWork.LearnerSessions.Add(new LearnerSession
+        unitOfWork.LearnerSessions.Add(new LearnerSessionEntity
         {
             OrganizationId = device.OrganizationId,
             DeviceId = device.Id,
@@ -93,7 +93,7 @@ internal sealed class LearnerSessionService(
         }
     }
 
-    private AuthSession CreateSession(Learner learner, Device device, string refreshToken, DateTimeOffset sessionEndsAt)
+    private AuthSession CreateSession(LearnerEntity learner, DeviceEntity device, string refreshToken, DateTimeOffset sessionEndsAt)
     {
         var (accessToken, accessExpiresAt) = tokenService.CreateLearnerAccessToken(
             learner.Id, learner.DisplayName, learner.AvatarId, device.OrganizationId, device.Id, sessionEndsAt);

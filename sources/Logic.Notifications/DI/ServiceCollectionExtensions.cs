@@ -1,3 +1,4 @@
+using Logic.Notifications.Formatting;
 using Logic.Notifications.Links;
 using Logic.Notifications.Rendering;
 using Logic.Notifications.Smtp;
@@ -8,7 +9,7 @@ namespace Logic.Notifications.DI;
 
 public static class ServiceCollectionExtensions
 {
-    /// <summary>Registers <see cref="IMailService"/> (SMTP via MailKit) and <see cref="IPublicLinkBuilder"/>.</summary>
+    /// <summary>Registers <see cref="IMailService"/> (SMTP via MailKit), <see cref="IPublicLinkBuilder"/> and <see cref="IMailDateFormatter"/>.</summary>
     public static IServiceCollection AddMerkwerkNotifications(this IServiceCollection services, IConfiguration configuration)
     {
         services.AddOptions<MailOptions>()
@@ -30,6 +31,7 @@ public static class ServiceCollectionExtensions
         services.AddSingleton<MailTemplateRenderer>();
         services.AddSingleton<IMailService, SmtpMailService>();
         services.AddSingleton<IPublicLinkBuilder, PublicLinkBuilder>();
+        services.AddSingleton<IMailDateFormatter, MailDateFormatter>();
 
         return services;
     }

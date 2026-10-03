@@ -74,7 +74,16 @@ database connection string and JWT signing key as `Web.Core` user secrets:
 .\deploy\setup-local.ps1
 ```
 
-Then run the API:
+Apply the migrations once (and after pulling new ones):
+
+```powershell
+cd sources
+dotnet tool restore
+dotnet ef database update -p Data.Database -s Web.Core
+```
+
+Then run the API. In Development it creates the account from `DevelopmentSeed` (appsettings.Development.json)
+while the database has no user yet – sign in with `eltern@merkwerk.local` / `merkwerk-dev`:
 
 ```powershell
 cd sources
@@ -166,6 +175,8 @@ Local development uses `Web.Core` user secrets. Production values are supplied b
 | `Mail__FromAddress` | Sender address |
 | `App__PublicBaseUrl` | Base URL used to build public mail links |
 | `Media__Path` | Persistent media path configured for the app |
+| `DataProtection__KeysPath` | Persistent key ring for password-reset and confirmation links (`/data/keys` volume) |
+| `DevelopmentSeed__*` | Development only: account created on first start while no user exists (until LP-105) |
 
 For local development, inspect or set secrets without putting values in project files:
 

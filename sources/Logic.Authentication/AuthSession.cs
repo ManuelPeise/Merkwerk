@@ -4,6 +4,7 @@ namespace Logic.Authentication;
 public sealed record AuthSession(
     string Name,
     string Role,
+    bool MustChangePassword,
     string AccessToken,
     DateTimeOffset AccessTokenExpiresAt,
     string RefreshToken,

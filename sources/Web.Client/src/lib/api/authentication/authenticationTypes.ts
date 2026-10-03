@@ -7,6 +7,8 @@ export interface ILoginRequest {
 export interface ISession {
     name: string;
     role: string;
+    /** Start password active: only change-password works until it is replaced (LP-104). */
+    mustChangePassword?: boolean;
     /** Only for learners. */
     avatarId?: string;
     /** ISO date-time. */
@@ -16,6 +18,7 @@ export interface ISession {
 export interface ICurrentUser {
     name: string;
     role: string;
+    mustChangePassword?: boolean;
     avatarId?: string;
 }
 
@@ -26,6 +29,11 @@ export interface IForgotPasswordRequest {
 export interface IResetPasswordRequest {
     email: string;
     token: string;
+    newPassword: string;
+}
+
+export interface IChangePasswordRequest {
+    currentPassword: string;
     newPassword: string;
 }
 

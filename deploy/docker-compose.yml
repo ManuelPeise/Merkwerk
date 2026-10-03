@@ -37,8 +37,11 @@ services:
       Mail__FromAddress: ${MAIL_FROM}
       App__PublicBaseUrl: https://${MERKWERK_HOST}
       Media__Path: /data/media
+      # Keys for reset/confirmation links (LP-104) – must survive container updates
+      DataProtection__KeysPath: /data/keys
     volumes:
       - media:/data/media
+      - keys:/data/keys
     depends_on:
       db:
         condition: service_healthy
@@ -105,6 +108,7 @@ services:
 volumes:
   db-data:
   media:
+  keys:
   caddy-data:
   caddy-config:
   caddy-dev-data:

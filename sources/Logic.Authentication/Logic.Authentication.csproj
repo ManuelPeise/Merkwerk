@@ -6,10 +6,16 @@
     <Nullable>enable</Nullable>
   </PropertyGroup>
 
-  <!-- No ASP.NET Core here: cookies, controllers and JwtBearer stay in Web.Core (transport). -->
+  <!-- No ASP.NET Core here: cookies, controllers and JwtBearer stay in Web.Core (transport).
+       Identity's UserManager comes from Microsoft.Extensions.Identity.Core (via Data.Database), not from ASP.NET Core. -->
   <ItemGroup>
     <PackageReference Include="Microsoft.Extensions.Options.ConfigurationExtensions" />
     <PackageReference Include="Microsoft.IdentityModel.JsonWebTokens" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Data.Accessor\Data.Accessor.csproj" />
+    <ProjectReference Include="..\Logic.Notifications\Logic.Notifications.csproj" />
   </ItemGroup>
 
   <ItemGroup>

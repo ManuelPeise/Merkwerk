@@ -4,11 +4,15 @@ using Logic.Authentication;
 using Logic.Authentication.DI;
 using Logic.Notifications.DI;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Mvc.ApplicationModels;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
 using Logic.Shared.DI;
+using Web.Core.Services.Authorization;
 using Web.Core.Services.Cookies;
 using Web.Core.Services.CurrentUser;
+using Web.Core.Services.Development;
+using Web.Core.Services.Routing;
 
 namespace Web.Core.Bundels;
 
@@ -20,9 +24,11 @@ public static class ServiceRegistrationExtensions
         // Errors as RFC 9457 ProblemDetails (AGENTS.md §8).
         services.AddProblemDetails();
 
-        // Lowercase routes: /api/v1/authentication/login. The refresh cookie path depends on it (AuthCookies).
+        // Lowercase, kebab-case routes: /api/v1/authentication/forgot-password (LP-104).
+        // The refresh cookie path depends on it (AuthCookies).
         services.AddRouting(options => options.LowercaseUrls = true);
-        services.AddControllers();
+        services.AddControllers(options =>
+            options.Conventions.Add(new RouteTokenTransformerConvention(new SlugifyParameterTransformer())));
 
         // OpenAPI document at /openapi/v1.json; Swagger UI renders it (see AppConfigurationExtensions).
         services.AddOpenApi(options => options.AddDocumentTransformer((document, _, _) =>
@@ -57,6 +63,8 @@ public static class ServiceRegistrationExtensions
         services.AddScoped<ICurrentUser, HttpCurrentUser>();
         services.AddMerkwerkDataAccess(configuration);
 
+        // Adult accounts (LP-104): Identity's UserManager, refresh tokens in the database, account mails.
+        services.AddMerkwerkIdentity(configuration);
         services.AddMerkwerkAuthentication(configuration);
 
         // Mail via SMTP (LP-162): Mailpit in development, MAIL_* from deploy/.env in production.
@@ -66,7 +74,12 @@ public static class ServiceRegistrationExtensions
 
         services.AddJwtCookieAuthentication();
         services.AddSingleton<AuthCookieWriter>();
-        services.AddAuthorization();
+        services.AddAuthorization(AuthorizationPolicies.Configure);
+
+        // Development only: one account to sign in with until the first-run setup exists (LP-105).
+        services.AddOptions<DevelopmentUserSeederOptions>()
+            .Bind(configuration.GetSection(DevelopmentUserSeederOptions.SectionName));
+        services.AddHostedService<DevelopmentUserSeeder>();
 
         return services;
     }
@@ -93,8 +106,8 @@ public static class ServiceRegistrationExtensions
                     IssuerSigningKey = TokenService.CreateSigningKey(settings),
                     ValidateLifetime = true,
                     ClockSkew = TimeSpan.FromSeconds(5),
-                    NameClaimType = "name",
-                    RoleClaimType = "role",
+                    NameClaimType = AuthClaims.Name,
+                    RoleClaimType = AuthClaims.Role,
                 };
                 bearer.Events = new JwtBearerEvents
                 {

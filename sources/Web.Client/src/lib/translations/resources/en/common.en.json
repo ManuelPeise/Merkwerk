@@ -74,5 +74,7 @@
   "labelPairDevice": "Pair device",
   "notificationPairingCodeInvalid": "The code is invalid or has expired.",
   "notificationTooManyAttempts": "Too many attempts. Please wait a moment and try again later.",
-  "notificationDeviceNotPaired": "This device is no longer paired. Please pair it again."
+  "notificationDeviceNotPaired": "This device is no longer paired. Please pair it again.",
+  "labelDelete": "Delete",
+  "labelDone": "Done"
 }

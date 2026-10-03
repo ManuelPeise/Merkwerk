@@ -28,6 +28,14 @@ services:
       ASPNETCORE_HTTP_PORTS: "8080"
       ConnectionStrings__Default: "Server=db;Port=3306;Database=${DB_NAME};User=${DB_USER};Password=${DB_PASSWORD}"
       Auth__Jwt__SigningKey: ${JWT_SIGNING_KEY}
+      # Mail (LP-162) – links in mails start with App__PublicBaseUrl
+      Mail__Host: ${MAIL_HOST}
+      Mail__Port: ${MAIL_PORT:-587}
+      Mail__Security: ${MAIL_SECURITY:-StartTls}
+      Mail__UserName: ${MAIL_USER}
+      Mail__Password: ${MAIL_PASSWORD}
+      Mail__FromAddress: ${MAIL_FROM}
+      App__PublicBaseUrl: https://${MERKWERK_HOST}
       Media__Path: /data/media
     volumes:
       - media:/data/media
@@ -60,6 +68,16 @@ services:
     volumes:
       - ./Caddyfile.dev:/etc/caddy/Caddyfile:ro
       - caddy-dev-data:/data
+
+  # Development only: catches every mail, nothing is really sent (LP-162).
+  #   UI http://localhost:8025, SMTP localhost:1025
+  #   docker compose -f deploy/docker-compose.yml --profile dev up -d mailpit
+  mailpit:
+    image: axllent/mailpit:latest
+    profiles: ["dev"]
+    ports:
+      - "127.0.0.1:1025:1025"
+      - "127.0.0.1:8025:8025"
 
   db:
     image: mysql:8.4

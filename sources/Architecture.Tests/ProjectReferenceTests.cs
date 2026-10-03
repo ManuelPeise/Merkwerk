@@ -37,7 +37,9 @@ public sealed class ProjectReferenceTests
         "Data.Accessor" => reference == "Data.Database",
         "Web.Core" => reference.StartsWith("Logic.", StringComparison.Ordinal)
             || reference is "Data.Accessor" or "Data.Database",
-        _ when project.StartsWith("Logic.", StringComparison.Ordinal) => reference is "Logic.Shared" or "Data.Accessor",
+        "Logic.Notifications" => reference is "Logic.Shared",
+        _ when project.StartsWith("Logic.", StringComparison.Ordinal) =>
+            reference is "Logic.Shared" or "Logic.Notifications" or "Data.Accessor",
         _ => false,
     };
 }

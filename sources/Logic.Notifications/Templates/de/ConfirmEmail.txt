@@ -1,0 +1,11 @@
+Hallo {{Name}},
+
+bitte bestätige deine E-Mail-Adresse, damit du Merkwerk vollständig nutzen kannst.
+
+Öffne diesen Link:
+{{Link}}
+
+Dein Merkwerk
+
+--
+Diese E-Mail wurde automatisch versendet. Bitte antworte nicht darauf.

@@ -8,6 +8,7 @@
   </Folder>
   <Folder Name="/02 Logic/">
     <Project Path="Logic.Authentication/Logic.Authentication.csproj" Id="8228cb98-e74e-4b27-9b03-e78fdd8c96d1" />
+    <Project Path="Logic.Notifications/Logic.Notifications.csproj" />
     <Project Path="Logic.Shared/Logic.Shared.csproj" />
   </Folder>
   <Folder Name="/03 Data/">
@@ -19,5 +20,6 @@
     <Project Path="Architecture.Tests/Architecture.Tests.csproj" />
     <Project Path="Data.IntegrationTests/Data.IntegrationTests.csproj" />
     <Project Path="Logic.Authentication.Tests/Logic.Authentication.Tests.csproj" />
+    <Project Path="Logic.Notifications.Tests/Logic.Notifications.Tests.csproj" />
   </Folder>
 </Solution>

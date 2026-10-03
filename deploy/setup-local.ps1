@@ -3,7 +3,7 @@
 #  Run from the repository root:   .\deploy\setup-local.ps1
 #
 #  1. creates deploy\.env with random passwords (only if it doesn't exist yet)
-#  2. starts the MySQL container and waits until it is healthy
+#  2. starts the MySQL container (waits until it is healthy) and Mailpit
 #  3. stores connection string and JWT key as user secrets of the Web project
 #  4. checks the database (version, character set, collation)
 #  Safe to run again: existing .env and data are kept.
@@ -51,8 +51,8 @@ Get-Content $envFile | Where-Object { $_ -match '^\s*[A-Z_]+=' } | ForEach-Objec
 }
 
 # ---------- 2. MySQL container ------------------------------------------
-Write-Host "Starting MySQL container ..." -ForegroundColor Cyan
-Invoke-Checked { docker compose -f $composeFile up -d db } "docker compose up"
+Write-Host "Starting MySQL and Mailpit containers ..." -ForegroundColor Cyan
+Invoke-Checked { docker compose -f $composeFile --profile dev up -d db mailpit } "docker compose up"
 
 $containerId = (docker compose -f $composeFile ps -q db).Trim()
 $deadline = (Get-Date).AddMinutes(2)
@@ -81,6 +81,7 @@ if ($LASTEXITCODE -ne 0) { throw "database check failed (exit code $LASTEXITCODE
 Write-Host ""
 Write-Host "Local environment is ready." -ForegroundColor Green
 Write-Host ('  MySQL:    localhost:3306, database ' + $settings['DB_NAME'] + ', user ' + $settings['DB_USER'])
+Write-Host "  Mailpit:      http://localhost:8025 (SMTP localhost:1025) - every mail lands here"
 Write-Host "  Secrets:      dotnet user-secrets list --project sources\Web.Core"
-Write-Host "  Stop:         docker compose -f deploy/docker-compose.yml stop db"
+Write-Host "  Stop:         docker compose -f deploy/docker-compose.yml stop db mailpit"
 Write-Host "  Reset (DATA LOSS): docker compose -f deploy/docker-compose.yml down -v"

@@ -1,0 +1,27 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+  </PropertyGroup>
+
+  <!-- No ASP.NET Core here (AGENTS.md §3). SMTP via MailKit (LP-162, approved 2026-10-03). -->
+  <ItemGroup>
+    <PackageReference Include="MailKit" />
+    <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" />
+    <PackageReference Include="Microsoft.Extensions.Options.ConfigurationExtensions" />
+  </ItemGroup>
+
+  <!-- Mail templates: Templates/{language}/{Template}.html and .txt. One folder per language – a file name like
+       ConfirmEmail.de.html would be treated as a culture resource and moved into a satellite assembly. -->
+  <ItemGroup>
+    <EmbeddedResource Include="Templates\**\*.html" />
+    <EmbeddedResource Include="Templates\**\*.txt" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <InternalsVisibleTo Include="Logic.Notifications.Tests" />
+  </ItemGroup>
+
+</Project>

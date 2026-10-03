@@ -1,0 +1,12 @@
+Hallo {{Name}},
+
+dein Startpasswort lautet:
+
+    {{Code}}
+
+Es gilt bis {{ExpiresAt}}. Nach der Anmeldung legst du ein eigenes Passwort fest.
+
+Dein Merkwerk
+
+--
+Diese E-Mail wurde automatisch versendet. Bitte antworte nicht darauf.

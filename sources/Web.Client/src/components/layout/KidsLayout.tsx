@@ -5,6 +5,7 @@ import AvatarImage from 'src/components/kids/AvatarImage';
 import { SwitchAccountIcon } from 'src/components/icons/AppIcons';
 import { kidsHeaderHeight } from 'src/components/layout/layoutConstants';
 import { useAuthentication } from 'src/hooks/useAuthentication';
+import { roles } from 'src/lib/auth/roles';
 import { useTranslation } from 'src/hooks/useTranslation';
 import { routes } from 'src/navigation/routes';
 
@@ -15,7 +16,9 @@ const KidsLayout: React.FC = () => {
 
     const navigate = useNavigate();
 
-    const name = user?.name ?? '';
+    // An adult signed in on the child's device is not shown here ("switch child" would sign them out).
+    const learner = user?.role === roles.learner ? user : null;
+    const name = learner?.name ?? '';
 
     const handleSwitchChild = async () => {
         await logout();
@@ -32,9 +35,9 @@ const KidsLayout: React.FC = () => {
             >
                 <Toolbar sx={{ minHeight: kidsHeaderHeight, gap: 2 }}>
                     {/* Without a child (profile selection) the header stays empty. */}
-                    {user && (
+                    {learner && (
                         <>
-                            <AvatarImage avatarId={user.avatarId} name={name} size={56} />
+                            <AvatarImage avatarId={learner.avatarId} name={name} size={56} />
                             <Typography
                                 variant="h6"
                                 component="span"

@@ -7,9 +7,13 @@ export interface IInvitationDetails {
     expiresAt: string;
 }
 
+/**
+ * New account: displayName, password and privacyAccepted are required.
+ * Already signed in (existing account): only the token – the server adds the membership to the current user.
+ */
 export interface IInvitationAcceptRequest {
     token: string;
-    displayName: string;
-    password: string;
-    privacyAccepted: boolean;
+    displayName?: string;
+    password?: string;
+    privacyAccepted?: boolean;
 }

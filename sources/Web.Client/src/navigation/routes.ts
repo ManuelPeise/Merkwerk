@@ -12,12 +12,12 @@ export const routes = {
     practiceProfiles: '/practice/profiles',
 } as const;
 
-/** Location state the guards pass to the login, so it can send the user back afterwards. */
 /** Location state for the pairing page, e.g. when a paired device was revoked. */
 export interface IPairState {
     notice?: 'notificationDeviceNotPaired';
 }
 
+/** Location state the guards pass to the login, so it can send the user back afterwards (path incl. query). */
 export interface IRedirectState {
     from?: string;
 }

@@ -99,8 +99,9 @@ const SetupPage: React.FC = () => {
         }
 
         await reloadUser();
-        navigate(routes.admin, { replace: true });
+        // Tell the SetupGate first – otherwise it would send /admin straight back to /setup.
         markSetupDone();
+        navigate(routes.admin, { replace: true });
     };
 
     return (

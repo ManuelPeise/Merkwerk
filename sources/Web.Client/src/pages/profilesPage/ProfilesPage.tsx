@@ -78,9 +78,10 @@ const ProfilesPage: React.FC = () => {
                     display: 'grid',
                     gap: 2,
                     gridTemplateColumns: {
-                        xs: 'repeat(2, 1fr)',
-                        sm: 'repeat(3, 1fr)',
-                        md: 'repeat(4, 1fr)',
+                        // minmax(0, …): columns may shrink below the tile's content width on 360 px phones.
+                        xs: 'repeat(2, minmax(0, 1fr))',
+                        sm: 'repeat(3, minmax(0, 1fr))',
+                        md: 'repeat(4, minmax(0, 1fr))',
                     },
                 }}
             >

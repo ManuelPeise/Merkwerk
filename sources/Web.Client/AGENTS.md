@@ -37,24 +37,33 @@ does not also enforce – the server is always authoritative (grading, permissio
 src/
   main.tsx                 Entry: loads i18n, renders <App />
   App.tsx                  ThemeProvider, CssBaseline, AuthenticationProvider, RouterProvider – nothing else
+  assets/
+    avatars/               Built-in avatar SVGs + avatars.ts (fixed id list, also validated by the backend)
   navigation/
-    routes.ts              All paths as constants
+    routes.ts              All paths as constants (+ location-state types)
     router.tsx             Route tree (incl. errorElement)
-    PublicRoute.tsx, ProtectedRoute.tsx   Route guards
-    SetupGate.tsx          Outermost layout element: redirects to /setup until the instance is set up (useSetupStatus)
+    SetupGate.tsx          Outermost element: redirects to /setup until the instance is set up (useSetupStatus)
+    PublicRoute.tsx        Only when NOT signed in (login, password reset)
+    ProtectedRoute.tsx     Only when signed in, optionally restricted to roles
     DeviceRoute.tsx        Guard for /practice/*: unpaired devices go to /practice/pair (useDeviceStatus)
     navigationItems.ts     Drawer entries (parents' area only)
   pages/
     <name>Page/            One folder per route: <Name>Page.tsx, plus components/ and types/ if needed
+    authentication/        All auth pages, each in its own <name>Page/ folder (login, setup, invitation, …)
   components/
-    input/                 Form fields (FormFieldContainer, FormTextField, …) and buttons
-    layout/                PublicLayout, AdminLayout, KidsLayout, HeaderBar, NavigationDrawer, components/LanguageSwitch
+    input/                 Form fields (FormFieldContainer, FormTextField, FormPinField, FormCheckbox, …), buttons, ChoiceTile
+    layout/                PublicLayout, AdminLayout, KidsLayout, AuthCard, HeaderBar, NavigationDrawer
+      components/          Parts used only by layouts (LanguageSwitch)
+    kids/                  Children's UI: AvatarImage, ProfileTile, NumberKeypad
     feedback/              LoadingIndicator, …
-    providers/             Context providers (AuthenticationContextProvider) and their contexts
+    providers/             Context providers and their contexts (authentication, setup) – context in its own .ts file
     icons/                 AppIcons – the only place that imports @mui/icons-material
-  hooks/                   Reusable hooks (useXyz.ts): useAuthentication, useTranslation, useForm, useReducer
+  hooks/                   Reusable hooks (useXyz.ts): useAuthentication, useTranslation, useForm, useReducer,
+                           useSetupStatus, useSetupCompletion, useDeviceStatus
   lib/
-    api/                   apiClient, StatelessApi, toApiError + one folder per backend module (<module>Api.ts, <module>Types.ts)
+    api/                   apiClient, StatelessApi, toApiError, getFieldErrors + one folder per backend module
+                           (<module>Api.ts, <module>Types.ts): authentication, setup, invitations, devices
+    auth/                  roles.ts (role constants), authValidation.ts (field checks for auth forms)
     theme/                 MUI theme (design direction A, LP-008)
     translations/          i18n.ts, i18next.d.ts, translationKeys.ts, resources/<lang>/<namespace>.<lang>.json
     utils.ts               Small pure helpers (validation, …)

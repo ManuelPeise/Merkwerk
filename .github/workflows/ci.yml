@@ -32,6 +32,20 @@ jobs:
       - name: Test
         run: dotnet test sources/Merkwerk.slnx -c Release --no-build --logger "trx" --results-directory TestResults
 
+      # LP-103: the model must match the last migration, and the migration bundle must build.
+      - name: Restore dotnet tools (dotnet-ef)
+        run: dotnet tool restore
+
+      - name: Check for missing migrations
+        env:
+          ConnectionStrings__Default: "Server=localhost;Database=ci;User=ci;Password=ci"
+        run: dotnet ef migrations has-pending-model-changes -p sources/Data.Database -s sources/Web.Core --no-build -c Release
+
+      - name: Build migration bundle
+        env:
+          ConnectionStrings__Default: "Server=localhost;Database=ci;User=ci;Password=ci"
+        run: dotnet ef migrations bundle -p sources/Data.Database -s sources/Web.Core -c Release -r linux-x64 --self-contained -o artifacts/efbundle --force
+
       - name: Upload test results
         if: always()
         uses: actions/upload-artifact@v4

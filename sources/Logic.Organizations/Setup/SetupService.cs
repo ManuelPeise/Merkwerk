@@ -1,9 +1,11 @@
 using Data.Accessor.Abstractions;
 using Data.Database.Entities.Identity;
 using Data.Database.Entities.Organizations;
-using Logic.Authentication;
-using Logic.Authentication.Accounts;
+using Logic.Shared.Interfaces;
 using Microsoft.Extensions.Logging;
+using Shared.Enums;
+using Shared.Models.Authentication;
+using Shared.Models.Organizations;
 
 namespace Logic.Organizations.Setup;
 

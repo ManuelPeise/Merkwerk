@@ -1,5 +1,4 @@
 using Data.Database.Abstractions;
-using Logic.Notifications;
 
 namespace Logic.Organizations.Tests.Infrastructure;
 

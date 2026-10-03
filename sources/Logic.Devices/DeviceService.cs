@@ -1,8 +1,9 @@
 using Data.Accessor.Abstractions;
 using Data.Database.Entities.Devices;
-using Logic.Devices.Pairing;
-using Logic.Notifications.Links;
+using Logic.Shared.Interfaces;
 using Microsoft.EntityFrameworkCore;
+using Shared.Enums;
+using Shared.Models.Devices;
 
 namespace Logic.Devices;
 

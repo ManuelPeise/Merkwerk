@@ -1,5 +1,5 @@
 using System.ComponentModel.DataAnnotations;
-using Logic.Organizations.Invitations;
+using Shared.Models.Organizations;
 
 namespace Web.Core.Services.ApiControllers.Invitations.Dtos;
 

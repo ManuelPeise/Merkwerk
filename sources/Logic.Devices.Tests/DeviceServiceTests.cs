@@ -1,9 +1,10 @@
 using Data.Accessor.Abstractions;
-using Data.Database.Entities.Organizations;
-using Logic.Devices.Pairing;
 using Logic.Devices.Tests.Infrastructure;
+using Logic.Shared.Interfaces;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
+using Shared.Enums;
+using Shared.Models.Devices;
 
 namespace Logic.Devices.Tests;
 

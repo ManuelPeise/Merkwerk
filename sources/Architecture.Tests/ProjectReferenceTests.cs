@@ -33,14 +33,15 @@ public sealed class ProjectReferenceTests
 
     private static bool IsAllowed(string project, string reference) => project switch
     {
-        "Logic.Shared" or "Data.Database" => false,
-        "Data.Accessor" => reference == "Data.Database",
+        "Shared" => false,
+        "Logic.Shared" or "Data.Database" => reference is "Shared",
+        "Data.Accessor" => reference is "Data.Database" or "Shared",
         "Web.Core" => reference.StartsWith("Logic.", StringComparison.Ordinal)
-            || reference is "Data.Accessor" or "Data.Database",
-        "Logic.Notifications" => reference is "Logic.Shared",
-        "Logic.Authentication" => reference is "Logic.Shared" or "Logic.Notifications" or "Data.Accessor",
+            || reference is "Shared" or "Data.Accessor" or "Data.Database",
+        "Logic.Notifications" => reference is "Logic.Shared" or "Shared",
+        "Logic.Authentication" => reference is "Logic.Shared" or "Logic.Notifications" or "Data.Accessor" or "Shared",
         _ when project.StartsWith("Logic.", StringComparison.Ordinal) =>
-            reference is "Logic.Shared" or "Logic.Notifications" or "Logic.Authentication" or "Data.Accessor",
+            reference is "Logic.Shared" or "Logic.Notifications" or "Logic.Authentication" or "Data.Accessor" or "Shared",
         _ => false,
     };
 }

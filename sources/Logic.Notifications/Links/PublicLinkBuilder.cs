@@ -1,3 +1,4 @@
+using Logic.Shared.Interfaces;
 using Microsoft.Extensions.Options;
 
 namespace Logic.Notifications.Links;

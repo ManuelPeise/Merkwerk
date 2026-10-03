@@ -1,10 +1,9 @@
 using Logic.Authentication;
-using Logic.Authentication.Accounts;
-using Logic.Authentication.Sessions;
-using Logic.Devices.Sessions;
-using Logic.Organizations.Members;
+using Logic.Shared.Interfaces;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Shared.Enums;
+using Shared.Models.Authentication;
 using Web.Core.Services.ApiControllers.Authentication.Dtos;
 using Web.Core.Services.Authorization;
 using Web.Core.Services.Cookies;

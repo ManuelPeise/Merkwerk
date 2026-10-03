@@ -1,9 +1,11 @@
 using Data.Accessor.Abstractions;
 using Data.Database.Entities.Identity;
 using Data.Database.Entities.Organizations;
-using Logic.Authentication.Sessions;
 using Logic.Authentication.Tokens;
+using Logic.Shared.Interfaces;
 using Microsoft.AspNetCore.Identity;
+using Shared.Enums;
+using Shared.Models.Authentication;
 
 namespace Logic.Authentication;
 

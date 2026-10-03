@@ -1,7 +1,9 @@
 using Data.Accessor.Abstractions;
 using Data.Database.Entities.Learners;
-using Logic.Organizations.Members;
+using Logic.Shared.Interfaces;
 using Microsoft.EntityFrameworkCore;
+using Shared.Enums;
+using Shared.Models.Organizations;
 
 namespace Logic.Organizations.Learners;
 

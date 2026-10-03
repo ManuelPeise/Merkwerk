@@ -1,5 +1,6 @@
 using System.Globalization;
 using Logic.Notifications.Links;
+using Logic.Shared.Interfaces;
 using Microsoft.Extensions.Options;
 
 namespace Logic.Notifications.Formatting;

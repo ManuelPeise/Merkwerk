@@ -1,3 +1,5 @@
+using Shared.Enums;
+
 namespace Logic.Notifications.Tests;
 
 /// <summary>A complete set of values for every template, plus helpers to build test data.</summary>

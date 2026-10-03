@@ -1,8 +1,11 @@
 using System.Globalization;
 using Logic.Authentication;
-using Logic.Devices.Sessions;
 using Logic.Devices.Tests.Infrastructure;
+using Logic.Shared.Interfaces;
 using Microsoft.IdentityModel.JsonWebTokens;
+using Shared.Enums;
+using Shared.Models.Authentication;
+using Shared.Models.Devices;
 
 namespace Logic.Devices.Tests;
 

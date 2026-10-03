@@ -1,6 +1,7 @@
 using System.Text;
 using Logic.Authentication.Accounts;
 using Logic.Authentication.Tokens;
+using Logic.Shared.Interfaces;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;

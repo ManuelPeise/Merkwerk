@@ -1,9 +1,8 @@
-using Logic.Devices;
-using Logic.Devices.Pairing;
-using Logic.Devices.Sessions;
+using Logic.Shared.Interfaces;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.RateLimiting;
+using Shared.Enums;
 using Web.Core.Bundles;
 using Web.Core.Services.ApiControllers.Authentication.Dtos;
 using Web.Core.Services.ApiControllers.Devices.Dtos;

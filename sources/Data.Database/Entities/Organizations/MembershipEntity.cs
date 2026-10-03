@@ -1,4 +1,5 @@
 using Data.Database.Entities.Base;
+using Shared.Enums;
 
 namespace Data.Database.Entities.Organizations;
 

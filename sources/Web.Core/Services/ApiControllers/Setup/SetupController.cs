@@ -1,6 +1,8 @@
-using Logic.Organizations.Setup;
+using Logic.Shared.Interfaces;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Shared.Enums;
+using Shared.Models.Organizations;
 using Web.Core.Services.ApiControllers.Authentication.Dtos;
 using Web.Core.Services.ApiControllers.Setup.Dtos;
 using Web.Core.Services.Cookies;

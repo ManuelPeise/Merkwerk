@@ -1,6 +1,7 @@
 using System.Net;
 using System.Reflection;
 using System.Text.RegularExpressions;
+using Shared.Enums;
 
 namespace Logic.Notifications.Rendering;
 

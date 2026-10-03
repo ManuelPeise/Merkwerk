@@ -2,6 +2,10 @@ using Data.Accessor.Abstractions;
 using Data.Database.Entities.Devices;
 using Data.Database.Entities.Learners;
 using Logic.Authentication;
+using Logic.Shared.Interfaces;
+using Shared.Enums;
+using Shared.Models.Authentication;
+using Shared.Models.Devices;
 
 namespace Logic.Devices.Sessions;
 

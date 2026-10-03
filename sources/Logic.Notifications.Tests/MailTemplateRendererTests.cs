@@ -1,4 +1,5 @@
 using Logic.Notifications.Rendering;
+using Shared.Enums;
 
 namespace Logic.Notifications.Tests;
 

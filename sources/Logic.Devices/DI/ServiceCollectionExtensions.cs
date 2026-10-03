@@ -1,4 +1,5 @@
 using Logic.Devices.Sessions;
+using Logic.Shared.Interfaces;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 

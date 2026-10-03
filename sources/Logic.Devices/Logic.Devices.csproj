@@ -12,6 +12,8 @@
     <ProjectReference Include="..\Data.Accessor\Data.Accessor.csproj" />
     <ProjectReference Include="..\Logic.Authentication\Logic.Authentication.csproj" />
     <ProjectReference Include="..\Logic.Notifications\Logic.Notifications.csproj" />
+    <ProjectReference Include="..\Logic.Shared\Logic.Shared.csproj" />
+    <ProjectReference Include="..\Shared\Shared.csproj" />
   </ItemGroup>
 
   <ItemGroup>

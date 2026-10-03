@@ -1,4 +1,4 @@
-using Logic.Authentication;
+using Shared.Models.Authentication;
 
 namespace Web.Core.Services.Cookies;
 

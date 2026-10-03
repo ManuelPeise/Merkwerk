@@ -1,7 +1,8 @@
-using Data.Database.Entities.Organizations;
-using Logic.Organizations.Invitations;
+using Logic.Shared.Interfaces;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Shared.Enums;
+using Shared.Models.Organizations;
 using Web.Core.Services.ApiControllers.Authentication.Dtos;
 using Web.Core.Services.ApiControllers.Invitations.Dtos;
 using Web.Core.Services.Authorization;

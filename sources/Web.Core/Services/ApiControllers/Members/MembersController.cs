@@ -1,6 +1,7 @@
-using Logic.Organizations.Members;
+using Logic.Shared.Interfaces;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Shared.Enums;
 using Web.Core.Services.ApiControllers.Members.Dtos;
 using Web.Core.Services.Authorization;
 

@@ -1,3 +1,5 @@
+using Shared.Enums;
+
 namespace Logic.Notifications;
 
 /// <summary>The mail could not be delivered to the SMTP server. The message never contains the recipient's address.</summary>

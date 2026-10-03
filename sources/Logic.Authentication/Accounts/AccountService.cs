@@ -3,11 +3,13 @@ using System.Security.Cryptography;
 using Data.Database.Entities.Identity;
 using Logic.Authentication.Tokens;
 using Logic.Notifications;
-using Logic.Notifications.Formatting;
-using Logic.Notifications.Links;
+using Logic.Shared.Interfaces;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
+using Shared.Enums;
+using Shared.Models.Authentication;
+using Shared.Models.Notifications;
 
 namespace Logic.Authentication.Accounts;
 

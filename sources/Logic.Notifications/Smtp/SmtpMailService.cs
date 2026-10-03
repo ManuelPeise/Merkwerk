@@ -1,9 +1,12 @@
 using Logic.Notifications.Rendering;
+using Logic.Shared.Interfaces;
 using MailKit.Net.Smtp;
 using MailKit.Security;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using MimeKit;
+using Shared.Enums;
+using Shared.Models.Notifications;
 
 namespace Logic.Notifications.Smtp;
 

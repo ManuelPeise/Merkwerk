@@ -3,14 +3,14 @@ using System.Text;
 using Data.Accessor.Abstractions;
 using Data.Database.Entities.Identity;
 using Data.Database.Entities.Organizations;
-using Logic.Authentication;
-using Logic.Authentication.Accounts;
 using Logic.Notifications;
-using Logic.Notifications.Formatting;
-using Logic.Notifications.Links;
-using Logic.Organizations.Members;
+using Logic.Shared.Interfaces;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
+using Shared.Enums;
+using Shared.Models.Authentication;
+using Shared.Models.Notifications;
+using Shared.Models.Organizations;
 
 namespace Logic.Organizations.Invitations;
 

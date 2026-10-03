@@ -1,3 +1,5 @@
+using Shared.Enums;
+
 namespace Logic.Notifications;
 
 /// <summary>SMTP settings (section "Mail"). Development: Mailpit on localhost:1025 without TLS.</summary>
@@ -24,9 +26,3 @@ public sealed class MailOptions
     public int TimeoutSeconds { get; set; } = 15;
 }
 
-public enum MailSecurity
-{
-    None,
-    StartTls,
-    SslOnConnect,
-}

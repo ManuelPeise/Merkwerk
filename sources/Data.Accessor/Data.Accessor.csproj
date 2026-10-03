@@ -10,4 +10,9 @@
     <Nullable>enable</Nullable>
   </PropertyGroup>
 
+  <ItemGroup>
+    <!-- Implementations stay internal; the integration tests build units of work on a test DbContext. -->
+    <InternalsVisibleTo Include="Data.IntegrationTests" />
+  </ItemGroup>
+
 </Project>

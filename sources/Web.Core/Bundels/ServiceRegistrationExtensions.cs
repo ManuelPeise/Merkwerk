@@ -1,5 +1,5 @@
+using Data.Accessor.DI;
 using Data.Database.Abstractions;
-using Data.Database.DI;
 using Logic.Authentication;
 using Logic.Authentication.DI;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
@@ -50,10 +50,11 @@ public static class ServiceRegistrationExtensions
             });
         });
 
-        // Database (LP-101): DbContext factory + audit interceptor; ICurrentUser comes from the access token.
+        // Database (LP-101/102): DbContext factory, audit interceptor and unit of work factory;
+        // ICurrentUser comes from the access token.
         services.AddHttpContextAccessor();
         services.AddScoped<ICurrentUser, HttpCurrentUser>();
-        services.AddMerkwerkDatabase(configuration);
+        services.AddMerkwerkDataAccess(configuration);
 
         services.AddMerkwerkAuthentication(configuration);
         services.AddMerkwerkLogicSharedServices(configuration);

@@ -46,7 +46,7 @@ sources/Merkwerk.slnx
   03 Data    Data.Database          Entities, MerkwerkDbContext, configurations, interceptors, migrations
              Data.Accessor          Repositories and unit of work – the only way to reach the database
   04 Shared  (empty for now)
-  05 Tests   (empty for now – test projects are added with the tickets that need them)
+  05 Tests   Data.IntegrationTests  DbContext, repositories and unit of work against MySQL 8.4 (Testcontainers, needs Docker)
 ```
 
 | Project | May reference |
@@ -86,7 +86,11 @@ Per module: `I<Name>Service` + implementation, validators, module-internal types
 - IDs: `long` (AUTO_INCREMENT). `Attempt` and `Answer` additionally have a unique `Guid ClientId` for idempotency/offline use.
 - Access data only through an `IUnitOfWork` from `IUnitOfWorkFactory`; **one unit of work per business operation**
   (`await using var uow = _uowFactory.Create();`). Never hold a DbContext in long-lived services.
-- Read queries: `Query()` + `AsNoTracking()` + `Select(...)` into DTOs. Don't load whole entity graphs just to build DTOs.
+- `IRepository<T>`: `GetByIdAsync` (tracked), `Query()` (**no tracking**, for reads), `QueryTracked()` (for loading entities
+  you change), `Add`, `Remove`. Read queries: `Query()` + `Select(...)` into DTOs. Don't load whole entity graphs just to build DTOs.
+- Queries Logic needs often get a named method in a specialized repository (e.g. `IOrganizationRepository.AnyAsync`),
+  exposed as a property on `IUnitOfWork` and returned by `Repository<T>()` as well – services stay unit-testable without
+  mocking `IQueryable`. Implementations in `Data.Accessor` are `internal`; Logic sees only `Data.Accessor.Abstractions`.
 - Tenant isolation: global query filter on `OrganizationId` **plus** an explicit check in the service
   (IDs are sequential and guessable). Use `IgnoreQueryFilters()` only in the `Administration` module, with a comment explaining why.
 - Exercise content (`Question.Payload`, `Question.Solution`, generator parameters) is stored in JSON columns with polymorphic types

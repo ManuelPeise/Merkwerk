@@ -3,6 +3,7 @@ using Data.Database.Abstractions;
 using Data.Database.Converters;
 using Data.Database.Entities.Base;
 using Data.Database.Entities.Identity;
+using Data.Database.Entities.Learners;
 using Data.Database.Entities.Organizations;
 using Data.Database.Entities.Subjects;
 using Microsoft.AspNetCore.Identity;
@@ -42,6 +43,12 @@ public class MerkwerkDbContext : IdentityUserContext<User, long>
     public DbSet<Subject> Subjects => Set<Subject>();
 
     public DbSet<RefreshToken> RefreshTokens => Set<RefreshToken>();
+
+    public DbSet<Membership> Memberships => Set<Membership>();
+
+    public DbSet<Invitation> Invitations => Set<Invitation>();
+
+    public DbSet<Learner> Learners => Set<Learner>();
 
     /// <summary>Read by the query filter on every query (EF parameterizes context members).</summary>
     protected long? CurrentOrganizationId => _currentUser.OrganizationId;

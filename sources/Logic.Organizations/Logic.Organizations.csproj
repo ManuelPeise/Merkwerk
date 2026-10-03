@@ -1,0 +1,21 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+  </PropertyGroup>
+
+  <!-- Families (later schools), memberships, invitations and child profiles (LP-105, approved 2026-10-03).
+       Uses Logic.Authentication for accounts and sessions – never the other way round. No ASP.NET Core. -->
+  <ItemGroup>
+    <ProjectReference Include="..\Data.Accessor\Data.Accessor.csproj" />
+    <ProjectReference Include="..\Logic.Authentication\Logic.Authentication.csproj" />
+    <ProjectReference Include="..\Logic.Notifications\Logic.Notifications.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <InternalsVisibleTo Include="Logic.Organizations.Tests" />
+  </ItemGroup>
+
+</Project>

@@ -13,6 +13,10 @@ internal sealed class UnitOfWork(MerkwerkDbContext context) : IUnitOfWork
 
     public IOrganizationRepository Organizations => (IOrganizationRepository)Repository<Organization>();
 
+    public IMembershipRepository Memberships => (IMembershipRepository)Repository<Membership>();
+
+    public IInvitationRepository Invitations => (IInvitationRepository)Repository<Invitation>();
+
     public IRepository<T> Repository<T>()
         where T : AEntityBase
     {
@@ -37,6 +41,16 @@ internal sealed class UnitOfWork(MerkwerkDbContext context) : IUnitOfWork
         if (typeof(T) == typeof(Organization))
         {
             return new OrganizationRepository(context);
+        }
+
+        if (typeof(T) == typeof(Membership))
+        {
+            return new MembershipRepository(context);
+        }
+
+        if (typeof(T) == typeof(Invitation))
+        {
+            return new InvitationRepository(context);
         }
 
         return new EntityRepository<T>(context);

@@ -3,6 +3,7 @@ using Data.Database.Abstractions;
 using Logic.Authentication;
 using Logic.Authentication.DI;
 using Logic.Notifications.DI;
+using Logic.Organizations.DI;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Mvc.ApplicationModels;
 using Microsoft.Extensions.Options;
@@ -11,7 +12,6 @@ using Logic.Shared.DI;
 using Web.Core.Services.Authorization;
 using Web.Core.Services.Cookies;
 using Web.Core.Services.CurrentUser;
-using Web.Core.Services.Development;
 using Web.Core.Services.Routing;
 
 namespace Web.Core.Bundels;
@@ -67,6 +67,9 @@ public static class ServiceRegistrationExtensions
         services.AddMerkwerkIdentity(configuration);
         services.AddMerkwerkAuthentication(configuration);
 
+        // Families, invitations, members, child profiles (LP-105).
+        services.AddMerkwerkOrganizations();
+
         // Mail via SMTP (LP-162): Mailpit in development, MAIL_* from deploy/.env in production.
         services.AddMerkwerkNotifications(configuration);
 
@@ -76,10 +79,6 @@ public static class ServiceRegistrationExtensions
         services.AddSingleton<AuthCookieWriter>();
         services.AddAuthorization(AuthorizationPolicies.Configure);
 
-        // Development only: one account to sign in with until the first-run setup exists (LP-105).
-        services.AddOptions<DevelopmentUserSeederOptions>()
-            .Bind(configuration.GetSection(DevelopmentUserSeederOptions.SectionName));
-        services.AddHostedService<DevelopmentUserSeeder>();
 
         return services;
     }

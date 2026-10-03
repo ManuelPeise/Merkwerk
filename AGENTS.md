@@ -43,6 +43,7 @@ sources/Merkwerk.slnx
                                     Services/ApiControllers/<Module>/ (controller + Dtos/), Services/Cookies/
   02 Logic   Logic.Authentication   Login, token issuing, refresh-token rotation, sessions (DI/ for registration)
              Logic.Notifications    Mails: IMailService (SMTP via MailKit), templates de/en, IPublicLinkBuilder
+             Logic.Organizations    First-run setup, families, memberships, invitations, child profiles (LP-105)
              Logic.Shared           Pure logic shared by modules (graders, generators) – no I/O
   03 Data    Data.Database          Entities, MerkwerkDbContext, configurations, interceptors, migrations
              Data.Accessor          Repositories and unit of work – the only way to reach the database
@@ -51,6 +52,7 @@ sources/Merkwerk.slnx
              Data.IntegrationTests  DbContext, repositories, unit of work, migrations against MySQL 8.4 (Testcontainers, needs Docker)
              Logic.Authentication.Tests  Unit tests of token issuing and session rotation
              Logic.Notifications.Tests   Template renderer, links; delivery into Mailpit (Testcontainers, needs Docker)
+             Logic.Organizations.Tests   Setup, invitations, members, learners against MySQL (Testcontainers, needs Docker)
 ```
 
 | Project | May reference |
@@ -59,7 +61,8 @@ sources/Merkwerk.slnx
 | Data.Database | – |
 | Data.Accessor | Data.Database |
 | Logic.Notifications | Logic.Shared |
-| Logic.* (e.g. Logic.Authentication) | Logic.Shared, Logic.Notifications, Data.Accessor |
+| Logic.Authentication | Logic.Shared, Logic.Notifications, Data.Accessor |
+| Logic.* (e.g. Logic.Organizations) | Logic.Shared, Logic.Notifications, Logic.Authentication, Data.Accessor |
 | Web.Core | Logic.*, Data.Accessor / Data.Database (the latter two for DI registration only) |
 | Web.Client | no .NET project – only the REST API |
 
@@ -77,7 +80,7 @@ sources/Merkwerk.slnx
 
 ## 4. Modules
 
-Planned business areas: `Organizations`, `Learners`, `Exercises`, `Assignments`, `Practice` (attempts, answers, learning state),
+Business areas: `Organizations` (setup, memberships, invitations, child profiles – `Logic.Organizations`, LP-105), `Learners`, `Exercises`, `Assignments`, `Practice` (attempts, answers, learning state),
 `Progress`, `WordLists`, later `Sharing`, `Administration`. Authentication lives in `Logic.Authentication`
 (`IAuthSessionService`, `TokenService`, options) so it can grow (Identity, invitations, device pairing – LP-104 to LP-106).
 Per module: `I<Name>Service` + implementation, validators, module-internal types, registration in a `DI/` extension.
@@ -101,6 +104,8 @@ Per module: `I<Name>Service` + implementation, validators, module-internal types
   mocking `IQueryable`. Implementations in `Data.Accessor` are `internal`; Logic sees only `Data.Accessor.Abstractions`.
 - Tenant isolation: global query filter on `OrganizationId` **plus** an explicit check in the service
   (IDs are sequential and guessable). Use `IgnoreQueryFilters()` only in the `Administration` module, with a comment explaining why.
+  Exception (LP-105): named lookups in Data.Accessor that must work before an organization is known –
+  `IMembershipRepository.FindPrimaryForUserAsync`/`FindAsync` (login, invitations) and `IInvitationRepository.FindByTokenHashAsync`.
 - Exercise content (`Question.Payload`, `Question.Solution`, generator parameters) is stored in JSON columns with polymorphic types
   (`System.Text.Json`, type discriminator). A new question type = a new class, **no** migration.
 - Migrations: `dotnet ef migrations add <Name> -p Data.Database -s Web.Core` (run `dotnet tool restore` once – dotnet-ef is

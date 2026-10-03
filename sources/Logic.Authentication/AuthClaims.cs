@@ -9,6 +9,9 @@ public static class AuthClaims
 
     public const string Role = "role";
 
+    /// <summary>Organization the session works in (LP-105); read by HttpCurrentUser for the tenant filter.</summary>
+    public const string OrganizationId = "org_id";
+
     /// <summary>"true" while the user still has to replace a start password (LP-104).</summary>
     public const string MustChangePassword = "must_change_password";
 }

@@ -15,6 +15,12 @@ public interface IAuthSessionService
     /// </summary>
     Task<AuthSession?> RefreshAsync(string refreshToken, CancellationToken cancellationToken);
 
+    /// <summary>
+    /// Starts a session without a password – only for callers that just authenticated the person another way
+    /// (first-run setup, accepted invitation; LP-105). <c>null</c> if the user does not exist.
+    /// </summary>
+    Task<AuthSession?> SignInAsync(long userId, CancellationToken cancellationToken);
+
     /// <summary>Ends the session: revokes every token of the refresh token's chain. Unknown tokens are ignored.</summary>
     Task LogoutAsync(string refreshToken, CancellationToken cancellationToken);
 }

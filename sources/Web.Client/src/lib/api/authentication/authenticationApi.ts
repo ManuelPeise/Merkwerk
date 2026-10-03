@@ -1,5 +1,6 @@
 import { statelessApi } from 'src/lib/api/StatelessApi';
 import type {
+    IAdminResetPasswordRequest,
     IChangePasswordRequest,
     IConfirmEmailRequest,
     ICurrentUser,
@@ -25,5 +26,8 @@ export const authenticationApi = {
     }),
     changePassword: statelessApi.create<ISession, IChangePasswordRequest>({
         serviceUrl: '/authentication/change-password',
+    }),
+    adminResetPassword: statelessApi.create<void, IAdminResetPasswordRequest>({
+        serviceUrl: '/authentication/admin-reset-password',
     }),
 };

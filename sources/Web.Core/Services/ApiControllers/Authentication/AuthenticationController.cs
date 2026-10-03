@@ -1,6 +1,7 @@
 using Logic.Authentication;
 using Logic.Authentication.Accounts;
 using Logic.Authentication.Sessions;
+using Logic.Organizations.Members;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Web.Core.Services.ApiControllers.Authentication.Dtos;
@@ -16,6 +17,7 @@ namespace Web.Core.Services.ApiControllers.Authentication;
 public sealed class AuthenticationController(
     IAuthSessionService authSessionService,
     IAccountService accountService,
+    IMemberService memberService,
     AuthCookieWriter cookieWriter) : ApiControllerBase
 {
     /// <summary>POST /api/v1/authentication/login – checks the credentials and sets the auth cookies.</summary>
@@ -158,6 +160,29 @@ public sealed class AuthenticationController(
 
         cookieWriter.Write(Response, result.Session!);
         return SessionDto.From(result.Session!);
+    }
+
+    /// <summary>
+    /// POST /api/v1/authentication/admin-reset-password – an admin gives an adult of the same family a start password
+    /// by mail (24 h, must be changed at the next login). 404 for anyone outside the family (LP-104/LP-105).
+    /// </summary>
+    [Authorize(Policy = AuthorizationPolicies.OrgAdmin)]
+    [HttpPost]
+    [ProducesResponseType(StatusCodes.Status204NoContent)]
+    [ProducesResponseType<ProblemDetails>(StatusCodes.Status404NotFound)]
+    public async Task<IActionResult> AdminResetPasswordAsync(
+        AdminResetPasswordRequestDto request,
+        CancellationToken cancellationToken)
+    {
+        if (CurrentOrganizationId is not { } organizationId || CurrentUserId is not { } userId)
+        {
+            return NotFound();
+        }
+
+        return await memberService.IssueStartPasswordAsync(
+            organizationId, userId, request.UserId, MailLanguage, cancellationToken)
+            ? NoContent()
+            : NotFound();
     }
 
     /// <summary>400 with Identity's messages attached to one field (camelCase, like the automatic model validation).</summary>

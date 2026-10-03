@@ -22,6 +22,29 @@ public abstract class ApiControllerBase : ControllerBase
             .FirstOrDefault(l => l is not null && MailLanguages.Contains(l))
         ?? "de";
 
+    /// <summary>Organization of the session (org_id claim, LP-105), or null without membership.</summary>
+    protected long? CurrentOrganizationId =>
+        long.TryParse(User.FindFirst(AuthClaims.OrganizationId)?.Value, NumberStyles.None, CultureInfo.InvariantCulture, out var id)
+            ? id
+            : null;
+
+    /// <summary>
+    /// 400 with messages per field (camelCase keys, like the automatic model validation) – for rule errors the
+    /// services report after the data annotations passed.
+    /// </summary>
+    protected ActionResult FieldErrors(IReadOnlyDictionary<string, string[]> errors)
+    {
+        foreach (var (field, messages) in errors)
+        {
+            foreach (var message in messages)
+            {
+                ModelState.AddModelError(field, message);
+            }
+        }
+
+        return ValidationProblem(ModelState);
+    }
+
     /// <summary>Id of the signed-in adult (sub claim), or null for anonymous calls.</summary>
     protected long? CurrentUserId =>
         long.TryParse(User.FindFirst(AuthClaims.Subject)?.Value, NumberStyles.None, CultureInfo.InvariantCulture, out var id)

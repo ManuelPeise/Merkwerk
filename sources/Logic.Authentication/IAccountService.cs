@@ -24,4 +24,15 @@ public interface IAccountService
     /// revokes all sessions and mails the password.
     /// </summary>
     Task<AccountResult> IssueStartPasswordAsync(long userId, string language, CancellationToken cancellationToken);
+
+    /// <summary>Creates an adult account (setup, accepted invitation; LP-105). <see cref="AccountResult.UserId"/> is set on success.</summary>
+    Task<AccountResult> CreateAccountAsync(NewAccount account, CancellationToken cancellationToken);
+
+    /// <summary>Removes an account again – only to undo a half-finished setup.</summary>
+    Task DeleteAccountAsync(long userId, CancellationToken cancellationToken);
+
+    Task<long?> FindUserIdByEmailAsync(string email, CancellationToken cancellationToken);
+
+    /// <summary>Name and address of the given users (member lists, invitation checks).</summary>
+    Task<IReadOnlyList<AccountInfo>> GetAccountsAsync(IReadOnlyCollection<long> userIds, CancellationToken cancellationToken);
 }

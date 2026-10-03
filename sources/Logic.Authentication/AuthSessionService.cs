@@ -1,4 +1,6 @@
+using Data.Accessor.Abstractions;
 using Data.Database.Entities.Identity;
+using Data.Database.Entities.Organizations;
 using Logic.Authentication.Sessions;
 using Logic.Authentication.Tokens;
 using Microsoft.AspNetCore.Identity;
@@ -10,6 +12,7 @@ internal sealed class AuthSessionService(
     UserManager<User> userManager,
     TokenService tokenService,
     RefreshTokenStore refreshTokens,
+    IUnitOfWorkFactory unitOfWorkFactory,
     TimeProvider timeProvider) : IAuthSessionService
 {
     public async Task<LoginResult> LoginAsync(string email, string password, CancellationToken cancellationToken)
@@ -66,7 +69,13 @@ internal sealed class AuthSessionService(
             return null;
         }
 
-        return CreateSession(user, rotated);
+        return await CreateSessionAsync(user, rotated, cancellationToken);
+    }
+
+    public async Task<AuthSession?> SignInAsync(long userId, CancellationToken cancellationToken)
+    {
+        var user = await userManager.FindByIdAsync(userId.ToString(System.Globalization.CultureInfo.InvariantCulture));
+        return user is null ? null : await IssueSessionAsync(user, Guid.NewGuid(), cancellationToken);
     }
 
     public Task LogoutAsync(string refreshToken, CancellationToken cancellationToken) =>
@@ -74,16 +83,26 @@ internal sealed class AuthSessionService(
 
     /// <summary>New access token plus refresh token in the given chain (new chain = new login).</summary>
     internal async Task<AuthSession> IssueSessionAsync(User user, Guid chainId, CancellationToken cancellationToken) =>
-        CreateSession(user, await refreshTokens.IssueAsync(user.Id, chainId, cancellationToken));
+        await CreateSessionAsync(user, await refreshTokens.IssueAsync(user.Id, chainId, cancellationToken), cancellationToken);
 
-    private AuthSession CreateSession(User user, IssuedRefreshToken refreshToken)
+    /// <summary>Role and organization come from the user's (oldest) membership – read on every login and refresh (LP-105).</summary>
+    private async Task<AuthSession> CreateSessionAsync(User user, IssuedRefreshToken refreshToken, CancellationToken cancellationToken)
     {
-        // Until memberships exist (LP-105/LP-107) every adult is a member.
-        const string role = AuthRoles.Member;
+        Membership? membership;
+        await using (var unitOfWork = unitOfWorkFactory.Create())
+        {
+            membership = await unitOfWork.Memberships.FindPrimaryForUserAsync(user.Id, cancellationToken);
+        }
+
+        var role = membership?.Role == OrganizationRole.OrgAdmin ? AuthRoles.OrgAdmin : AuthRoles.Member;
         var name = string.IsNullOrEmpty(user.DisplayName) ? user.Email ?? string.Empty : user.DisplayName;
 
         var (accessToken, accessExpiresAt) = tokenService.CreateAccessToken(
-            user.Id.ToString(System.Globalization.CultureInfo.InvariantCulture), name, role, user.MustChangePassword);
+            user.Id.ToString(System.Globalization.CultureInfo.InvariantCulture),
+            name,
+            role,
+            user.MustChangePassword,
+            membership?.OrganizationId);
 
         return new AuthSession(
             name, role, user.MustChangePassword, accessToken, accessExpiresAt, refreshToken.Token, refreshToken.ExpiresAt);

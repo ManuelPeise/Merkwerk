@@ -7,6 +7,7 @@ export const routes = {
     invitation: '/invitation',
     confirmEmail: '/confirm-email',
     admin: '/admin',
+    family: '/admin/family',
     practice: '/practice',
     practicePair: '/practice/pair',
     practiceProfiles: '/practice/profiles',

@@ -21,3 +21,11 @@ The developer wants a clear, layered solution in Visual Studio. Project name: Me
 
 - `Web.Client` never references Logic or Data (no EF Core in the browser).
 - Business logic starts as one `Logic` project with one folder per module.
+
+## Update 2026-10-03 (ADR 015, LP-011/LP-012)
+
+The solution was restructured with the switch to React:
+`01 Web` (Web.Client – React, Web.Core – API host), `02 Logic` (Logic.Authentication, Logic.Shared),
+`03 Data` (Data.Database, Data.Accessor), `04 Shared` and `05 Tests` (empty for now). The former `Web`, `Service`, `Logic`
+and `Shared` projects are no longer part of the solution; transport code lives in `Web.Core`, business logic in `Logic.*`
+projects. The current dependency rules are in AGENTS.md §3.

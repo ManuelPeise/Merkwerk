@@ -1,6 +1,6 @@
 # 003 – Blazor for all users: adults in Server mode, children in WebAssembly mode as PWA; Expo app later
 
-- Status: Accepted
+- Status: Superseded by [015](015-react-typescript-ui.md) (2026-10-03)
 - Date: 2026-10-02
 - Ticket: LP-002
 

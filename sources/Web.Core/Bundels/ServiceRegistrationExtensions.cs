@@ -1,3 +1,5 @@
+using Data.Database.Abstractions;
+using Data.Database.DI;
 using Logic.Authentication;
 using Logic.Authentication.DI;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
@@ -5,6 +7,7 @@ using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
 using Logic.Shared.DI;
 using Web.Core.Services.Cookies;
+using Web.Core.Services.CurrentUser;
 
 namespace Web.Core.Bundels;
 
@@ -46,6 +49,11 @@ public static class ServiceRegistrationExtensions
                     .AllowCredentials();
             });
         });
+
+        // Database (LP-101): DbContext factory + audit interceptor; ICurrentUser comes from the access token.
+        services.AddHttpContextAccessor();
+        services.AddScoped<ICurrentUser, HttpCurrentUser>();
+        services.AddMerkwerkDatabase(configuration);
 
         services.AddMerkwerkAuthentication(configuration);
         services.AddMerkwerkLogicSharedServices(configuration);

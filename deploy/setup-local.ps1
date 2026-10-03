@@ -14,7 +14,7 @@ $repoRoot    = Split-Path $PSScriptRoot -Parent
 $composeFile = Join-Path $PSScriptRoot "docker-compose.yml"
 $envFile     = Join-Path $PSScriptRoot ".env"
 $envExample  = Join-Path $PSScriptRoot ".env.example"
-$webProject  = Join-Path $repoRoot "sources\Web"
+$webProject  = Join-Path $repoRoot "sources\Web.Core"
 
 function New-Secret([int]$bytes = 24) {
     $buffer = [byte[]]::new($bytes)
@@ -64,7 +64,7 @@ do {
 if ($health -ne 'healthy') { throw "MySQL did not become healthy within 2 minutes. Check: docker compose -f deploy/docker-compose.yml logs db" }
 
 # ---------- 3. user secrets of the Web project ---------------------------
-Write-Host "Storing user secrets for sources\Web ..." -ForegroundColor Cyan
+Write-Host "Storing user secrets for sources\Web.Core ..." -ForegroundColor Cyan
 $connection = 'Server=localhost;Port=3306;Database=' + $settings['DB_NAME'] + ';User=' + $settings['DB_USER'] + ';Password=' + $settings['DB_PASSWORD']
 Invoke-Checked { dotnet user-secrets set "ConnectionStrings:Default" $connection --project $webProject } "user-secrets (connection string)"
 Invoke-Checked { dotnet user-secrets set "Auth:Jwt:SigningKey" $settings['JWT_SIGNING_KEY'] --project $webProject } "user-secrets (JWT key)"
@@ -81,6 +81,6 @@ if ($LASTEXITCODE -ne 0) { throw "database check failed (exit code $LASTEXITCODE
 Write-Host ""
 Write-Host "Local environment is ready." -ForegroundColor Green
 Write-Host ('  MySQL:    localhost:3306, database ' + $settings['DB_NAME'] + ', user ' + $settings['DB_USER'])
-Write-Host "  Secrets:      dotnet user-secrets list --project sources\Web"
+Write-Host "  Secrets:      dotnet user-secrets list --project sources\Web.Core"
 Write-Host "  Stop:         docker compose -f deploy/docker-compose.yml stop db"
 Write-Host "  Reset (DATA LOSS): docker compose -f deploy/docker-compose.yml down -v"

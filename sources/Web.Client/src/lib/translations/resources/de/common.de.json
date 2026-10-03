@@ -74,5 +74,7 @@
   "labelPairDevice": "Gerät koppeln",
   "notificationPairingCodeInvalid": "Der Code ist ungültig oder abgelaufen.",
   "notificationTooManyAttempts": "Zu viele Versuche. Bitte warte kurz und versuche es später noch einmal.",
-  "notificationDeviceNotPaired": "Dieses Gerät ist nicht mehr gekoppelt. Bitte koppele es neu."
+  "notificationDeviceNotPaired": "Dieses Gerät ist nicht mehr gekoppelt. Bitte koppele es neu.",
+  "labelDelete": "Löschen",
+  "labelDone": "Fertig"
 }

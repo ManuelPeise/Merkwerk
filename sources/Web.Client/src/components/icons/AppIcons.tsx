@@ -21,3 +21,8 @@ import FaceIconMui from '@mui/icons-material/Face';
 
 export const ChildIcon = FaceIconMui;
 export const AdultIcon = AdminIconMui;
+import BackspaceIconMui from '@mui/icons-material/Backspace';
+import CheckIconMui from '@mui/icons-material/Check';
+
+export const BackspaceIcon = BackspaceIconMui;
+export const CheckIcon = CheckIconMui;

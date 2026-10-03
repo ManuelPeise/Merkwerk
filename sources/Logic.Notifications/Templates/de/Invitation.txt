@@ -1,0 +1,13 @@
+Hallo {{Name}},
+
+{{InvitedBy}} lädt dich ein, bei „{{OrganizationName}}“ in Merkwerk mitzumachen.
+
+Die Einladung gilt bis {{ExpiresAt}}.
+
+Öffne diesen Link:
+{{Link}}
+
+Dein Merkwerk
+
+--
+Diese E-Mail wurde automatisch versendet. Bitte antworte nicht darauf.

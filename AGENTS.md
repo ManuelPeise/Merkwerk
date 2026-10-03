@@ -27,7 +27,7 @@ practise on a tablet or phone. Deployment: self-hosted, the family instance runs
 | API | ASP.NET Core **controllers** in `Web.Core` under `/api/v1`, OpenAPI + Swagger UI (development), errors as `ProblemDetails` |
 | Database | MySQL 8.4 LTS, EF Core 10, provider **MySql.EntityFrameworkCore** (Oracle). **No Pomelo.** |
 | Auth | ASP.NET Core Identity + **JWT** (access token 15 min, rotating refresh token stored hashed in the DB). Browsers: HttpOnly cookies `mw_access` / `mw_refresh` |
-| Mail | SMTP (MailKit, proposed in LP-162); Mailpit catches all mails in development |
+| Mail | SMTP via MailKit in `Logic.Notifications` (LP-162); Mailpit catches all mails in development |
 | Tests | xUnit, NSubstitute, Testcontainers (MySQL); UI: ESLint/TypeScript now, Vitest planned |
 | Operations | Docker Compose (Caddy, app, MySQL), multi-arch images (amd64 + arm64). Development runs over plain HTTP |
 
@@ -42,6 +42,7 @@ sources/Merkwerk.slnx
              Web.Core               Startup project, API host: Bundels/ (registration, pipeline),
                                     Services/ApiControllers/<Module>/ (controller + Dtos/), Services/Cookies/
   02 Logic   Logic.Authentication   Login, token issuing, refresh-token rotation, sessions (DI/ for registration)
+             Logic.Notifications    Mails: IMailService (SMTP via MailKit), templates de/en, IPublicLinkBuilder
              Logic.Shared           Pure logic shared by modules (graders, generators) – no I/O
   03 Data    Data.Database          Entities, MerkwerkDbContext, configurations, interceptors, migrations
              Data.Accessor          Repositories and unit of work – the only way to reach the database
@@ -49,6 +50,7 @@ sources/Merkwerk.slnx
   05 Tests   Architecture.Tests     Rules of this section (project references, layers, controllers) via reflection
              Data.IntegrationTests  DbContext, repositories, unit of work, migrations against MySQL 8.4 (Testcontainers, needs Docker)
              Logic.Authentication.Tests  Unit tests of token issuing and session rotation
+             Logic.Notifications.Tests   Template renderer, links; delivery into Mailpit (Testcontainers, needs Docker)
 ```
 
 | Project | May reference |
@@ -56,7 +58,8 @@ sources/Merkwerk.slnx
 | Logic.Shared | – (Microsoft.Extensions abstractions only) |
 | Data.Database | – |
 | Data.Accessor | Data.Database |
-| Logic.* (e.g. Logic.Authentication) | Logic.Shared, Data.Accessor |
+| Logic.Notifications | Logic.Shared |
+| Logic.* (e.g. Logic.Authentication) | Logic.Shared, Logic.Notifications, Data.Accessor |
 | Web.Core | Logic.*, Data.Accessor / Data.Database (the latter two for DI registration only) |
 | Web.Client | no .NET project – only the REST API |
 
@@ -70,7 +73,7 @@ sources/Merkwerk.slnx
 - **Entities never leave the server.** Only DTOs (`sealed record` in `Web.Core/Services/ApiControllers/<Module>/Dtos/`) go over the wire;
   the UI mirrors them as TypeScript types in `Web.Client/src/lib/api/<module>/<module>Types.ts`.
 - Controllers talk to **services**, never directly to repositories or the DbContext.
-- New projects (e.g. another `Logic.<Area>` or `Logic.Notifications`) only after asking.
+- New projects (e.g. another `Logic.<Area>`) only after asking.
 
 ## 4. Modules
 
@@ -140,7 +143,7 @@ touch targets ≥ 64×64 px, icons plus text and friendly feedback; no CDNs, no 
 - Never commit secrets: use user secrets or `deploy/.env` (ignored). Sample values only in `.env.example`. Never commit `*.crt`, `*.pfx`, `*.key`.
 - Passwords only through ASP.NET Core Identity; store refresh tokens, invitation and pairing codes hashed only.
 - Logs contain no personal data (no names, e-mail addresses, tokens, children's answers).
-- Mails only to adults and never with data about children.
+- Mails only to adults and never with data about children. Logs never contain e-mail addresses; links carry tokens only.
 
 ## 10. C# conventions
 
@@ -181,7 +184,7 @@ dotnet tool restore                                            # once: dotnet-ef
 dotnet ef migrations add <Name> -p Data.Database -s Web.Core
 dotnet ef database update -p Data.Database -s Web.Core         # local DB (connection string from user secrets)
 docker compose -f ../deploy/docker-compose.yml up -d db
-docker compose -f ../deploy/docker-compose.yml --profile dev up -d mailpit   # after LP-162, UI at http://localhost:8025
+docker compose -f ../deploy/docker-compose.yml --profile dev up -d mailpit   # mail catcher, UI at http://localhost:8025
 
 cd Web.Client
 npm install

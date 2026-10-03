@@ -13,20 +13,12 @@
     <PackageReference Include="xunit" />
     <PackageReference Include="xunit.runner.visualstudio" />
     <PackageReference Include="coverlet.collector" />
+    <!-- Generic container for Mailpit (MailpitTests, needs Docker). -->
+    <PackageReference Include="Testcontainers" />
   </ItemGroup>
 
-  <!-- Every production project, so the rules can inspect their assemblies (no extra package, plain reflection). -->
   <ItemGroup>
-    <ProjectReference Include="..\Web.Core\Web.Core.csproj" />
-    <ProjectReference Include="..\Logic.Authentication\Logic.Authentication.csproj" />
     <ProjectReference Include="..\Logic.Notifications\Logic.Notifications.csproj" />
-    <ProjectReference Include="..\Logic.Shared\Logic.Shared.csproj" />
-    <ProjectReference Include="..\Data.Accessor\Data.Accessor.csproj" />
-    <ProjectReference Include="..\Data.Database\Data.Database.csproj" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <FrameworkReference Include="Microsoft.AspNetCore.App" />
   </ItemGroup>
 
   <ItemGroup>

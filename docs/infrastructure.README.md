@@ -246,6 +246,7 @@ Shared/
 | `proxy` | `caddy:2` | 443 | `caddy-data` (certificates) |
 | `app` | `ghcr.io/<owner>/merkwerk:<version>` | internal only | `media` (uploaded images/audio) |
 | `db` | `mysql:8.4` | internal only | `db-data` |
+| `mailpit` (profile `dev`) | `axllent/mailpit` | 127.0.0.1:1025 (SMTP), 127.0.0.1:8025 (UI) | – |
 
 Environments:
 
@@ -268,6 +269,10 @@ Precedence (last wins): `appsettings.json` → `appsettings.{Environment}.json` 
 | Access/refresh lifetimes | `Auth__Jwt__AccessTokenMinutes`, `Auth__RefreshTokenDays` | appsettings |
 | Media storage path | `Media__Path` | appsettings / `.env` |
 | Registration open | `Instance__AllowRegistration` | appsettings / admin page (phase 2) |
+| SMTP server | `Mail__Host`, `Mail__Port`, `Mail__Security` (`None`/`StartTls`/`SslOnConnect`) | appsettings.Development (Mailpit) / `.env` `MAIL_*` |
+| SMTP login | `Mail__UserName`, `Mail__Password` | user secrets / `.env` – never in appsettings |
+| Sender | `Mail__FromAddress`, `Mail__FromName` | appsettings.Development / `.env` `MAIL_FROM` |
+| Public address for links in mails | `App__PublicBaseUrl` | appsettings.Development (`http://localhost:65350`) / compose: `https://MERKWERK_HOST` |
 
 ```powershell
 # local secrets (once per machine)
@@ -276,6 +281,14 @@ dotnet user-secrets init
 dotnet user-secrets set "ConnectionStrings:Default" "Server=localhost;Database=merkwerk;User=app;Password=..."
 dotnet user-secrets set "Auth:Jwt:SigningKey" "<at least 32 random characters>"
 ```
+
+### Mail (LP-162)
+
+- `Logic.Notifications` sends every mail through `IMailService` (MailKit, one SMTP connection per mail, 15 s timeout).
+  Templates live in `Logic.Notifications/Templates/{de|en}/{Template}.html|.txt`; the HTML `<title>` is the subject.
+- Development: `deploy/setup-local.ps1` starts **Mailpit**. Every mail lands in http://localhost:8025 – nothing leaves the machine.
+- Production: set `MAIL_*` in `deploy/.env`. Without a valid `Mail` section the app refuses to start (`ValidateOnStart`).
+- Privacy: mails only to adults, never data about children; logs contain template, language and result, never addresses.
 
 ## 6. CI/CD (GitHub Actions)
 

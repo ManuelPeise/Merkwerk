@@ -1,0 +1,13 @@
+Hello {{Name}},
+
+{{InvitedBy}} invites you to join “{{OrganizationName}}” on Merkwerk.
+
+The invitation is valid until {{ExpiresAt}}.
+
+Open this link:
+{{Link}}
+
+Your Merkwerk
+
+--
+This e-mail was sent automatically. Please do not reply.

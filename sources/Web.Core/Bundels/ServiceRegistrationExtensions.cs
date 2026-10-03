@@ -2,6 +2,7 @@ using Data.Accessor.DI;
 using Data.Database.Abstractions;
 using Logic.Authentication;
 using Logic.Authentication.DI;
+using Logic.Notifications.DI;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
@@ -57,6 +58,10 @@ public static class ServiceRegistrationExtensions
         services.AddMerkwerkDataAccess(configuration);
 
         services.AddMerkwerkAuthentication(configuration);
+
+        // Mail via SMTP (LP-162): Mailpit in development, MAIL_* from deploy/.env in production.
+        services.AddMerkwerkNotifications(configuration);
+
         services.AddMerkwerkLogicSharedServices(configuration);
 
         services.AddJwtCookieAuthentication();

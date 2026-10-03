@@ -15,7 +15,7 @@ jobs:
     env:
       OWNER: ${{ github.repository_owner }}
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
 
       - name: Lower-case owner for GHCR
         run: echo "OWNER_LC=${OWNER,,}" >> "$GITHUB_ENV"

@@ -46,7 +46,9 @@ sources/Merkwerk.slnx
   03 Data    Data.Database          Entities, MerkwerkDbContext, configurations, interceptors, migrations
              Data.Accessor          Repositories and unit of work – the only way to reach the database
   04 Shared  (empty for now)
-  05 Tests   Data.IntegrationTests  DbContext, repositories and unit of work against MySQL 8.4 (Testcontainers, needs Docker)
+  05 Tests   Architecture.Tests     Rules of this section (project references, layers, controllers) via reflection
+             Data.IntegrationTests  DbContext, repositories, unit of work, migrations against MySQL 8.4 (Testcontainers, needs Docker)
+             Logic.Authentication.Tests  Unit tests of token issuing and session rotation
 ```
 
 | Project | May reference |
@@ -58,7 +60,7 @@ sources/Merkwerk.slnx
 | Web.Core | Logic.*, Data.Accessor / Data.Database (the latter two for DI registration only) |
 | Web.Client | no .NET project – only the REST API |
 
-**Hard rules** (to be enforced by architecture tests again):
+**Hard rules** (checked by `Architecture.Tests` – a rule change means changing the test as well):
 
 - `Web.Core` is **transport only**: controllers, DTOs, cookies, authentication middleware, OpenAPI. Business logic goes into a `Logic.*` project.
 - `Logic.*` projects never reference ASP.NET Core (`HttpContext`, cookies, JwtBearer stay in `Web.Core`) and reach data
@@ -149,7 +151,7 @@ touch targets ≥ 64×64 px, icons plus text and friendly feedback; no CDNs, no 
 - `sealed` for classes not designed for inheritance; `record` for DTOs.
 - Primary constructors for DI are fine. No service locator, no static state.
 - Options classes with `SectionName`, bound with `ValidateOnStart`.
-- No warnings in commits (`TreatWarningsAsErrors` in Release).
+- No warnings in commits (`TreatWarningsAsErrors` in Release, set in `sources/Directory.Build.props`).
 - PowerShell scripts (`*.ps1`): ASCII only, or save as UTF-8 **with BOM**. Windows PowerShell 5.1 reads UTF-8 without BOM
   as ANSI, and characters like `–` turn into quote marks that break the script.
 - Line endings: Git defaults (CRLF on Windows).
@@ -159,7 +161,7 @@ touch targets ≥ 64×64 px, icons plus text and friendly feedback; no CDNs, no 
 A ticket is done when:
 
 1. all acceptance criteria of the ticket are met,
-2. backend: `dotnet build` has no warnings and `dotnet test` is green,
+2. backend: `dotnet build -c Release` succeeds (warnings are errors) and `dotnet test` is green,
 3. UI: `npm run lint`, `npm run build` and `npm run i18n:check` are green (in `sources/Web.Client`),
 4. new logic has unit tests (services with a mocked `IUnitOfWork`),
 5. changes to repositories, query filters or controllers have an integration test against MySQL (Testcontainers),

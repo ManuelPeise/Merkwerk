@@ -5,6 +5,7 @@ import {
     type IAuthenticationContext,
 } from 'src/components/providers/authenticationContext';
 import { onSessionExpired } from 'src/lib/api/apiClient';
+import { devicesApi } from 'src/lib/api/devices/devicesApi';
 import { authenticationApi } from 'src/lib/api/authentication/authenticationApi';
 import type { ICurrentUser, ILoginRequest } from 'src/lib/api/authentication/authenticationTypes';
 
@@ -61,6 +62,25 @@ const AuthenticationProvider: React.FC<IAuthenticationProviderProps> = (props) =
         return undefined;
     }, []);
 
+    const signInLearner = React.useCallback(async (learnerId: number) => {
+        const result = await devicesApi.signIn.post({ body: { learnerId } });
+
+        if (!result.data) {
+            return result.error;
+        }
+
+        setAuthenticationState({
+            status: 'authenticated',
+            user: {
+                name: result.data.name,
+                role: result.data.role,
+                avatarId: result.data.avatarId,
+            },
+        });
+
+        return undefined;
+    }, []);
+
     const logout = React.useCallback(async () => {
         await authenticationApi.logout.post();
         setAuthenticationState(anonymous);
@@ -81,9 +101,10 @@ const AuthenticationProvider: React.FC<IAuthenticationProviderProps> = (props) =
             isAuthenticated: authenticationState.status === 'authenticated',
             login,
             logout,
+            signInLearner,
             reloadUser,
         }),
-        [authenticationState, login, logout, reloadUser],
+        [authenticationState, login, logout, signInLearner, reloadUser],
     );
 
     return (

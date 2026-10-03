@@ -42,6 +42,7 @@ src/
     router.tsx             Route tree (incl. errorElement)
     PublicRoute.tsx, ProtectedRoute.tsx   Route guards
     SetupGate.tsx          Outermost layout element: redirects to /setup until the instance is set up (useSetupStatus)
+    DeviceRoute.tsx        Guard for /practice/*: unpaired devices go to /practice/pair (useDeviceStatus)
     navigationItems.ts     Drawer entries (parents' area only)
   pages/
     <name>Page/            One folder per route: <Name>Page.tsx, plus components/ and types/ if needed
@@ -142,7 +143,8 @@ New top-level folders under `src/` only after asking.
   `AuthenticationProvider` (`src/components/providers`); never call the authentication endpoints from pages.
 - Every route belongs to exactly one layout: `PublicLayout` (no menu, language switch), `AdminLayout` (header, drawer, `adultRoles`), `KidsLayout` (large header, `roles.learner`).
 - `SetupGate` wraps the whole route tree; auth pages (login, setup, invitation, forgot/reset password, confirm e-mail) live in `PublicLayout` and render inside `AuthCard`.
-- Server field errors (`ProblemDetails.errors`) go through `getFieldErrors` to the matching field's `errorText`; alerts always use `notification�` keys.
+- Server field errors (`ProblemDetails.errors`) go through `getFieldErrors` to the matching field's `errorText`; alerts always use `notification…` keys.
+- Children's entry: `/practice/pair` (PublicLayout, pairing code) ? `/practice/profiles` (KidsLayout, `ProfileTile` + `AvatarImage`, avatars in `src/assets/avatars/`) ? `/practice`. `DeviceRoute` guards the last two; the child route uses `<ProtectedRoute signedOutTo={routes.practiceProfiles} />`.
 - Roles only via `src/lib/auth/roles.ts` (`roles`, `adultRoles`) – no role strings in components.
 - Navigation entries (`navigationItems.ts`) exist only for the parents' drawer; public pages have no menu.
 - Unknown paths redirect to `routes.start`.

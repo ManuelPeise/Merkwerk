@@ -13,6 +13,8 @@ export interface IAuthenticationContext {
     /** Returns the error, or undefined on success. */
     login: (request: ILoginRequest) => Promise<ApiError | undefined>;
     logout: () => Promise<void>;
+    /** Signs a child in on a paired device. Returns the error, or undefined on success. */
+    signInLearner: (learnerId: number) => Promise<ApiError | undefined>;
     /** Asks the server who is signed in (after setup or accepting an invitation, which sign in via cookies). */
     reloadUser: () => Promise<void>;
 }

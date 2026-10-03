@@ -3,7 +3,6 @@
   "captionWelcome": "Welcome to Merkwerk!",
   "captionWhoAreYou": "Who are you?",
   "captionAdminArea": "Parents' area",
-  "captionPracticeHome": "Practise",
   "captionLogin": "Sign in",
   "captionError": "Oops, something went wrong.",
   "labelPracticeEntry": "I want to practise",
@@ -63,5 +62,17 @@
   "notificationPasswordTooShort": "The password needs at least 10 characters.",
   "notificationPasswordsDoNotMatch": "The passwords do not match.",
   "notificationEmailInvalid": "Please enter a valid email address.",
-  "notificationPrivacyRequired": "Please agree to the privacy notice."
+  "notificationPrivacyRequired": "Please agree to the privacy notice.",
+  "captionPairDevice": "Pair device",
+  "captionPairDeviceDescription": "An adult enters the code from the parents' area. After that, children can practise on this device.",
+  "captionWhoIsPracticing": "Who is practising today?",
+  "captionNoProfiles": "No children yet – please add them in the parents' area.",
+  "captionPracticeGreeting": "Hello {{name}}!",
+  "labelPairingCode": "Pairing code",
+  "labelDeviceName": "Device name",
+  "labelDefaultDeviceName": "Tablet",
+  "labelPairDevice": "Pair device",
+  "notificationPairingCodeInvalid": "The code is invalid or has expired.",
+  "notificationTooManyAttempts": "Too many attempts. Please wait a moment and try again later.",
+  "notificationDeviceNotPaired": "This device is no longer paired. Please pair it again."
 }

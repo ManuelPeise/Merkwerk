@@ -7,6 +7,8 @@ export interface ILoginRequest {
 export interface ISession {
     name: string;
     role: string;
+    /** Only for learners. */
+    avatarId?: string;
     /** ISO date-time. */
     accessTokenExpiresAt: string;
 }
@@ -14,6 +16,7 @@ export interface ISession {
 export interface ICurrentUser {
     name: string;
     role: string;
+    avatarId?: string;
 }
 
 export interface IForgotPasswordRequest {

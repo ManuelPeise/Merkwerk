@@ -3,7 +3,6 @@
   "captionWelcome": "Willkommen bei Merkwerk!",
   "captionWhoAreYou": "Wer bist du?",
   "captionAdminArea": "Elternbereich",
-  "captionPracticeHome": "Üben",
   "captionLogin": "Anmelden",
   "captionError": "Hoppla, da ist etwas schiefgelaufen.",
   "labelPracticeEntry": "Ich möchte üben",
@@ -63,5 +62,17 @@
   "notificationPasswordTooShort": "Das Passwort braucht mindestens 10 Zeichen.",
   "notificationPasswordsDoNotMatch": "Die Passwörter sind nicht gleich.",
   "notificationEmailInvalid": "Bitte gib eine gültige E-Mail-Adresse ein.",
-  "notificationPrivacyRequired": "Bitte stimme dem Datenschutzhinweis zu."
+  "notificationPrivacyRequired": "Bitte stimme dem Datenschutzhinweis zu.",
+  "captionPairDevice": "Gerät koppeln",
+  "captionPairDeviceDescription": "Ein Erwachsener gibt den Code aus dem Elternbereich ein. Danach können die Kinder auf diesem Gerät üben.",
+  "captionWhoIsPracticing": "Wer übt heute?",
+  "captionNoProfiles": "Noch keine Kinder angelegt – bitte im Elternbereich anlegen.",
+  "captionPracticeGreeting": "Hallo {{name}}!",
+  "labelPairingCode": "Kopplungscode",
+  "labelDeviceName": "Name des Geräts",
+  "labelDefaultDeviceName": "Tablet",
+  "labelPairDevice": "Gerät koppeln",
+  "notificationPairingCodeInvalid": "Der Code ist ungültig oder abgelaufen.",
+  "notificationTooManyAttempts": "Zu viele Versuche. Bitte warte kurz und versuche es später noch einmal.",
+  "notificationDeviceNotPaired": "Dieses Gerät ist nicht mehr gekoppelt. Bitte koppele es neu."
 }

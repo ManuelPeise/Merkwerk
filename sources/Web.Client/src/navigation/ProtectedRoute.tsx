@@ -7,11 +7,13 @@ import { routes, type IRedirectState } from 'src/navigation/routes';
 interface IProps {
     /** Only these roles may enter; omit for "any signed-in user". */
     roles?: string[];
+    /** Where signed-out visitors go instead of the login (e.g. the profile selection). */
+    signedOutTo?: string;
 }
 
 /** Child routes only for signed-in users. Others go to the login and come back afterwards. */
 const ProtectedRoute: React.FC<IProps> = (props) => {
-    const { roles } = props;
+    const { roles, signedOutTo } = props;
 
     const { status, user } = useAuthentication();
     const location = useLocation();
@@ -21,6 +23,10 @@ const ProtectedRoute: React.FC<IProps> = (props) => {
     }
 
     if (!user) {
+        if (signedOutTo) {
+            return <Navigate to={signedOutTo} replace />;
+        }
+
         const state: IRedirectState = { from: location.pathname };
         return <Navigate to={routes.login} replace state={state} />;
     }

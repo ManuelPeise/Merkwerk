@@ -59,10 +59,14 @@ const AdultsSection: React.FC<IProps> = (props) => {
     const [role, setRole] = React.useState<OrganizationRole>('Member');
     const [emailError, setEmailError] = React.useState<string | undefined>(undefined);
 
-    const load = React.useCallback(
-        async (signal?: AbortSignal) => {
-            const membersResult = await membersApi.list.get({ signal });
+    // Incremented to reload members and invitations after a change.
+    const [reloadKey, setReloadKey] = React.useState(0);
 
+    React.useEffect(() => {
+        const controller = new AbortController();
+        const signal = controller.signal;
+
+        void membersApi.list.get({ signal }).then((membersResult) => {
             if (membersResult.error?.kind === 'canceled') {
                 return;
             }
@@ -72,20 +76,22 @@ const AdultsSection: React.FC<IProps> = (props) => {
             if (membersResult.error) {
                 setFeedback({ severity: 'error', key: membersResult.error.messageKey });
             }
+        });
 
-            if (isAdmin) {
-                const invitationsResult = await invitationsApi.list.get({ signal });
+        if (isAdmin) {
+            void invitationsApi.list.get({ signal }).then((invitationsResult) => {
+                if (invitationsResult.error?.kind === 'canceled') {
+                    return;
+                }
+
                 setInvitations(invitationsResult.data ?? []);
-            }
-        },
-        [isAdmin],
-    );
+            });
+        }
 
-    React.useEffect(() => {
-        const controller = new AbortController();
-        void load(controller.signal);
         return () => controller.abort();
-    }, [load]);
+    }, [isAdmin, reloadKey]);
+
+    const reload = () => setReloadKey((key) => key + 1);
 
     const formatDate = (value: string) => new Date(value).toLocaleDateString(language);
 
@@ -114,13 +120,13 @@ const AdultsSection: React.FC<IProps> = (props) => {
 
         setEmail('');
         setFeedback({ severity: 'success', key: 'notificationInvitationSent', values: { email: address } });
-        void load();
+        reload();
     };
 
     const handleRevoke = async (invitation: IInvitation) => {
         const result = await invitationsApi.revoke.post({ body: { id: invitation.id } });
         setFeedback(result.error ? { severity: 'error', key: result.error.messageKey } : null);
-        void load();
+        reload();
     };
 
     const handleConfirm = async () => {
@@ -148,7 +154,7 @@ const AdultsSection: React.FC<IProps> = (props) => {
         }
 
         setConfirm({ kind: 'none' });
-        void load();
+        reload();
     };
 
     const isEmailValid = utils.validation.validateEmail(email.trim());

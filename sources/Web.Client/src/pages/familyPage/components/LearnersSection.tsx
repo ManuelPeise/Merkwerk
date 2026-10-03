@@ -34,30 +34,34 @@ const LearnersSection: React.FC<IProps> = (props) => {
     const { getResource } = useTranslation();
 
     const [learners, setLearners] = React.useState<ILearner[] | null>(null);
-    const [errorKey, setErrorKey] = React.useState<NotificationKey | null>(null);
+    const [loadErrorKey, setLoadErrorKey] = React.useState<NotificationKey | null>(null);
+    const [actionErrorKey, setActionErrorKey] = React.useState<NotificationKey | null>(null);
     const [dialog, setDialog] = React.useState<DialogState>({ kind: 'closed' });
     const [isDeleting, setIsDeleting] = React.useState(false);
-
-    const load = React.useCallback(async (signal?: AbortSignal) => {
-        const result = await learnersApi.list.get({ signal });
-
-        if (result.error?.kind === 'canceled') {
-            return;
-        }
-
-        setLearners(result.data ?? []);
-        setErrorKey(result.error ? result.error.messageKey : null);
-    }, []);
+    // Incremented to reload the list after a change.
+    const [reloadKey, setReloadKey] = React.useState(0);
 
     React.useEffect(() => {
         const controller = new AbortController();
-        void load(controller.signal);
+
+        void learnersApi.list.get({ signal: controller.signal }).then((result) => {
+            if (result.error?.kind === 'canceled') {
+                return;
+            }
+
+            setLearners(result.data ?? []);
+            setLoadErrorKey(result.error ? result.error.messageKey : null);
+        });
+
         return () => controller.abort();
-    }, [load]);
+    }, [reloadKey]);
+
+    const reload = () => setReloadKey((key) => key + 1);
 
     const handleSaved = () => {
         setDialog({ kind: 'closed' });
-        void load();
+        setActionErrorKey(null);
+        reload();
     };
 
     const handleDelete = async (learner: ILearner) => {
@@ -65,12 +69,11 @@ const LearnersSection: React.FC<IProps> = (props) => {
         const result = await learnersApi.delete.post({ body: { id: learner.id } });
         setIsDeleting(false);
         setDialog({ kind: 'closed' });
-        // Reload first: load() clears the error, so a failed delete must be shown afterwards.
-        await load();
-        if (result.error) {
-            setErrorKey(result.error.messageKey);
-        }
+        setActionErrorKey(result.error ? result.error.messageKey : null);
+        reload();
     };
+
+    const errorKey = actionErrorKey ?? loadErrorKey;
 
     return (
         <Stack spacing={2} component="section" aria-labelledby="children-heading">

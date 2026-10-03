@@ -54,3 +54,29 @@ jobs:
           name: test-results
           path: TestResults
           if-no-files-found: ignore
+
+  # LP-163: the React client (lint includes the translation check, see package.json).
+  web:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    defaults:
+      run:
+        working-directory: sources/Web.Client
+    steps:
+      - uses: actions/checkout@v5
+
+      - name: Set up Node.js (LTS)
+        uses: actions/setup-node@v5
+        with:
+          node-version: lts/*
+          cache: npm
+          cache-dependency-path: sources/Web.Client/package-lock.json
+
+      - name: Install
+        run: npm ci
+
+      - name: Lint and translation check
+        run: npm run lint
+
+      - name: Build (tsc + Vite)
+        run: npm run build

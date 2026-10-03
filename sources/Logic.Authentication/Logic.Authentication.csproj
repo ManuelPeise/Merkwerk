@@ -6,10 +6,14 @@
     <Nullable>enable</Nullable>
   </PropertyGroup>
 
-  <!-- No ASP.NET Core here: cookies, controllers and JwtBearer stay in Service (transport). -->
+  <!-- No ASP.NET Core here: cookies, controllers and JwtBearer stay in Web.Core (transport). -->
   <ItemGroup>
     <PackageReference Include="Microsoft.Extensions.Options.ConfigurationExtensions" />
     <PackageReference Include="Microsoft.IdentityModel.JsonWebTokens" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <InternalsVisibleTo Include="Logic.Authentication.Tests" />
   </ItemGroup>
 
 </Project>

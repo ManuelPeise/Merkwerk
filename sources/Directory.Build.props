@@ -1,0 +1,7 @@
+<Project>
+  <!-- Shared build settings for the .NET projects under sources/ (AGENTS.md §10: no warnings in commits).
+       Not for Web.Client.esproj: npm/Vite output must not turn into build errors. -->
+  <PropertyGroup Condition="'$(Configuration)' == 'Release' And '$(MSBuildProjectExtension)' == '.csproj'">
+    <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
+  </PropertyGroup>
+</Project>

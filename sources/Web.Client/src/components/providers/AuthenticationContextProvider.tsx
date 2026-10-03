@@ -66,6 +66,14 @@ const AuthenticationProvider: React.FC<IAuthenticationProviderProps> = (props) =
         setAuthenticationState(anonymous);
     }, []);
 
+    const reloadUser = React.useCallback(async () => {
+        const result = await authenticationApi.me.get();
+
+        setAuthenticationState(
+            result.data ? { status: 'authenticated', user: result.data } : anonymous,
+        );
+    }, []);
+
     // Memoized, so consumers only re-render when the authentication state really changes.
     const value = React.useMemo<IAuthenticationContext>(
         () => ({
@@ -73,8 +81,9 @@ const AuthenticationProvider: React.FC<IAuthenticationProviderProps> = (props) =
             isAuthenticated: authenticationState.status === 'authenticated',
             login,
             logout,
+            reloadUser,
         }),
-        [authenticationState, login, logout],
+        [authenticationState, login, logout, reloadUser],
     );
 
     return (

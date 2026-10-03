@@ -20,6 +20,10 @@ const messageKeyForStatus = (status: number): NotificationKey => {
             return 'notificationAccessDenied';
         case 404:
             return 'notificationNotFound';
+        case 410:
+            return 'notificationLinkExpired';
+        case 423:
+            return 'notificationAccountLocked';
         default:
             return 'notificationUnexpectedError';
     }

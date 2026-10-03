@@ -35,10 +35,9 @@ efbundle.exe
 # ---------------------------------------------------------------------
 **/wwwroot/_framework/
 **/wwwroot/_content/
-# Note: Web.Client/wwwroot/css/tokens.css is generated from shared/design-tokens/tokens.json but committed on purpose (LP-008).
-# Vendored JS libraries are committed on purpose (no CDNs, AGENTS.md §9).
-# Overrides global ignore rules such as [Ll]ib/ from Visual Studio templates.
-!**/wwwroot/lib/
+# Aus den Design Tokens generierte Dateien (Quelle: shared/design-tokens/tokens.json)
+**/wwwroot/css/tokens.generated.css
+**/*.generated.css
 
 # ---------------------------------------------------------------------
 # Tests, Coverage, Playwright
@@ -69,7 +68,6 @@ secrets.json
 *.p12
 *.key
 *.pem
-*.crt
 !**/testdata/**/*.pem
 
 # ---------------------------------------------------------------------
@@ -201,8 +199,3 @@ $RECYCLE.BIN/
 *.swp
 *.orig
 *.rej
-
-# ---------------------------------------------------------------------
-# Claude Code (shared skills/settings are committed, personal ones not)
-# ---------------------------------------------------------------------
-.claude/settings.local.json

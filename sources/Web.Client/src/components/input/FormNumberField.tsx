@@ -1,0 +1,58 @@
+import React from 'react';
+import { OutlinedInput } from '@mui/material';
+import FormFieldContainer from 'src/components/input/FormFieldContainer';
+import type { IFormFieldProps } from 'src/components/input/types/formFieldProps';
+
+type IProps = IFormFieldProps<number | null>;
+
+/** Whole numbers ≥ 0. Empty field = null. */
+const digitsOnly = /^\d*$/;
+
+const FormNumberField: React.FC<IProps> = (props) => {
+    const { label, value, name, disabled, required, errorText, helperText, onChange } = props;
+
+    const inputId = React.useId();
+    const hasMessage = Boolean(errorText ?? helperText);
+
+    const handleChange = (event: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+        const nextValue = event.target.value;
+
+        // Ignore anything that is not a digit, so the field never holds an invalid number.
+        if (!digitsOnly.test(nextValue)) {
+            return;
+        }
+
+        onChange(nextValue === '' ? null : Number(nextValue));
+    };
+
+    return (
+        <FormFieldContainer
+            label={label}
+            inputId={inputId}
+            disabled={disabled}
+            required={required}
+            errorText={errorText}
+            helperText={helperText}
+        >
+            <OutlinedInput
+                id={inputId}
+                value={value ?? ''}
+                name={name}
+                // type="text" + inputMode: numeric keypad on phones, without the quirks of type="number".
+                type="text"
+                fullWidth
+                onChange={handleChange}
+                sx={{ '& input': { textAlign: 'right' } }}
+                slotProps={{
+                    input: {
+                        inputMode: 'numeric',
+                        pattern: '[0-9]*',
+                        'aria-describedby': hasMessage ? `${inputId}-message` : undefined,
+                    },
+                }}
+            />
+        </FormFieldContainer>
+    );
+};
+
+export default FormNumberField;

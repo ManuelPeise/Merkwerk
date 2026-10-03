@@ -1,0 +1,82 @@
+using Logic.Authentication;
+using Logic.Authentication.DI;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.Extensions.Options;
+using Microsoft.IdentityModel.Tokens;
+using Logic.Shared.DI;
+using Web.Core.Services.Cookies;
+
+namespace Web.Core.Bundels;
+
+/// <summary>Composition root: every service registration of the backend, called once from Program.cs.</summary>
+public static class ServiceRegistrationExtensions
+{
+    public static IServiceCollection ConfigureServices(this IServiceCollection services, IConfiguration configuration)
+    {
+        // Errors as RFC 9457 ProblemDetails (AGENTS.md §8).
+        services.AddProblemDetails();
+
+        // Lowercase routes: /api/v1/authentication/login. The refresh cookie path depends on it (AuthCookies).
+        services.AddRouting(options => options.LowercaseUrls = true);
+        services.AddControllers();
+
+        // OpenAPI document at /openapi/v1.json; Swagger UI renders it (see AppConfigurationExtensions).
+        services.AddOpenApi(options => options.AddDocumentTransformer((document, _, _) =>
+        {
+            document.Info.Title = "Merkwerk API";
+            document.Info.Version = "v1";
+            document.Info.Description = "REST API for the Merkwerk web app and the later Expo app.";
+            return Task.CompletedTask;
+        }));
+
+        services.AddMerkwerkAuthentication(configuration);
+        services.AddMerkwerkLogicSharedServices(configuration);
+
+        services.AddJwtCookieAuthentication();
+        services.AddSingleton<AuthCookieWriter>();
+        services.AddAuthorization();
+
+        return services;
+    }
+
+    /// <summary>
+    /// JWT bearer validation. Browsers send the token in the HttpOnly cookie, native clients in the
+    /// Authorization header (ADR 013, confirmed in spike LP-006).
+    /// </summary>
+    private static void AddJwtCookieAuthentication(this IServiceCollection services)
+    {
+        services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme).AddJwtBearer();
+        services.AddOptions<JwtBearerOptions>(JwtBearerDefaults.AuthenticationScheme)
+            .Configure<IOptions<JwtOptions>>((bearer, jwt) =>
+            {
+                var settings = jwt.Value;
+                bearer.MapInboundClaims = false;
+                bearer.TokenValidationParameters = new TokenValidationParameters
+                {
+                    ValidateIssuer = true,
+                    ValidIssuer = settings.Issuer,
+                    ValidateAudience = true,
+                    ValidAudience = settings.Audience,
+                    ValidateIssuerSigningKey = true,
+                    IssuerSigningKey = TokenService.CreateSigningKey(settings),
+                    ValidateLifetime = true,
+                    ClockSkew = TimeSpan.FromSeconds(5),
+                    NameClaimType = "name",
+                    RoleClaimType = "role",
+                };
+                bearer.Events = new JwtBearerEvents
+                {
+                    OnMessageReceived = context =>
+                    {
+                        if (!context.Request.Headers.ContainsKey("Authorization")
+                            && context.Request.Cookies.TryGetValue(AuthCookies.AccessToken, out var token))
+                        {
+                            context.Token = token;
+                        }
+
+                        return Task.CompletedTask;
+                    },
+                };
+            });
+    }
+}

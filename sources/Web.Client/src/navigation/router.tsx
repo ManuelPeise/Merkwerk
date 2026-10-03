@@ -3,6 +3,7 @@ import AdminLayout from 'src/components/layout/AdminLayout';
 import KidsLayout from 'src/components/layout/KidsLayout';
 import PublicLayout from 'src/components/layout/PublicLayout';
 import { adultRoles, roles } from 'src/lib/auth/roles';
+import DeviceRoute from 'src/navigation/DeviceRoute';
 import SetupGate from 'src/navigation/SetupGate';
 import ProtectedRoute from 'src/navigation/ProtectedRoute';
 import PublicRoute from 'src/navigation/PublicRoute';
@@ -14,8 +15,10 @@ import ForgotPasswordPage from 'src/pages/authentication/forgotPasswordPage/Forg
 import InvitationPage from 'src/pages/authentication/invitationPage/InvitationPage';
 import LandingPage from 'src/pages/landingPage/LandingPage';
 import LoginPage from 'src/pages/authentication/loginPage/LoginPage';
+import ProfilesPage from 'src/pages/profilesPage/ProfilesPage';
 import ResetPasswordPage from 'src/pages/authentication/resetPasswordPage/ResetPasswordPage';
 import SetupPage from 'src/pages/authentication/setupPage/SetupPage';
+import PairDevicePage from 'src/pages/pairDevicePage/PairDevicePage';
 import PracticeHomePage from 'src/pages/practiceHomePage/PracticeHomePage';
 
 // Every route belongs to exactly one layout. Pages marked LP-124 / LP-125 get their routes with those tickets.
@@ -52,6 +55,7 @@ export const router = createBrowserRouter([
                             { path: routes.setup, element: <SetupPage /> },
                             { path: routes.invitation, element: <InvitationPage /> },
                             { path: routes.confirmEmail, element: <ConfirmEmailPage /> },
+                            { path: routes.practicePair, element: <PairDevicePage /> },
                         ],
                     },
                     {
@@ -69,9 +73,25 @@ export const router = createBrowserRouter([
                         element: <KidsLayout />,
                         children: [
                             {
-                                element: <ProtectedRoute roles={[roles.learner]} />,
+                                // Unpaired devices go to "pair device" first.
+                                element: <DeviceRoute />,
                                 children: [
-                                    { path: routes.practice, element: <PracticeHomePage /> },
+                                    { path: routes.practiceProfiles, element: <ProfilesPage /> },
+                                    {
+                                        // No child signed in (or session expired): back to the profile selection.
+                                        element: (
+                                            <ProtectedRoute
+                                                roles={[roles.learner]}
+                                                signedOutTo={routes.practiceProfiles}
+                                            />
+                                        ),
+                                        children: [
+                                            {
+                                                path: routes.practice,
+                                                element: <PracticeHomePage />,
+                                            },
+                                        ],
+                                    },
                                 ],
                             },
                         ],

@@ -24,6 +24,8 @@ const messageKeyForStatus = (status: number): NotificationKey => {
             return 'notificationLinkExpired';
         case 423:
             return 'notificationAccountLocked';
+        case 429:
+            return 'notificationTooManyAttempts';
         default:
             return 'notificationUnexpectedError';
     }

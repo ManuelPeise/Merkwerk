@@ -1,6 +1,7 @@
 import React from 'react';
-import { AppBar, Avatar, Box, Button, Container, Toolbar, Typography } from '@mui/material';
+import { AppBar, Box, Button, Container, Toolbar, Typography } from '@mui/material';
 import { Outlet, useNavigate } from 'react-router-dom';
+import AvatarImage from 'src/components/kids/AvatarImage';
 import { SwitchAccountIcon } from 'src/components/icons/AppIcons';
 import { kidsHeaderHeight } from 'src/components/layout/layoutConstants';
 import { useAuthentication } from 'src/hooks/useAuthentication';
@@ -30,21 +31,28 @@ const KidsLayout: React.FC = () => {
                 sx={{ borderBottom: 1, borderColor: 'divider' }}
             >
                 <Toolbar sx={{ minHeight: kidsHeaderHeight, gap: 2 }}>
-                    {/* Placeholder until children have a real avatar: initial of the first name. */}
-                    <Avatar sx={{ width: 48, height: 48, bgcolor: 'primary.main' }}>
-                        {name.charAt(0).toUpperCase()}
-                    </Avatar>
-                    <Typography variant="h6" component="span" noWrap sx={{ fontWeight: 700 }}>
-                        {name}
-                    </Typography>
-                    <Button
-                        variant="outlined"
-                        startIcon={<SwitchAccountIcon />}
-                        onClick={handleSwitchChild}
-                        sx={{ ml: 'auto', minWidth: 64, minHeight: 64, flexShrink: 0 }}
-                    >
-                        {getResource('labelSwitchChild')}
-                    </Button>
+                    {/* Without a child (profile selection) the header stays empty. */}
+                    {user && (
+                        <>
+                            <AvatarImage avatarId={user.avatarId} name={name} size={56} />
+                            <Typography
+                                variant="h6"
+                                component="span"
+                                noWrap
+                                sx={{ fontWeight: 700 }}
+                            >
+                                {name}
+                            </Typography>
+                            <Button
+                                variant="outlined"
+                                startIcon={<SwitchAccountIcon />}
+                                onClick={handleSwitchChild}
+                                sx={{ ml: 'auto', minWidth: 64, minHeight: 64, flexShrink: 0 }}
+                            >
+                                {getResource('labelSwitchChild')}
+                            </Button>
+                        </>
+                    )}
                 </Toolbar>
             </AppBar>
             <Container component="main" maxWidth="md" sx={{ py: 4, flexGrow: 1 }}>

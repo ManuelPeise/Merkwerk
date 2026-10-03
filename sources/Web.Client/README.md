@@ -1,108 +1,100 @@
 # Web.Client
 
-React/TypeScript UI of Merkwerk: the parents' area (`/admin`) and the children's practice area (`/ueben`).
-It talks only to the backend **Web.Core** over `/api/v1`.
+Merkwerk's React and TypeScript single-page application. It contains the shared public entry and adult account pages,
+the `/admin` area, and the children's `/practice` flow. It communicates with the ASP.NET Core host in `Web.Core`
+through `/api/v1`; the backend remains authoritative for grading, access control, and tenant isolation.
 
-Conventions for contributors and AI assistants: [`AGENTS.md`](AGENTS.md).
+Contributor conventions are in [AGENTS.md](AGENTS.md); repository-wide architecture and security rules are in
+[../../AGENTS.md](../../AGENTS.md).
 
-## Tech stack
+## Stack
 
-React 19 · TypeScript 6 · Vite 8 · MUI · react-router-dom · axios · i18next · ESLint · Prettier · npm
+React 19 · TypeScript 6 · Vite 8 · MUI 9 · React Router 7 · Axios · i18next · ESLint · Prettier · npm
 
 ## Prerequisites
 
-- Node.js (current LTS) and npm
-- .NET 10 SDK for the backend (`sources/Web.Core`)
-- User secret `Auth:Jwt:SigningKey` (at least 32 characters) for Web.Core, see the root README
+- Node.js LTS and npm
+- .NET 10 SDK to run the backend
+- The development JWT signing key in user secrets; see the root [README](../../README.md)
 
-## Getting started
+## Run locally
+
+Start the backend in one PowerShell terminal:
 
 ```powershell
-# 1. Backend (terminal 1)
 cd sources
-dotnet run --project Web.Core --launch-profile http     # http://localhost:5138, Swagger at /swagger
-
-# 2. Frontend (terminal 2)
-cd sources\Web.Client
-npm install
-npm run dev                                             # http://localhost:65350
+dotnet run --project Web.Core --launch-profile http
 ```
 
-Vite proxies every request to `/api` to `http://localhost:5138`, so the browser sees a single origin and the auth
-cookies work without CORS. Development runs over plain HTTP.
+It listens at `http://localhost:5138` and exposes Swagger at `/swagger`. Start the UI in another terminal:
 
-**Visual Studio:** set _Multiple startup projects_ → `Web.Core` and `Web.Client` (`Web.Client.esproj` runs `npm run dev`).
+```powershell
+cd sources\Web.Client
+npm ci
+npm run dev
+```
 
-**Phone or tablet on the LAN:** `npm run dev -- --host`, then open `http://<your-PC-IP>:65350`
-(Windows network profile "Private", firewall rule for port 65350).
+Vite serves the UI at `http://localhost:65350` and proxies `/api` requests to `Web.Core` on port 5138. Both use plain
+HTTP during development. See [the infrastructure guide](../../docs/infrastructure.README.md) for local MySQL and Mailpit.
+
+To open the development UI from a phone or tablet on the LAN:
+
+```powershell
+npm run dev -- --host
+```
+
+Open `http://<your-PC-IP>:65350` from the device. This is a development server, not a production deployment.
 
 ## Scripts
 
-| Command              | What it does                                                  |
-| -------------------- | ------------------------------------------------------------- |
-| `npm run dev`        | Dev server with hot reload                                    |
-| `npm run build`      | Type check (`tsc -b`) and production build to `dist/`         |
-| `npm run preview`    | Serves the production build locally                           |
-| `npm run lint`       | ESLint + translation check                                    |
-| `npm run lint:fix`   | ESLint with auto-fix                                          |
-| `npm run format`     | Formats everything with Prettier (`format:check` only checks) |
-| `npm run i18n:check` | Key prefixes and identical keys in `de` and `en`              |
+| Command | Purpose |
+| --- | --- |
+| `npm run dev` | Vite development server with hot reload |
+| `npm run build` | TypeScript project build and production bundle to `dist/` |
+| `npm run preview` | Serve the built bundle locally |
+| `npm run lint` | ESLint and translation-key parity/prefix checks |
+| `npm run lint:fix` | ESLint with automatic fixes |
+| `npm run format` | Format UI files with Prettier |
+| `npm run format:check` | Check UI formatting without writing |
+| `npm run i18n:check` | Check translation keys in German and English |
 
-## Project structure
+## Structure
 
-```
+```text
 src/
-  main.tsx, App.tsx      Entry point, theme, router
-  navigation/            routes.ts (all paths), router.tsx (route tree)
-  pages/                 One component per route
-  components/            Reusable UI (layout/, …)
-  hooks/                 Reusable hooks
-  lib/api/               apiClient (axios) + one folder per backend module
-  lib/theme/             MUI theme (design direction A)
-  lib/translations/      i18n setup + resources/<lang>/<namespace>.<lang>.json
-scripts/                 check-translations.mjs
+  assets/avatars/       built-in child profile avatar SVGs and IDs
+  components/           shared input, layout, feedback, icon, and child UI
+  hooks/                reusable hooks
+  lib/api/              stateless API bindings, transport types, and error mapping
+  lib/auth/             role constants and authentication validation
+  lib/translations/     i18next setup, typed keys, German and English resources
+  navigation/           route constants, route tree, and route guards
+  pages/                route-level UI
+scripts/                translation validation
 ```
 
-## Conventions in short
+## Conventions
 
-- Imports always start with `src/` – never `./` or `../` (ESLint error).
-- No hard-coded texts: every string comes from `t('…')`. Keys start with `caption`, `label` or `notification`
-  and exist in `de` **and** `en`.
-- Colours, spacing and fonts only through the MUI theme; no CDNs, no tracking.
-- Paths only from `routes.ts`; API calls only through `apiClient`.
+- Application imports start with `src/`; do not use relative imports.
+- UI text and accessible labels come from `getResource` in `src/hooks/useTranslation.ts`; add every key to both
+  `src/lib/translations/resources/de/common.de.json` and `en/common.en.json`.
+- Pages and components use the project conventions in `AGENTS.md`; presentation is built with MUI and the theme.
+- API bindings use `statelessApi` in `src/lib/api`; pages and components do not call Axios or `fetch` directly.
+- Browser authentication uses HttpOnly cookies. The UI never reads or stores access or refresh tokens.
+- Children's screens use large touch targets and clear icon/text feedback. No tracking, third-party child-data services,
+  or external CDNs.
 
-## How to …
+## Current scope
 
-**… add a page**
+The UI currently includes public landing and account flows, admin and practice shells, device pairing/profile-selection
+screens, and reusable child input/learning-aid components. Some corresponding backend API endpoints and exercise flows
+are still in development; the screens should not be treated as evidence those server features are available.
 
-1. Create `src/pages/myPage/MyPage.tsx` (`export default`, `React.FC<IProps>`, props destructured in the body).
-2. Add the path to `src/navigation/routes.ts` and the route to `src/navigation/router.tsx`.
-3. Add its texts to `common.de.json` and `common.en.json`.
-
-**… add a text**
-
-```json
-// src/lib/translations/resources/de/common.de.json
-"captionMyPage": "Meine Seite"
-```
-
-Add the same key to `common.en.json`, then use it: `const { t } = useTranslation(); t('captionMyPage')`.
-
-**… call the backend**
-
-```ts
-// src/lib/api/exercises/exercisesApi.ts
-import { apiClient } from 'src/lib/api/apiClient';
-import type { ExerciseDto } from 'src/lib/api/exercises/exercisesTypes';
-
-export const getExercises = async (): Promise<ExerciseDto[]> =>
-    (await apiClient.get<ExerciseDto[]>('/exercises')).data;
-```
-
-Authentication is handled by HttpOnly cookies and the 401 refresh in `apiClient` – no token handling in components.
-
-## Before you commit
+## Before a change is ready
 
 ```powershell
-npm run lint; npm run format:check; npm run build
+npm run lint
+npm run format:check
+npm run build
+npm run i18n:check
 ```

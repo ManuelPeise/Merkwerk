@@ -2,119 +2,117 @@
 
 [![CI](https://github.com/ManuelPeise/Merkwerk/actions/workflows/ci.yml/badge.svg?branch=Development)](https://github.com/ManuelPeise/Merkwerk/actions/workflows/ci.yml)
 
-**The open learning platform for practice – for children, parents and teachers.**
+**An open-source learning platform for children, parents, and teachers.**
 
-Adults create exercises in German, English and maths and assign them to individual children or groups.
-Children practise on a tablet and get instant feedback; adults see where help is needed.
-Merkwerk is self-hosted – at home on a Raspberry Pi or on a school's own server.
-Children's data never leaves your own installation.
+Merkwerk is designed for self-hosting at home or in a school. Adults manage learning activities; children practise on a
+tablet or phone. The project prioritises privacy, accessibility, and a child-friendly interface.
 
-> **Status:** in development (phase 0 – foundations). Not ready for production use yet.
+> **Project status:** early development. The repository contains the React UI, an ASP.NET Core API host, shared
+> infrastructure, authentication groundwork, and deployment scaffolding. Most planned exercise, assignment, and
+> progress features are not yet implemented; this is not ready for production use.
 
-## Features (planned for the MVP)
-
-- **Create exercises** with multiple-choice, free-text, cloze, matching and flashcard questions
-- **Maths from generators**: basic arithmetic with a configurable number range, times tables – fresh exercises every time
-- **Vocabulary from word lists**: enter a word once, practise it in many modes (reading, writing, listening, dictation)
-- **German**: mark parts of speech, split and count syllables, reading texts with comprehension questions
-- **Learning aids** such as a dot field and a times-table grid – adults see whether a task was solved with or without help
-- **Spaced repetition** (Leitner system): what's mastered comes up less often
-- **Child-friendly**: large touch targets, read-aloud, password-free sign-in on paired tablets
-- **Privacy first**: no tracking, no third parties, minimal data about children
-
-The user interface is in German; more languages may follow.
-
-## Tech stack
+## Technology
 
 | Area | Technology |
 | --- | --- |
-| Backend | .NET 10, ASP.NET Core (controllers, OpenAPI) |
-| Adult UI | Blazor (Interactive Server) |
-| Children's UI | Blazor WebAssembly as an installable PWA |
-| Database | MySQL 8.4 with Entity Framework Core 10 |
-| Authentication | ASP.NET Core Identity + JWT |
-| Operations | Docker Compose (Caddy, app, MySQL), runs on amd64 and ARM64 (Raspberry Pi) |
+| Web UI | React 19, TypeScript 6, Vite 8, MUI 9, React Router, i18next |
+| API host | ASP.NET Core controllers on .NET 10, `/api/v1`, OpenAPI/Swagger in development |
+| Business logic | `Logic.*` projects; `Logic.Shared` is intended for pure shared graders and generators |
+| Data | EF Core 10, MySQL 8.4, Oracle's `MySql.EntityFrameworkCore` provider |
+| Authentication | ASP.NET Core authentication services, JWT in HttpOnly browser cookies, refresh-token work in progress |
+| Deployment | Docker Compose, Caddy, MySQL; multi-architecture images for amd64 and arm64 |
+
+The current UI is bilingual (German and English). This does not imply that every planned backend or exercise feature is
+available in either language.
 
 ## Repository layout
 
-```
+```text
 Merkwerk/
 ├─ sources/
 │  ├─ Merkwerk.slnx
-│  ├─ 01 Web      Web (host, adults), Web.Client (children, WASM)
-│  ├─ 02 Service  Service (API controllers)
-│  ├─ 03 Logic    Logic, Logic.Shared (graders, generators)
-│  ├─ 04 Data     Data.Database (entities, DbContext, migrations),
-│  │              Data.Accessor (repositories, unit of work)
-│  ├─ 05 Shared   Shared (DTOs, enums)
-│  └─ 06 Tests    *.Tests
-├─ shared/        grading-cases (grader test cases), design-tokens
-├─ deploy/        docker-compose.yml, Caddyfile
-├─ docs/         adr/ (architecture decisions), git.README.md, infrastructure.README.md
-├─ .claude/skills/ workflows for AI-assisted development
-├─ AGENTS.md      conventions for contributors and AI assistants
+│  ├─ Web.Client/                 React/TypeScript UI
+│  ├─ Web.Core/                   ASP.NET Core API host
+│  ├─ Service/                    API/authentication registration
+│  ├─ Logic.Authentication/       authentication and session services
+│  ├─ Logic.Notifications/        email abstractions, templates, and SMTP delivery
+│  ├─ Logic.Shared/               shared logic library (planned exercise logic)
+│  ├─ Data.Database/              EF Core model and migrations
+│  ├─ Data.Accessor/              repositories and unit of work
+│  └─ *Tests/ and Architecture.Tests
+├─ shared/
+│  ├─ grading-cases/              shared grader fixtures
+│  └─ design-tokens/              design reference tokens
+├─ deploy/                        Docker Compose, Dockerfile, Caddy, local setup
+├─ docs/                          architecture decisions and contributor guides
+├─ AGENTS.md                      repository conventions
 └─ CLAUDE.md
 ```
 
-Details per project, runtime setup and configuration: [docs/infrastructure.README.md](docs/infrastructure.README.md).
-The numbers are solution folders in Visual Studio. The rules for which project may reference which are in
-[AGENTS.md](AGENTS.md#3-solution-layout-and-dependency-rules) and are checked automatically by an architecture test.
+See the [infrastructure guide](docs/infrastructure.README.md) for project responsibilities and runtime setup, and the
+[ADR index](docs/adr/README.md) for architecture decisions. Layer and dependency rules are defined in
+[AGENTS.md](AGENTS.md#3-solution-layout-and-dependency-rules) and checked by architecture tests.
 
-## Getting started (development)
+## Development setup
 
-Prerequisites: [.NET 10 SDK](https://dotnet.microsoft.com/download), Docker Desktop, optionally Visual Studio 2026 or Rider.
+Prerequisites: [.NET 10 SDK](https://dotnet.microsoft.com/download), Node.js LTS with npm, and Docker Desktop (for the
+local MySQL and integration tests).
 
 ```powershell
 git clone <repo-url> Merkwerk
 cd Merkwerk
 
-# Local environment: creates deploy\.env with random passwords, starts MySQL,
-# stores connection string and JWT key as user secrets (safe to run again)
+# Creates deploy\.env if missing; starts MySQL and Mailpit; saves local user secrets.
 .\deploy\setup-local.ps1
 
-# Build, create the database, run
+# Build the backend and run the API.
 cd sources
 dotnet build Merkwerk.slnx
-dotnet ef database update -p Data.Database -s Web      # once migrations exist (LP-103)
-dotnet run --project Web
+dotnet run --project Web.Core --launch-profile http
 ```
 
-Then open `https://localhost:<port>/admin` (adults) and `https://localhost:<port>/ueben` (children).
-
-Run the tests:
+The API is available at `http://localhost:5138`; Swagger is at `/swagger`. In a second terminal:
 
 ```powershell
-dotnet test sources/Merkwerk.slnx
+cd sources\Web.Client
+npm ci
+npm run dev
 ```
 
-> `deploy/` and the database migrations are created during phases 0/1 – until then not every command works yet.
+The UI is at `http://localhost:65350`. Vite proxies `/api` to the local API. Development uses plain HTTP. The app does
+not automatically apply database migrations on startup; for schema updates use the migration commands in the
+[infrastructure guide](docs/infrastructure.README.md).
 
-## Running on a Raspberry Pi
+To build and test the .NET solution:
 
-Short version (a full guide will follow in `docs/self-hosting.md`):
+```powershell
+cd sources
+dotnet build Merkwerk.slnx -c Release
+dotnet test Merkwerk.slnx -c Release
+```
 
-1. Raspberry Pi 4/5 with at least 4 GB RAM, **boot from an SSD**, install Docker
-2. Copy `deploy/` to the Pi and create `.env`
-3. `docker compose pull && docker compose up -d`
-4. Install Caddy's root certificate on the tablets once (HTTPS on the home network)
-5. Set up a nightly backup with `mysqldump`
+Some integration tests require Docker. For frontend checks and details, see
+[Web.Client/README.md](sources/Web.Client/README.md).
+
+## Planned product capabilities
+
+Planned work includes exercise authoring, generated maths and vocabulary practice, spaced repetition, learning aids,
+assignments, and adult progress views. Tickets and acceptance criteria are maintained outside the repository. A listed
+capability is not necessarily implemented; consult the source code and current project status before relying on it.
+
+## Privacy and security
+
+The product is intended to keep children's data within the self-hosted installation. No tracking or advertising SDKs
+are used. Do not send children's data to third-party services, put secrets in source control, or log personal data.
+Installations in schools must be reviewed by the responsible data controller for their legal and operational
+requirements.
 
 ## Contributing
 
-Contributions are welcome. Please read [AGENTS.md](AGENTS.md) first – it covers the architecture, conventions
-and the definition of done. Please discuss larger changes in an issue before starting.
-
-- Git workflow in detail: [docs/git.README.md](docs/git.README.md)
-- Branches: `feature/LP-xxx-short-description`, branched from `Development`
-- Commits: `LP-xxx: <what, imperative mood>`
-- Pull requests target `Development`
-
-## Privacy
-
-For children, Merkwerk stores only a first name or pseudonym, the school grade and an avatar. There are no
-tracking or advertising SDKs and no data is sent to third parties. If you run Merkwerk in a school, you are the
-data controller under the GDPR and should agree its use with the responsible authority.
+Read [AGENTS.md](AGENTS.md) before changing code. Work on one ticket branch created from `Development`, keep changes
+focused, and validate with the relevant builds and tests. The detailed branch and pull-request process is in
+[docs/git.README.md](docs/git.README.md).
 
 ## License
 
-Code: [MIT](LICENSE). Shared exercises and word lists: CC BY-SA 4.0.
+The application source is licensed under the [MIT License](LICENSE).

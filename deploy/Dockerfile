@@ -33,6 +33,9 @@ ENTRYPOINT ["sh", "-c", "./efbundle --connection \"$ConnectionStrings__Default\"
 FROM mcr.microsoft.com/dotnet/aspnet:10.0 AS runtime
 WORKDIR /app
 COPY --from=build /app .
+# Mount points for the volumes in docker-compose.yml. Docker copies their owner into a new named volume; without this
+# they would belong to root and the non-root app user could not write media or data protection keys.
+RUN mkdir -p /data/media /data/keys && chown -R $APP_UID /data
 USER $APP_UID
 EXPOSE 8080
 ENTRYPOINT ["dotnet", "Web.Core.dll"]

@@ -67,9 +67,13 @@ internal sealed partial class AccountService(
 
         var result = await userManager.ResetPasswordAsync(user, decoded, newPassword);
 
+        // Identity checks the token before the password rules. A wrong token must answer exactly like an unknown
+        // address, otherwise this anonymous endpoint tells which addresses are registered.
         if (!result.Succeeded)
         {
-            return ToFailure(result);
+            return result.Errors.Any(e => e.Code == nameof(IdentityErrorDescriber.InvalidToken))
+                ? AccountResult.Failed(InvalidTokenError)
+                : ToFailure(result);
         }
 
         user.MustChangePassword = false;

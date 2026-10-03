@@ -15,4 +15,10 @@ public sealed class JwtOptions
     public int AccessTokenMinutes { get; set; } = 15;
 
     public int RefreshTokenDays { get; set; } = 14;
+
+    /// <summary>
+    /// How long a just rotated refresh token may be presented again without counting as theft: parallel refreshes from
+    /// several tabs share one cookie. Within this window a copied token is not detected – keep it short.
+    /// </summary>
+    public int RefreshTokenReuseSeconds { get; set; } = 30;
 }

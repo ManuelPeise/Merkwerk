@@ -25,7 +25,6 @@ public sealed class AuthenticationController(
     [ProducesResponseType<ProblemDetails>(StatusCodes.Status400BadRequest)]
     [ProducesResponseType<ProblemDetails>(StatusCodes.Status401Unauthorized)]
     [ProducesResponseType<ProblemDetails>(StatusCodes.Status403Forbidden)]
-    [ProducesResponseType<ProblemDetails>(StatusCodes.Status423Locked)]
     public async Task<ActionResult<SessionDto>> LoginAsync(LoginRequestDto request, CancellationToken cancellationToken)
     {
         var result = await authSessionService.LoginAsync(request.Email, request.Password, cancellationToken);
@@ -35,13 +34,10 @@ public sealed class AuthenticationController(
             case LoginStatus.Success:
                 cookieWriter.Write(Response, result.Session!);
                 return SessionDto.From(result.Session!);
-            case LoginStatus.LockedOut:
-                return Problem(statusCode: StatusCodes.Status423Locked, title: "Account locked",
-                    detail: "Too many failed attempts. Try again in 15 minutes.");
             case LoginStatus.EmailNotConfirmed:
                 return Problem(statusCode: StatusCodes.Status403Forbidden, title: "E-mail not confirmed");
             default:
-                // Same answer for unknown user and wrong password – don't reveal which one it was.
+                // Same answer for unknown user, wrong password and locked account – don't reveal which one it was.
                 return Problem(statusCode: StatusCodes.Status401Unauthorized, title: "Invalid credentials");
         }
     }

@@ -21,17 +21,17 @@ internal sealed class AuthSessionService(
             return new LoginResult(LoginStatus.InvalidCredentials);
         }
 
+        // A locked account answers like a wrong password: a distinct answer would tell an attacker which addresses
+        // are registered (unknown addresses never lock).
         if (await userManager.IsLockedOutAsync(user))
         {
-            return new LoginResult(LoginStatus.LockedOut);
+            return new LoginResult(LoginStatus.InvalidCredentials);
         }
 
         if (!await userManager.CheckPasswordAsync(user, password))
         {
             await userManager.AccessFailedAsync(user);
-            return new LoginResult(await userManager.IsLockedOutAsync(user)
-                ? LoginStatus.LockedOut
-                : LoginStatus.InvalidCredentials);
+            return new LoginResult(LoginStatus.InvalidCredentials);
         }
 
         if (IsStartPasswordExpired(user))
@@ -51,28 +51,32 @@ internal sealed class AuthSessionService(
 
     public async Task<AuthSession?> RefreshAsync(string refreshToken, CancellationToken cancellationToken)
     {
-        var redeemed = await refreshTokens.RedeemAsync(refreshToken, cancellationToken);
+        var rotated = await refreshTokens.RotateAsync(refreshToken, cancellationToken);
 
-        if (redeemed is not { } token)
+        if (rotated is null)
         {
             return null;
         }
 
-        var user = await userManager.FindByIdAsync(token.UserId.ToString(System.Globalization.CultureInfo.InvariantCulture));
+        var user = await userManager.FindByIdAsync(rotated.UserId.ToString(System.Globalization.CultureInfo.InvariantCulture));
 
         if (user is null || await userManager.IsLockedOutAsync(user))
         {
+            await refreshTokens.RevokeChainAsync(rotated.ChainId, cancellationToken);
             return null;
         }
 
-        return await IssueSessionAsync(user, token.ChainId, cancellationToken);
+        return CreateSession(user, rotated);
     }
 
     public Task LogoutAsync(string refreshToken, CancellationToken cancellationToken) =>
-        refreshTokens.RevokeAsync(refreshToken, cancellationToken);
+        refreshTokens.RevokeChainAsync(refreshToken, cancellationToken);
 
     /// <summary>New access token plus refresh token in the given chain (new chain = new login).</summary>
-    internal async Task<AuthSession> IssueSessionAsync(User user, Guid chainId, CancellationToken cancellationToken)
+    internal async Task<AuthSession> IssueSessionAsync(User user, Guid chainId, CancellationToken cancellationToken) =>
+        CreateSession(user, await refreshTokens.IssueAsync(user.Id, chainId, cancellationToken));
+
+    private AuthSession CreateSession(User user, IssuedRefreshToken refreshToken)
     {
         // Until memberships exist (LP-105/LP-107) every adult is a member.
         const string role = AuthRoles.Member;
@@ -80,9 +84,9 @@ internal sealed class AuthSessionService(
 
         var (accessToken, accessExpiresAt) = tokenService.CreateAccessToken(
             user.Id.ToString(System.Globalization.CultureInfo.InvariantCulture), name, role, user.MustChangePassword);
-        var (refreshToken, refreshExpiresAt) = await refreshTokens.IssueAsync(user.Id, chainId, cancellationToken);
 
-        return new AuthSession(name, role, user.MustChangePassword, accessToken, accessExpiresAt, refreshToken, refreshExpiresAt);
+        return new AuthSession(
+            name, role, user.MustChangePassword, accessToken, accessExpiresAt, refreshToken.Token, refreshToken.ExpiresAt);
     }
 
     private bool IsStartPasswordExpired(User user) =>

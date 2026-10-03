@@ -77,7 +77,7 @@
   "notificationAccessDenied": "You don't have permission to do that.",
   "notificationNotFound": "This could not be found.",
   "notificationUnexpectedError": "Something went wrong. Please try again.",
-  "notificationLoginFailed": "Email or password is incorrect.",
+  "notificationLoginFailed": "Email or password is incorrect. After too many attempts, signing in is blocked for a short time.",
   "notificationResetLinkSent": "If an account exists for this email, we have sent you a link to reset your password.",
   "notificationPasswordChanged": "Your password has been changed. You can sign in now.",
   "notificationEmailConfirmed": "Your email address is confirmed.",

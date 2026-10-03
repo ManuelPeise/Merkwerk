@@ -77,7 +77,7 @@
   "notificationAccessDenied": "Dafür hast du keine Berechtigung.",
   "notificationNotFound": "Das wurde leider nicht gefunden.",
   "notificationUnexpectedError": "Etwas ist schiefgelaufen. Bitte versuche es noch einmal.",
-  "notificationLoginFailed": "E-Mail oder Passwort stimmt nicht.",
+  "notificationLoginFailed": "E-Mail oder Passwort stimmt nicht. Nach zu vielen Versuchen ist die Anmeldung kurz gesperrt.",
   "notificationResetLinkSent": "Wenn es zu dieser E-Mail ein Konto gibt, haben wir dir einen Link zum Zurücksetzen geschickt.",
   "notificationPasswordChanged": "Dein Passwort wurde geändert. Du kannst dich jetzt anmelden.",
   "notificationEmailConfirmed": "Deine E-Mail-Adresse ist bestätigt.",

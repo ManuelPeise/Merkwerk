@@ -53,6 +53,25 @@ public sealed class AccountServiceTests(AuthDatabaseFixture database)
     }
 
     [Fact]
+    public async Task ResetPasswordAsync_WrongTokenForKnownEmail_AnswersLikeUnknownEmail()
+    {
+        // Arrange: a well-formed token of another account, so Identity really verifies it.
+        var user = await _context.CreateUserAsync(Password);
+        var other = await _context.CreateUserAsync(Password);
+        await _context.AccountsAsync(a => a.RequestPasswordResetAsync(other.Email!, "de", default));
+        var foreignToken = _context.Mail.LinkValue(MailTemplate.PasswordReset, "token");
+
+        // Act
+        var known = await _context.AccountsAsync(a => a.ResetPasswordAsync(user.Email!, foreignToken, NewPassword, default));
+        var unknown = await _context.AccountsAsync(
+            a => a.ResetPasswordAsync("nobody@example.org", foreignToken, NewPassword, default));
+
+        // Assert
+        Assert.False(known.Succeeded);
+        Assert.Equal(unknown.Errors, known.Errors);
+    }
+
+    [Fact]
     public async Task ResetPasswordAsync_PasswordTooShort_FailsWithMessage()
     {
         var user = await _context.CreateUserAsync(Password);

@@ -10,10 +10,11 @@ public interface IAuthSessionService
 
     /// <summary>
     /// Redeems the refresh token (it can be used only once) and issues new tokens; <c>null</c> if it is unknown, expired
-    /// or revoked. Redeeming an already used token revokes the whole chain.
+    /// or revoked. Redeeming an already used token revokes the whole chain – unless it was rotated only seconds ago
+    /// (parallel refresh from several tabs, <see cref="JwtOptions.RefreshTokenReuseSeconds"/>).
     /// </summary>
     Task<AuthSession?> RefreshAsync(string refreshToken, CancellationToken cancellationToken);
 
-    /// <summary>Revokes the refresh token. Unknown tokens are ignored.</summary>
+    /// <summary>Ends the session: revokes every token of the refresh token's chain. Unknown tokens are ignored.</summary>
     Task LogoutAsync(string refreshToken, CancellationToken cancellationToken);
 }

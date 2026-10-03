@@ -6,6 +6,9 @@ import LoginIconMui from '@mui/icons-material/Login';
 import LogoutIconMui from '@mui/icons-material/Logout';
 import AdminIconMui from '@mui/icons-material/SupervisorAccount';
 
+import SwitchAccountIconMui from '@mui/icons-material/SwitchAccount';
+
+export const SwitchAccountIcon = SwitchAccountIconMui;
 export const MenuIcon = MenuIconMui;
 export const HomeIcon = HomeIconMui;
 export const VisibilityIcon = VisibilityIconMui;

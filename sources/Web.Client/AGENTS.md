@@ -41,12 +41,12 @@ src/
     routes.ts              All paths as constants
     router.tsx             Route tree (incl. errorElement)
     PublicRoute.tsx, ProtectedRoute.tsx   Route guards
-    navigationItems.ts     Drawer entries
+    navigationItems.ts     Drawer entries (parents' area only)
   pages/
     <name>Page/            One folder per route: <Name>Page.tsx, plus components/ and types/ if needed
   components/
     input/                 Form fields (FormFieldContainer, FormTextField, …) and buttons
-    layout/                AppLayout, HeaderBar, NavigationDrawer
+    layout/                PublicLayout, AdminLayout, KidsLayout, HeaderBar, NavigationDrawer, components/LanguageSwitch
     feedback/              LoadingIndicator, …
     providers/             Context providers (AuthenticationContextProvider) and their contexts
     icons/                 AppIcons – the only place that imports @mui/icons-material
@@ -139,7 +139,9 @@ New top-level folders under `src/` only after asking.
 - The guards only improve the UI – **the server's `[Authorize]` is what protects data.**
 - Auth state only via `useAuthentication()` (`status`, `isAuthenticated`, `user`, `login`, `logout`) from
   `AuthenticationProvider` (`src/components/providers`); never call the authentication endpoints from pages.
-- Navigation entries (`navigationItems.ts`) carry a `visibility` that must match their route group.
+- Every route belongs to exactly one layout: `PublicLayout` (no menu, language switch), `AdminLayout` (header, drawer, `adultRoles`), `KidsLayout` (large header, `roles.learner`).
+- Roles only via `src/lib/auth/roles.ts` (`roles`, `adultRoles`) – no role strings in components.
+- Navigation entries (`navigationItems.ts`) exist only for the parents' drawer; public pages have no menu.
 - Unknown paths redirect to `routes.start`.
 
 ## 9. API access

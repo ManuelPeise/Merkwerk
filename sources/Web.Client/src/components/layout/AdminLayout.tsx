@@ -5,8 +5,8 @@ import HeaderBar from 'src/components/layout/HeaderBar';
 import { headerHeight } from 'src/components/layout/layoutConstants';
 import NavigationDrawer from 'src/components/layout/NavigationDrawer';
 
-/** Shell for every page: header bar on top, navigation drawer on the left, page content via <Outlet />. */
-const AppLayout: React.FC = () => {
+/** Shell for the parents' area: header bar on top, navigation drawer on the left, page content via <Outlet />. */
+const AdminLayout: React.FC = () => {
     const theme = useTheme();
     // noSsr: evaluate immediately, so large screens don't flash the temporary drawer first.
     const isDesktop = useMediaQuery(theme.breakpoints.up('md'), { noSsr: true });
@@ -34,4 +34,4 @@ const AppLayout: React.FC = () => {
     );
 };
 
-export default AppLayout;
+export default AdminLayout;

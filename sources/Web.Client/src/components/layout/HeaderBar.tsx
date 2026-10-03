@@ -1,7 +1,8 @@
 import React from 'react';
-import { AppBar, IconButton, Toolbar, Typography } from '@mui/material';
+import { AppBar, Box, IconButton, Toolbar, Typography } from '@mui/material';
 import { useTranslation } from 'src/hooks/useTranslation';
 import { LogoutIcon, MenuIcon } from 'src/components/icons/AppIcons';
+import LanguageSwitch from 'src/components/layout/components/LanguageSwitch';
 import { headerHeight } from 'src/components/layout/layoutConstants';
 import { useAuthentication } from 'src/hooks/useAuthentication';
 
@@ -44,16 +45,19 @@ const HeaderBar: React.FC<IProps> = (props) => {
                 <Typography variant="h6" component="span" sx={{ fontWeight: 700 }}>
                     {getResource('captionAppTitle')}
                 </Typography>
-                {isAuthenticated && (
-                    <IconButton
-                        size="large"
-                        aria-label={getResource('labelLogout')}
-                        onClick={() => void logout()}
-                        sx={{ ml: 'auto', width: 56, height: 56 }}
-                    >
-                        <LogoutIcon />
-                    </IconButton>
-                )}
+                <Box sx={{ ml: 'auto', display: 'flex', alignItems: 'center', gap: 1 }}>
+                    <LanguageSwitch />
+                    {isAuthenticated && (
+                        <IconButton
+                            size="large"
+                            aria-label={getResource('labelLogout')}
+                            onClick={() => void logout()}
+                            sx={{ width: 56, height: 56 }}
+                        >
+                            <LogoutIcon />
+                        </IconButton>
+                    )}
+                </Box>
             </Toolbar>
         </AppBar>
     );

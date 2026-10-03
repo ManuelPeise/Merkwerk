@@ -1,4 +1,4 @@
-import type { FC } from 'react';
+import React from 'react';
 import {
     Box,
     Drawer,
@@ -15,14 +15,14 @@ import { useAuthentication } from 'src/hooks/useAuthentication';
 import { isNavigationItemVisible, navigationItems } from 'src/navigation/navigationItems';
 import { routes } from 'src/navigation/routes';
 
-export type NavigationDrawerProps = {
+interface IProps {
     /** `permanent` on large screens, `temporary` (opened from the header) on phones and tablets. */
     variant: 'permanent' | 'temporary';
     open: boolean;
     onClose: () => void;
-};
+}
 
-export const NavigationDrawer: FC<NavigationDrawerProps> = (props) => {
+const NavigationDrawer: React.FC<IProps> = (props) => {
     const { variant, open, onClose } = props;
 
     const { getResource } = useTranslation();
@@ -69,3 +69,5 @@ export const NavigationDrawer: FC<NavigationDrawerProps> = (props) => {
         </Drawer>
     );
 };
+
+export default NavigationDrawer;

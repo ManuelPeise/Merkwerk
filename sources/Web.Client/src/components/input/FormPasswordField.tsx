@@ -52,7 +52,9 @@ const FormPasswordField: React.FC<IProps> = (props) => {
                     <InputAdornment position="end">
                         <IconButton
                             edge="end"
-                            aria-label={getResource(isVisible ? 'labelHidePassword' : 'labelShowPassword')}
+                            aria-label={getResource(
+                                isVisible ? 'labelHidePassword' : 'labelShowPassword',
+                            )}
                             onClick={() => setIsVisible((visible) => !visible)}
                             disabled={disabled}
                         >

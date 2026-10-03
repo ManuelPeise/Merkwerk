@@ -31,22 +31,22 @@ npm run dev                                             # http://localhost:65350
 Vite proxies every request to `/api` to `http://localhost:5138`, so the browser sees a single origin and the auth
 cookies work without CORS. Development runs over plain HTTP.
 
-**Visual Studio:** set *Multiple startup projects* → `Web.Core` and `Web.Client` (`Web.Client.esproj` runs `npm run dev`).
+**Visual Studio:** set _Multiple startup projects_ → `Web.Core` and `Web.Client` (`Web.Client.esproj` runs `npm run dev`).
 
 **Phone or tablet on the LAN:** `npm run dev -- --host`, then open `http://<your-PC-IP>:65350`
 (Windows network profile "Private", firewall rule for port 65350).
 
 ## Scripts
 
-| Command | What it does |
-| --- | --- |
-| `npm run dev` | Dev server with hot reload |
-| `npm run build` | Type check (`tsc -b`) and production build to `dist/` |
-| `npm run preview` | Serves the production build locally |
-| `npm run lint` | ESLint + translation check |
-| `npm run lint:fix` | ESLint with auto-fix |
-| `npm run format` | Formats everything with Prettier (`format:check` only checks) |
-| `npm run i18n:check` | Key prefixes and identical keys in `de` and `en` |
+| Command              | What it does                                                  |
+| -------------------- | ------------------------------------------------------------- |
+| `npm run dev`        | Dev server with hot reload                                    |
+| `npm run build`      | Type check (`tsc -b`) and production build to `dist/`         |
+| `npm run preview`    | Serves the production build locally                           |
+| `npm run lint`       | ESLint + translation check                                    |
+| `npm run lint:fix`   | ESLint with auto-fix                                          |
+| `npm run format`     | Formats everything with Prettier (`format:check` only checks) |
+| `npm run i18n:check` | Key prefixes and identical keys in `de` and `en`              |
 
 ## Project structure
 
@@ -75,7 +75,7 @@ scripts/                 check-translations.mjs
 
 **… add a page**
 
-1. Create `src/pages/MyPage.tsx` (named export, `FC`).
+1. Create `src/pages/myPage/MyPage.tsx` (`export default`, `React.FC<IProps>`, props destructured in the body).
 2. Add the path to `src/navigation/routes.ts` and the route to `src/navigation/router.tsx`.
 3. Add its texts to `common.de.json` and `common.en.json`.
 

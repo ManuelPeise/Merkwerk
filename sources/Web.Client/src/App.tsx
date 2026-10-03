@@ -1,11 +1,11 @@
-import type { FC } from 'react';
+import React from 'react';
 import { CssBaseline, ThemeProvider } from '@mui/material';
 import { RouterProvider } from 'react-router-dom';
-import { AuthenticationProvider } from 'src/components/providers/AuthenticationContextProvider';
+import AuthenticationProvider from 'src/components/providers/AuthenticationContextProvider';
 import { theme } from 'src/lib/theme/theme';
 import { router } from 'src/navigation/router';
 
-const App: FC = () => (
+const App: React.FC = () => (
     <ThemeProvider theme={theme}>
         <CssBaseline />
         <AuthenticationProvider>

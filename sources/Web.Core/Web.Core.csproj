@@ -11,12 +11,19 @@
   <ItemGroup>
     <ProjectReference Include="..\Logic.Authentication\Logic.Authentication.csproj" />
     <ProjectReference Include="..\Logic.Shared\Logic.Shared.csproj" />
+    <!-- Data.Database only for DI registration (AGENTS.md §3). -->
+    <ProjectReference Include="..\Data.Database\Data.Database.csproj" />
   </ItemGroup>
 
   <ItemGroup>
     <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" />
     <PackageReference Include="Microsoft.AspNetCore.OpenApi" />
     <PackageReference Include="Swashbuckle.AspNetCore.SwaggerUI" />
+    <!-- dotnet ef (migrations with -s Web.Core); not part of the published app. -->
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Design">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+    </PackageReference>
   </ItemGroup>
 
   <ItemGroup>

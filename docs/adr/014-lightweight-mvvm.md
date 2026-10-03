@@ -1,6 +1,6 @@
 # 014 – Lightweight MVVM with CommunityToolkit.Mvvm
 
-- Status: Proposed
+- Status: Superseded by [015](015-react-typescript-ui.md) (2026-10-03)
 - Date: 2026-10-02
 - Ticket: LP-002
 

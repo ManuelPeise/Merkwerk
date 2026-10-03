@@ -4,13 +4,11 @@ namespace Data.IntegrationTests.Infrastructure;
 
 /// <summary>
 /// One throwaway MySQL 8.4 container per test class (needs Docker). The schema is created once with
-/// EnsureCreated – migrations come with LP-103.
+/// EnsureCreated – the real migrations are tested separately (MigratedMySqlFixture).
 /// </summary>
 public sealed class MySqlFixture : IAsyncLifetime
 {
-    private readonly MySqlContainer _container = new MySqlBuilder()
-        .WithImage("mysql:8.4")
-        .Build();
+    private readonly MySqlContainer _container = new MySqlBuilder(MySqlImage.Name).Build();
 
     public string ConnectionString => _container.GetConnectionString();
 

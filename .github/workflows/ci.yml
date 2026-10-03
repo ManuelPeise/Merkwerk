@@ -2,7 +2,7 @@ name: CI
 
 on:
   push:
-    branches: [ "Development", "Master", "feature/**", "fix/**", "hotfix/**" ]
+    branches: [ "Development", "Master", "feature/**", "fix/**", "bug/**", "hotfix/**" ]
   pull_request:
     branches: [ "Development", "Master" ]
 
@@ -15,10 +15,10 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 20
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
 
       - name: Set up .NET (version from global.json)
-        uses: actions/setup-dotnet@v4
+        uses: actions/setup-dotnet@v5
         with:
           global-json-file: global.json
 
@@ -33,22 +33,23 @@ jobs:
         run: dotnet test sources/Merkwerk.slnx -c Release --no-build --logger "trx" --results-directory TestResults
 
       # LP-103: the model must match the last migration, and the migration bundle must build.
+      # Note: in `dotnet ef`, -c means --context, so the build configuration is always spelled out.
       - name: Restore dotnet tools (dotnet-ef)
         run: dotnet tool restore
 
       - name: Check for missing migrations
         env:
           ConnectionStrings__Default: "Server=localhost;Database=ci;User=ci;Password=ci"
-        run: dotnet ef migrations has-pending-model-changes -p sources/Data.Database -s sources/Web.Core --no-build -c Release
+        run: dotnet ef migrations has-pending-model-changes -p sources/Data.Database -s sources/Web.Core --no-build --configuration Release
 
       - name: Build migration bundle
         env:
           ConnectionStrings__Default: "Server=localhost;Database=ci;User=ci;Password=ci"
-        run: dotnet ef migrations bundle -p sources/Data.Database -s sources/Web.Core -c Release -r linux-x64 --self-contained -o artifacts/efbundle --force
+        run: dotnet ef migrations bundle -p sources/Data.Database -s sources/Web.Core --configuration Release -r linux-x64 --self-contained -o artifacts/efbundle --force
 
       - name: Upload test results
         if: always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v5
         with:
           name: test-results
           path: TestResults

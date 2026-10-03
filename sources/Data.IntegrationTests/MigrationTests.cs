@@ -1,40 +1,26 @@
-using Data.Database;
 using Data.Database.Entities.Subjects;
 using Data.IntegrationTests.Infrastructure;
 using Microsoft.EntityFrameworkCore;
-using Testcontainers.MySql;
 
 namespace Data.IntegrationTests;
 
 /// <summary>LP-103: the migrations build the real schema on an empty MySQL 8.4 and seed the standard subjects.</summary>
-public sealed class MigrationTests : IAsyncLifetime
+public sealed class MigrationTests(MigratedMySqlFixture database) : IClassFixture<MigratedMySqlFixture>
 {
-    // Own container: the shared MySqlFixture creates its schema with EnsureCreated, which cannot be migrated.
-    private readonly MySqlContainer _container = new MySqlBuilder()
-        .WithImage("mysql:8.4")
-        .Build();
-
-    public Task InitializeAsync() => _container.StartAsync();
-
-    public Task DisposeAsync() => _container.DisposeAsync().AsTask();
-
     [Fact]
-    public async Task MigrateAsync_EmptyDatabase_AppliesAllMigrations()
+    public async Task Migrate_EmptyDatabase_AppliesAllMigrations()
     {
-        await using var context = CreateContext();
-
-        await context.Database.MigrateAsync();
+        await using var context = database.CreateContext();
 
         Assert.Empty(await context.Database.GetPendingMigrationsAsync());
         Assert.NotEmpty(await context.Database.GetAppliedMigrationsAsync());
     }
 
     [Fact]
-    public async Task MigrateAsync_EmptyDatabase_SeedsStandardSubjects()
+    public async Task Migrate_EmptyDatabase_SeedsStandardSubjects()
     {
-        await using var context = CreateContext();
+        await using var context = database.CreateContext();
 
-        await context.Database.MigrateAsync();
         var subjects = await context.Subjects.OrderBy(s => s.Id).ToListAsync();
 
         Assert.Collection(
@@ -48,18 +34,9 @@ public sealed class MigrationTests : IAsyncLifetime
     public void Model_AfterLastMigration_HasNoPendingChanges()
     {
         // Fails when an entity or configuration changed without `dotnet ef migrations add`.
-        using var context = CreateContext();
+        using var context = database.CreateContext();
 
         Assert.False(context.Database.HasPendingModelChanges());
-    }
-
-    private MerkwerkDbContext CreateContext()
-    {
-        var options = new DbContextOptionsBuilder<MerkwerkDbContext>()
-            .UseMySQL(_container.GetConnectionString())
-            .Options;
-
-        return new MerkwerkDbContext(options, new TestCurrentUser());
     }
 
     private static void AssertSubject(Subject subject, string name, string languageCode, string color)

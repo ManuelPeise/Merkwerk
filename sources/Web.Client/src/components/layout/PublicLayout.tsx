@@ -40,7 +40,11 @@ const PublicLayout: React.FC = () => {
                     </Box>
                 </Toolbar>
             </AppBar>
-            <Container component="main" maxWidth="sm" sx={{ py: 4, flexGrow: 1 }}>
+            <Container
+                component="main"
+                maxWidth="xl"
+                sx={{ py: { xs: 4, md: 8 }, flexGrow: 1, display: 'flex', flexDirection: 'column' }}
+            >
                 <Outlet />
             </Container>
         </Box>

@@ -1,10 +1,15 @@
 {
   "captionAppTitle": "Merkwerk",
-  "captionStartPage": "Hello! Who are you?",
+  "captionWelcome": "Welcome to Merkwerk!",
+  "captionWhoAreYou": "Who are you?",
   "captionAdminArea": "Parents' area",
   "captionPracticeHome": "Practise",
   "captionLogin": "Sign in",
   "captionError": "Oops, something went wrong.",
+  "labelPracticeEntry": "I want to practise",
+  "labelPracticeEntryDescription": "Go to your exercises.",
+  "labelAdultEntry": "I am a mum, dad or teacher",
+  "labelAdultEntryDescription": "Sign in and manage exercises.",
   "labelBackToStart": "Back to start",
   "labelOpenMenu": "Open menu",
   "labelMainNavigation": "Main menu",
@@ -30,5 +35,6 @@
   "notificationAccessDenied": "You don't have permission to do that.",
   "notificationNotFound": "This could not be found.",
   "notificationUnexpectedError": "Something went wrong. Please try again.",
-  "notificationLoginFailed": "Email or password is incorrect."
+  "notificationLoginFailed": "Email or password is incorrect.",
+  "captionWelcome": "Welcome to Merkwerk!"
 }

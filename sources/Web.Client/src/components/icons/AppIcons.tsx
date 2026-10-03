@@ -16,3 +16,8 @@ export const VisibilityOffIcon = VisibilityOffIconMui;
 export const LoginIcon = LoginIconMui;
 export const LogoutIcon = LogoutIconMui;
 export const AdminIcon = AdminIconMui;
+
+import FaceIconMui from '@mui/icons-material/Face';
+
+export const ChildIcon = FaceIconMui;
+export const AdultIcon = AdminIconMui;

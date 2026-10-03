@@ -1,10 +1,15 @@
 {
   "captionAppTitle": "Merkwerk",
-  "captionStartPage": "Hallo! Wer bist du?",
+  "captionWelcome": "Willkommen bei Merkwerk!",
+  "captionWhoAreYou": "Wer bist du?",
   "captionAdminArea": "Elternbereich",
   "captionPracticeHome": "Üben",
   "captionLogin": "Anmelden",
   "captionError": "Hoppla, da ist etwas schiefgelaufen.",
+  "labelPracticeEntry": "Ich möchte üben",
+  "labelPracticeEntryDescription": "Hier geht es zu deinen Aufgaben.",
+  "labelAdultEntry": "Ich bin Mama, Papa oder Lehrkraft",
+  "labelAdultEntryDescription": "Anmelden und Aufgaben verwalten.",
   "labelBackToStart": "Zurück zum Start",
   "labelOpenMenu": "Menü öffnen",
   "labelMainNavigation": "Hauptmenü",
@@ -30,5 +35,6 @@
   "notificationAccessDenied": "Dafür hast du keine Berechtigung.",
   "notificationNotFound": "Das wurde leider nicht gefunden.",
   "notificationUnexpectedError": "Etwas ist schiefgelaufen. Bitte versuche es noch einmal.",
-  "notificationLoginFailed": "E-Mail oder Passwort stimmt nicht."
+  "notificationLoginFailed": "E-Mail oder Passwort stimmt nicht.",
+  "captionWelcome": "Willkommen bei Merkwerk!"
 }

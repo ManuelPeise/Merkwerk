@@ -4,8 +4,7 @@ import React from 'react';
 export type StateUpdate<TState> = Partial<TState> | ((state: TState) => Partial<TState>);
 
 type ReducerAction<TState> =
-    | { type: 'merge'; update: StateUpdate<TState> }
-    | { type: 'replace'; state: TState };
+    { type: 'merge'; update: StateUpdate<TState> } | { type: 'replace'; state: TState };
 
 const isUpdater = <TState>(
     update: StateUpdate<TState>,
@@ -54,7 +53,9 @@ export type UseReducerResult<TModel> = {
  * dispatch({ isLoading: true });
  * dispatch((current) => ({ items: [...current.items, item] }));
  */
-export const useReducer = <TModel extends object>(initialModel: TModel): UseReducerResult<TModel> => {
+export const useReducer = <TModel extends object>(
+    initialModel: TModel,
+): UseReducerResult<TModel> => {
     const [originalState, setOriginalState] = React.useState(initialModel);
     const [state, dispatchAction] = React.useReducer(reducerFunction<TModel>, initialModel);
 

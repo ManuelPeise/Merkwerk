@@ -17,16 +17,16 @@ does not also enforce – the server is always authoritative (grading, permissio
 
 ## 2. Tech stack (fixed – change only after asking)
 
-| Area | Choice |
-| --- | --- |
-| Language | TypeScript 6, `strict`, `verbatimModuleSyntax` |
-| Framework | React 19, function components and hooks only |
-| Build / dev server | Vite 8 (`@vitejs/plugin-react`), npm, `package-lock.json` is committed |
-| UI | MUI (`@mui/material`) with Emotion, theme in `src/lib/theme/theme.ts` |
-| Routing | `react-router-dom` (data router, `createBrowserRouter`) |
-| HTTP | `axios`, one shared instance in `src/lib/api/apiClient.ts` |
-| Translations | `i18next` + `react-i18next` |
-| Quality | ESLint (typescript-eslint, react-hooks, react-refresh), Prettier, `scripts/check-translations.mjs` |
+| Area               | Choice                                                                                             |
+| ------------------ | -------------------------------------------------------------------------------------------------- |
+| Language           | TypeScript 6, `strict`, `verbatimModuleSyntax`                                                     |
+| Framework          | React 19, function components and hooks only                                                       |
+| Build / dev server | Vite 8 (`@vitejs/plugin-react`), npm, `package-lock.json` is committed                             |
+| UI                 | MUI (`@mui/material`) with Emotion, theme in `src/lib/theme/theme.ts`                              |
+| Routing            | `react-router-dom` (data router, `createBrowserRouter`)                                            |
+| HTTP               | `axios`, one shared instance in `src/lib/api/apiClient.ts`                                         |
+| Translations       | `i18next` + `react-i18next`                                                                        |
+| Quality            | ESLint (typescript-eslint, react-hooks, react-refresh), Prettier, `scripts/check-translations.mjs` |
 
 **Ask before adding any npm package.** Check the installed major version in `package.json` before using an API
 (MUI and react-router change between majors) – don't rely on memory.
@@ -36,17 +36,26 @@ does not also enforce – the server is always authoritative (grading, permissio
 ```
 src/
   main.tsx                 Entry: loads i18n, renders <App />
-  App.tsx                  ThemeProvider, CssBaseline, RouterProvider – nothing else
+  App.tsx                  ThemeProvider, CssBaseline, AuthenticationProvider, RouterProvider – nothing else
   navigation/
-    routes.ts              All paths as constants (routes.start, routes.admin, routes.practice)
-    router.tsx             Route tree
-  pages/                   One component per route (StartPage, AdminPage, PracticePage, …)
-  components/              Reusable UI, grouped by topic (layout/, practice/, admin/, …)
-  hooks/                   Reusable hooks (useXyz.ts)
+    routes.ts              All paths as constants
+    router.tsx             Route tree (incl. errorElement)
+    PublicRoute.tsx, ProtectedRoute.tsx   Route guards
+    navigationItems.ts     Drawer entries
+  pages/
+    <name>Page/            One folder per route: <Name>Page.tsx, plus components/ and types/ if needed
+  components/
+    input/                 Form fields (FormFieldContainer, FormTextField, …) and buttons
+    layout/                AppLayout, HeaderBar, NavigationDrawer
+    feedback/              LoadingIndicator, …
+    providers/             Context providers (AuthenticationContextProvider) and their contexts
+    icons/                 AppIcons – the only place that imports @mui/icons-material
+  hooks/                   Reusable hooks (useXyz.ts): useAuthentication, useTranslation, useForm, useReducer
   lib/
-    api/                   apiClient.ts + one folder per backend module (<module>Api.ts, <module>Types.ts)
+    api/                   apiClient, StatelessApi, toApiError + one folder per backend module (<module>Api.ts, <module>Types.ts)
     theme/                 MUI theme (design direction A, LP-008)
-    translations/          i18n.ts, i18next.d.ts, resources/<lang>/<namespace>.<lang>.json
+    translations/          i18n.ts, i18next.d.ts, translationKeys.ts, resources/<lang>/<namespace>.<lang>.json
+    utils.ts               Small pure helpers (validation, …)
 scripts/                   Node scripts used by npm scripts
 ```
 
@@ -61,20 +70,21 @@ New top-level folders under `src/` only after asking.
 
 ## 5. Components and code style
 
-- Function components typed as `FC<Props>`; props type named `<Component>Props`.
+- Function components typed as `React.FC<IProps>`; the props interface in the component file is named `IProps`.
 - **Never destructure props in the parameter list.** Take `props` and destructure in the first line of the body:
 
-  ```tsx
-  // never
-  const FormNumberField: React.FC<IProps> = ({ label, value, disabled, onChange }) => {
+    ```tsx
+    // never
+    const FormNumberField: React.FC<IProps> = ({ label, value, disabled, onChange }) => {
 
-  // always
-  const FormNumberField: React.FC<IProps> = (props) => {
-      const { label, value, disabled, onChange } = props;
-  ```
+    // always
+    const FormNumberField: React.FC<IProps> = (props) => {
+        const { label, value, disabled, onChange } = props;
+    ```
 
-- **Named exports**, one component per file, file name = component name in PascalCase (`StartPage.tsx`).
-  Only `App.tsx` uses a default export.
+- **Components use `export default`**, one component per file, file name = component name in PascalCase
+  (`LoginPage.tsx`). Everything else (hooks, functions, constants, types, contexts) uses **named exports**.
+- A component file exports only its component (react-refresh); contexts live in their own `.ts` file.
 - Components render; logic (data loading, state machines, grading) lives in hooks or `src/lib`.
 - No `any`. No non-null assertions except the root element in `main.tsx`.
 - No `console.log` in committed code.
@@ -85,13 +95,15 @@ New top-level folders under `src/` only after asking.
 
 - Use MUI components and the theme. Colours, spacing, radii and fonts only via the theme
   (`sx={{ color: 'primary.main', p: 2 }}`) – **no hex colours outside `theme.ts`**, no new CSS files.
+- MUI 9 has **no system props** on components (`<Stack alignItems=…>`, `<Box mt={2}>` fail to compile):
+  layout values always go into `sx` (`<Stack spacing={2} sx={{ alignItems: 'center' }}>`).
 - Fonts are self-hosted (Andika); **no font or script CDNs**.
 - Children's area (`/ueben`):
-  - touch targets ≥ 64×64 px;
-  - little text, icons plus read-aloud;
-  - feedback never by colour alone (always an icon as well);
-  - mistakes are friendly ("Probier es nochmal"), never harsh red;
-  - number input via the on-screen keypad.
+    - touch targets ≥ 64×64 px;
+    - little text, icons plus read-aloud;
+    - feedback never by colour alone (always an icon as well);
+    - mistakes are friendly ("Probier es nochmal"), never harsh red;
+    - number input via the on-screen keypad.
 - Accessibility: WCAG AA contrast, everything reachable by keyboard, `aria-label` on icon buttons (text from translations).
 
 ## 7. Translations (i18n)
@@ -102,11 +114,11 @@ New top-level folders under `src/` only after asking.
 - Resources: `src/lib/translations/resources/<lang>/<namespace>.<lang>.json` (`de`, `en`). German is the source language.
 - Keys are flat camelCase and start with a prefix:
 
-  | Prefix | Used for | Example |
-  | --- | --- | --- |
-  | `caption` | headings, titles, captions | `captionStartPage` |
-  | `label` | buttons, links, form labels, `aria-label` | `labelBackToStart` |
-  | `notification` | snackbars, alerts, error and success messages | `notificationNetworkError` |
+    | Prefix         | Used for                                      | Example                    |
+    | -------------- | --------------------------------------------- | -------------------------- |
+    | `caption`      | headings, titles, captions                    | `captionStartPage`         |
+    | `label`        | buttons, links, form labels, `aria-label`     | `labelBackToStart`         |
+    | `notification` | snackbars, alerts, error and success messages | `notificationNetworkError` |
 
 - Every key exists in **every** language; `npm run i18n:check` enforces prefixes and parity.
 - Keys are typed (`i18next.d.ts`, `TranslationKey`): a typo in `getResource('…')` is a compile error.
@@ -118,11 +130,11 @@ New top-level folders under `src/` only after asking.
 - Navigate with `<Link>` / `useNavigate`; MUI buttons via `component={Link}`.
 - Every route belongs to exactly one group in `src/navigation/router.tsx`:
 
-  | Group | Guard | Example |
-  | --- | --- | --- |
-  | Everyone | none | landing page |
-  | Only when **not** signed in | `<PublicRoute />` – signed-in users are sent on | login |
-  | Only when signed in | `<ProtectedRoute />`, optionally `roles={['…']}` – others go to the login and come back afterwards | `/admin` |
+    | Group                       | Guard                                                                                              | Example      |
+    | --------------------------- | -------------------------------------------------------------------------------------------------- | ------------ |
+    | Everyone                    | none                                                                                               | landing page |
+    | Only when **not** signed in | `<PublicRoute />` – signed-in users are sent on                                                    | login        |
+    | Only when signed in         | `<ProtectedRoute />`, optionally `roles={['…']}` – others go to the login and come back afterwards | `/admin`     |
 
 - The guards only improve the UI – **the server's `[Authorize]` is what protects data.**
 - Auth state only via `useAuthentication()` (`status`, `isAuthenticated`, `user`, `login`, `logout`) from

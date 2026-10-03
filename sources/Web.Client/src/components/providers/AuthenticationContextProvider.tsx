@@ -18,7 +18,7 @@ interface IAuthenticationState {
 const anonymous: IAuthenticationState = { status: 'anonymous', user: null };
 
 /** Holds who is signed in. The tokens stay in HttpOnly cookies – the client only knows name and role. */
-export const AuthenticationProvider: React.FC<IAuthenticationProviderProps> = (props) => {
+const AuthenticationProvider: React.FC<IAuthenticationProviderProps> = (props) => {
     const { children } = props;
 
     const [authenticationState, setAuthenticationState] = useState<IAuthenticationState>({
@@ -77,5 +77,9 @@ export const AuthenticationProvider: React.FC<IAuthenticationProviderProps> = (p
         [authenticationState, login, logout],
     );
 
-    return <AuthenticationContext.Provider value={value}>{children}</AuthenticationContext.Provider>;
+    return (
+        <AuthenticationContext.Provider value={value}>{children}</AuthenticationContext.Provider>
+    );
 };
+
+export default AuthenticationProvider;

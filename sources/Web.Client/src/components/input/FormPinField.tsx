@@ -67,7 +67,10 @@ const FormPinField: React.FC<IProps> = (props) => {
         }
     };
 
-    const handleFocus = (index: number, event: React.FocusEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+    const handleFocus = (
+        index: number,
+        event: React.FocusEvent<HTMLInputElement | HTMLTextAreaElement>,
+    ) => {
         // Keep the PIN without gaps: always continue in the first empty box.
         if (index > pin.length) {
             focusBox(pin.length);
@@ -108,13 +111,19 @@ const FormPinField: React.FC<IProps> = (props) => {
                             onKeyDown={(event) => handleKeyDown(index, event)}
                             onFocus={(event) => handleFocus(index, event)}
                             // Square boxes with the same height as every other field.
-                            sx={{ width: 64, '& input': { textAlign: 'center', fontSize: '1.75rem', px: 0 } }}
+                            sx={{
+                                width: 64,
+                                '& input': { textAlign: 'center', fontSize: '1.75rem', px: 0 },
+                            }}
                             slotProps={{
                                 input: {
                                     inputMode: 'numeric',
                                     pattern: '[0-9]*',
                                     autoComplete: index === 0 ? 'one-time-code' : 'off',
-                                    'aria-label': getResource('labelPinDigit', { position: index + 1, length }),
+                                    'aria-label': getResource('labelPinDigit', {
+                                        position: index + 1,
+                                        length,
+                                    }),
                                 },
                             }}
                         />

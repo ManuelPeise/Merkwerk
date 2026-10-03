@@ -18,11 +18,24 @@ export type NavigationItem = {
 /** Entries of the navigation drawer, in display order. Keep visibility in line with the route guards. */
 export const navigationItems: readonly NavigationItem[] = [
     { path: routes.start, labelKey: 'labelNavigationStart', icon: HomeIcon, visibility: 'always' },
-    { path: routes.admin, labelKey: 'labelNavigationAdmin', icon: AdminIcon, visibility: 'authenticated' },
-    { path: routes.login, labelKey: 'labelNavigationLogin', icon: LoginIcon, visibility: 'anonymous' },
+    {
+        path: routes.admin,
+        labelKey: 'labelNavigationAdmin',
+        icon: AdminIcon,
+        visibility: 'authenticated',
+    },
+    {
+        path: routes.login,
+        labelKey: 'labelNavigationLogin',
+        icon: LoginIcon,
+        visibility: 'anonymous',
+    },
 ];
 
-export const isNavigationItemVisible = (item: NavigationItem, status: AuthenticationStatus): boolean =>
+export const isNavigationItemVisible = (
+    item: NavigationItem,
+    status: AuthenticationStatus,
+): boolean =>
     item.visibility === 'always' ||
     (item.visibility === 'authenticated' && status === 'authenticated') ||
     (item.visibility === 'anonymous' && status === 'anonymous');

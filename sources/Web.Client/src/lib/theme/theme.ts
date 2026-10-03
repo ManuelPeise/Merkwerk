@@ -32,7 +32,9 @@ export const theme = createTheme({
             styleOverrides: { root: { fontWeight: 700, color: '#1E2328', fontSize: '1rem' } },
         },
         MuiOutlinedInput: {
-            styleOverrides: { root: { minHeight: 64, fontSize: '1.125rem', backgroundColor: '#FFFFFF' } },
+            styleOverrides: {
+                root: { minHeight: 64, fontSize: '1.125rem', backgroundColor: '#FFFFFF' },
+            },
         },
         MuiFormHelperText: {
             styleOverrides: { root: { marginLeft: 0, fontSize: '0.9375rem' } },
@@ -45,9 +47,14 @@ export const theme = createTheme({
             // Large touch targets for children (LP-007).
             styleOverrides: { root: { minHeight: 56, paddingInline: 24, fontSize: '1.125rem' } },
         },
+        // Flat surfaces. No border here: AppBar, Drawer, Alert and Menu are Papers too.
         MuiPaper: {
             defaultProps: { elevation: 0 },
-            styleOverrides: { root: { border: '2px solid #E3DED5' } },
+        },
+        // Cards (task tiles etc.) get the outline of design direction A.
+        MuiCard: {
+            defaultProps: { variant: 'outlined' },
+            styleOverrides: { root: { border: '2px solid #E3DED5', borderRadius: 20 } },
         },
     },
 });

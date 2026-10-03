@@ -1,17 +1,17 @@
-import type { FC } from 'react';
+import React from 'react';
 import { AppBar, IconButton, Toolbar, Typography } from '@mui/material';
 import { useTranslation } from 'src/hooks/useTranslation';
 import { LogoutIcon, MenuIcon } from 'src/components/icons/AppIcons';
 import { headerHeight } from 'src/components/layout/layoutConstants';
 import { useAuthentication } from 'src/hooks/useAuthentication';
 
-export type HeaderBarProps = {
+interface IProps {
     /** Shown on small screens, where the drawer is hidden until opened. */
     showMenuButton: boolean;
     onMenuClick: () => void;
-};
+}
 
-export const HeaderBar: FC<HeaderBarProps> = (props) => {
+const HeaderBar: React.FC<IProps> = (props) => {
     const { showMenuButton, onMenuClick } = props;
 
     const { getResource } = useTranslation();
@@ -58,3 +58,5 @@ export const HeaderBar: FC<HeaderBarProps> = (props) => {
         </AppBar>
     );
 };
+
+export default HeaderBar;

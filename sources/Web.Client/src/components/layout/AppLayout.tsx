@@ -1,16 +1,16 @@
-import { useState, type FC } from 'react';
+import React from 'react';
 import { Box, Container, Toolbar, useMediaQuery, useTheme } from '@mui/material';
 import { Outlet } from 'react-router-dom';
-import { HeaderBar } from 'src/components/layout/HeaderBar';
+import HeaderBar from 'src/components/layout/HeaderBar';
 import { headerHeight } from 'src/components/layout/layoutConstants';
-import { NavigationDrawer } from 'src/components/layout/NavigationDrawer';
+import NavigationDrawer from 'src/components/layout/NavigationDrawer';
 
 /** Shell for every page: header bar on top, navigation drawer on the left, page content via <Outlet />. */
-export const AppLayout: FC = () => {
+const AppLayout: React.FC = () => {
     const theme = useTheme();
     // noSsr: evaluate immediately, so large screens don't flash the temporary drawer first.
     const isDesktop = useMediaQuery(theme.breakpoints.up('md'), { noSsr: true });
-    const [isDrawerOpen, setIsDrawerOpen] = useState(false);
+    const [isDrawerOpen, setIsDrawerOpen] = React.useState(false);
 
     return (
         <Box sx={{ display: 'flex', minHeight: '100dvh' }}>
@@ -33,3 +33,5 @@ export const AppLayout: FC = () => {
         </Box>
     );
 };
+
+export default AppLayout;

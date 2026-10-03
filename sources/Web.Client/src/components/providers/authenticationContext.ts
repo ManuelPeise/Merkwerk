@@ -13,6 +13,8 @@ export interface IAuthenticationContext {
     /** Returns the error, or undefined on success. */
     login: (request: ILoginRequest) => Promise<ApiError | undefined>;
     logout: () => Promise<void>;
+    /** Asks the server who is signed in (after setup or accepting an invitation, which sign in via cookies). */
+    reloadUser: () => Promise<void>;
 }
 
 // Own file: react-refresh (Fast Refresh) only works when component files export nothing but components.

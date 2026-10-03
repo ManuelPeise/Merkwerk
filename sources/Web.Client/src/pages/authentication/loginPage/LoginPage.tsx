@@ -1,6 +1,8 @@
 import React from 'react';
-import { Alert, Box, Stack, Typography } from '@mui/material';
+import { Alert, Stack } from '@mui/material';
 import { useTranslation } from 'src/hooks/useTranslation';
+import AuthCard from 'src/components/layout/AuthCard';
+import FormLink from 'src/components/input/FormLink';
 import FormButton from 'src/components/input/FormButton';
 import FormPasswordField from 'src/components/input/FormPasswordField';
 import FormTextField from 'src/components/input/FormTextField';
@@ -8,6 +10,8 @@ import { useAuthentication } from 'src/hooks/useAuthentication';
 import { useForm } from 'src/hooks/useForm';
 import type { ILoginRequest } from 'src/lib/api/authentication/authenticationTypes';
 import type { NotificationKey } from 'src/lib/translations/translationKeys';
+import { getEmailError } from 'src/lib/auth/authValidation';
+import { routes } from 'src/navigation/routes';
 import { utils } from 'src/lib/utils';
 
 const isLoginValid = (model: ILoginRequest): boolean =>
@@ -40,11 +44,12 @@ const LoginPage: React.FC = () => {
         }
     };
 
+    const emailErrorKey = getEmailError(state.email);
+
     return (
-        <Box sx={{ maxWidth: 420, mx: 'auto' }}>
+        <AuthCard title={getResource('captionLogin')}>
             <form onSubmit={handleSubmit} noValidate>
                 <Stack spacing={2}>
-                    <Typography variant="h1">{getResource('captionLogin')}</Typography>
                     {errorKey && <Alert severity="error">{getResource(errorKey)}</Alert>}
                     <FormTextField
                         label={getResource('labelEmail')}
@@ -52,14 +57,20 @@ const LoginPage: React.FC = () => {
                         type="email"
                         required
                         value={state.email}
+                        errorText={emailErrorKey ? getResource(emailErrorKey) : undefined}
                         onChange={(email) => updateFormField({ email })}
                     />
                     <FormPasswordField
                         label={getResource('labelPassword')}
                         name="password"
+                        autoComplete="current-password"
                         required
                         value={state.password}
                         onChange={(password) => updateFormField({ password })}
+                    />
+                    <FormLink
+                        to={routes.forgotPassword}
+                        label={getResource('labelForgotPassword')}
                     />
                     <FormButton
                         label={getResource('labelLogin')}
@@ -68,7 +79,7 @@ const LoginPage: React.FC = () => {
                     />
                 </Stack>
             </form>
-        </Box>
+        </AuthCard>
     );
 };
 

@@ -15,3 +15,18 @@ export interface ICurrentUser {
     name: string;
     role: string;
 }
+
+export interface IForgotPasswordRequest {
+    email: string;
+}
+
+export interface IResetPasswordRequest {
+    email: string;
+    token: string;
+    newPassword: string;
+}
+
+export interface IConfirmEmailRequest {
+    userId: string;
+    token: string;
+}

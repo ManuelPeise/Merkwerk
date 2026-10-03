@@ -41,6 +41,7 @@ src/
     routes.ts              All paths as constants
     router.tsx             Route tree (incl. errorElement)
     PublicRoute.tsx, ProtectedRoute.tsx   Route guards
+    SetupGate.tsx          Outermost layout element: redirects to /setup until the instance is set up (useSetupStatus)
     navigationItems.ts     Drawer entries (parents' area only)
   pages/
     <name>Page/            One folder per route: <Name>Page.tsx, plus components/ and types/ if needed
@@ -140,6 +141,8 @@ New top-level folders under `src/` only after asking.
 - Auth state only via `useAuthentication()` (`status`, `isAuthenticated`, `user`, `login`, `logout`) from
   `AuthenticationProvider` (`src/components/providers`); never call the authentication endpoints from pages.
 - Every route belongs to exactly one layout: `PublicLayout` (no menu, language switch), `AdminLayout` (header, drawer, `adultRoles`), `KidsLayout` (large header, `roles.learner`).
+- `SetupGate` wraps the whole route tree; auth pages (login, setup, invitation, forgot/reset password, confirm e-mail) live in `PublicLayout` and render inside `AuthCard`.
+- Server field errors (`ProblemDetails.errors`) go through `getFieldErrors` to the matching field's `errorText`; alerts always use `notification…` keys.
 - Roles only via `src/lib/auth/roles.ts` (`roles`, `adultRoles`) â€“ no role strings in components.
 - Navigation entries (`navigationItems.ts`) exist only for the parents' drawer; public pages have no menu.
 - Unknown paths redirect to `routes.start`.

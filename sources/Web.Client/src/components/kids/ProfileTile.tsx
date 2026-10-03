@@ -20,7 +20,6 @@ const ProfileTile: React.FC<IProps> = (props) => {
                 onClick={onSelect}
                 sx={{
                     height: '100%',
-                    minWidth: 160,
                     minHeight: 160,
                     p: 2,
                     display: 'flex',
@@ -36,7 +35,7 @@ const ProfileTile: React.FC<IProps> = (props) => {
                     },
                 }}
             >
-                <AvatarImage avatarId={avatarId} name={name} size={120} />
+                <AvatarImage avatarId={avatarId} name={name} size={96} />
                 <Typography variant="h6" component="span" sx={{ fontWeight: 700 }}>
                     {name}
                 </Typography>

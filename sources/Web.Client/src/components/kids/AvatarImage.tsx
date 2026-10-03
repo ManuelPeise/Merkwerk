@@ -1,6 +1,6 @@
 import React from 'react';
 import { Avatar } from '@mui/material';
-import { avatarImages, type AvatarId } from 'src/assets/avatars/avatars';
+import { avatarIds, avatarImages, type AvatarId } from 'src/assets/avatars/avatars';
 
 interface IProps {
     /** One of the built-in avatar ids; unknown or missing ids fall back to the initial of the name. */
@@ -11,8 +11,9 @@ interface IProps {
     size: number;
 }
 
+// Checks the fixed list – `value in avatarImages` would also accept inherited names such as "constructor".
 const isAvatarId = (value: string | undefined): value is AvatarId =>
-    value !== undefined && value in avatarImages;
+    (avatarIds as readonly (string | undefined)[]).includes(value);
 
 /** Decorative: the name is always shown next to the avatar, so the image has no alt text. */
 const AvatarImage: React.FC<IProps> = (props) => {

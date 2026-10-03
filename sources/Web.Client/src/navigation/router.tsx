@@ -21,7 +21,7 @@ import SetupPage from 'src/pages/authentication/setupPage/SetupPage';
 import PairDevicePage from 'src/pages/pairDevicePage/PairDevicePage';
 import PracticeHomePage from 'src/pages/practiceHomePage/PracticeHomePage';
 
-// Every route belongs to exactly one layout. Pages marked LP-124 / LP-125 get their routes with those tickets.
+// Every route belongs to exactly one layout.
 export const router = createBrowserRouter([
     {
         // Outermost: redirects to /setup until the instance is set up.

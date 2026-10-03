@@ -41,6 +41,7 @@ git switch -c feature/LP-131-arithmetic-generator
 # 3. Work in small steps; build and test before every commit
 dotnet build sources/Merkwerk.slnx
 dotnet test  sources/Merkwerk.slnx
+# For UI changes, also run the client checks (see sources/Web.Client/README.md).
 git add -p                      # review what you stage, hunk by hunk
 git commit -m "LP-131: Add arithmetic generator with number range"
 
@@ -101,6 +102,7 @@ The `.gitignore` covers these cases. If you accidentally committed a secret: **r
    - [ ] Branch rebased on current `Development`
    - [ ] Acceptance criteria of the ticket met
    - [ ] Migration reviewed (if any)
+   - [ ] For UI changes: `npm run lint`, `npm run format:check`, and `npm run build` in `sources/Web.Client`
 5. Merge with **Squash and merge**. The squash commit message is `LP-xxx: <ticket title>`.
 6. Delete the feature branch after the merge.
 

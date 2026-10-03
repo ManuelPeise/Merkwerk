@@ -3,7 +3,8 @@ namespace Logic.Organizations.Learners;
 /// <summary>Child profiles of a family (LP-105). Everyone in the family reads, only admins change.</summary>
 public interface ILearnerService
 {
-    Task<IReadOnlyList<LearnerInfo>> ListAsync(long organizationId, CancellationToken cancellationToken);
+    /// <summary>Null if the acting user is no member of the organization (any more).</summary>
+    Task<IReadOnlyList<LearnerInfo>?> ListAsync(long organizationId, long actingUserId, CancellationToken cancellationToken);
 
     Task<LearnerChangeResult> CreateAsync(
         long organizationId,

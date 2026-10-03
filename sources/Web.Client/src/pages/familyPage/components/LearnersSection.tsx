@@ -65,8 +65,11 @@ const LearnersSection: React.FC<IProps> = (props) => {
         const result = await learnersApi.delete.post({ body: { id: learner.id } });
         setIsDeleting(false);
         setDialog({ kind: 'closed' });
-        setErrorKey(result.error ? result.error.messageKey : null);
-        void load();
+        // Reload first: load() clears the error, so a failed delete must be shown afterwards.
+        await load();
+        if (result.error) {
+            setErrorKey(result.error.messageKey);
+        }
     };
 
     return (

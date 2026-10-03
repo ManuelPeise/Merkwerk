@@ -73,14 +73,13 @@ internal sealed partial class SetupService(
 
     private async Task CreateFamilyAsync(string familyName, long ownerUserId, CancellationToken cancellationToken)
     {
+        // One save = one transaction: a family saved without its owner would block the setup for good.
         await using var unitOfWork = unitOfWorkFactory.Create();
         var organization = new Organization { Name = familyName };
         unitOfWork.Organizations.Add(organization);
-        await unitOfWork.SaveChangesAsync(cancellationToken);
-
         unitOfWork.Memberships.Add(new Membership
         {
-            OrganizationId = organization.Id,
+            Organization = organization,
             UserId = ownerUserId,
             Role = OrganizationRole.OrgAdmin,
             IsOwner = true,

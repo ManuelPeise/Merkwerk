@@ -7,8 +7,17 @@ namespace Logic.Organizations.Members;
 
 internal sealed class MemberService(IUnitOfWorkFactory unitOfWorkFactory, IAccountService accounts) : IMemberService
 {
-    public async Task<IReadOnlyList<MemberInfo>> ListAsync(long organizationId, CancellationToken cancellationToken)
+    public async Task<IReadOnlyList<MemberInfo>?> ListAsync(
+        long organizationId,
+        long actingUserId,
+        CancellationToken cancellationToken)
     {
+        // Checked against the database: a removed member keeps the organization claim for up to 15 minutes.
+        if (!await IsMemberAsync(organizationId, actingUserId, cancellationToken))
+        {
+            return null;
+        }
+
         await using var unitOfWork = unitOfWorkFactory.Create();
         var memberships = await unitOfWork.Memberships.Query()
             .Where(m => m.OrganizationId == organizationId)
@@ -57,6 +66,22 @@ internal sealed class MemberService(IUnitOfWorkFactory unitOfWorkFactory, IAccou
         unitOfWork.Memberships.Remove(membership);
         await unitOfWork.SaveChangesAsync(cancellationToken);
         return RemoveMemberStatus.Success;
+    }
+
+    public async Task<bool> IssueStartPasswordAsync(
+        long organizationId,
+        long actingUserId,
+        long targetUserId,
+        string language,
+        CancellationToken cancellationToken)
+    {
+        if (!await IsAdminAsync(organizationId, actingUserId, cancellationToken)
+            || !await IsMemberAsync(organizationId, targetUserId, cancellationToken))
+        {
+            return false;
+        }
+
+        return (await accounts.IssueStartPasswordAsync(targetUserId, language, cancellationToken)).Succeeded;
     }
 
     public async Task<bool> IsMemberAsync(long organizationId, long userId, CancellationToken cancellationToken)

@@ -13,14 +13,15 @@ public sealed class LearnersController(ILearnerService learnerService) : ApiCont
     [Authorize(Policy = AuthorizationPolicies.Member)]
     [HttpGet]
     [ProducesResponseType<IReadOnlyList<LearnerDto>>(StatusCodes.Status200OK)]
+    [ProducesResponseType<ProblemDetails>(StatusCodes.Status403Forbidden)]
     public async Task<ActionResult<IReadOnlyList<LearnerDto>>> ListAsync(CancellationToken cancellationToken)
     {
-        if (CurrentOrganizationId is not { } organizationId)
+        if (CurrentOrganizationId is not { } organizationId || CurrentUserId is not { } userId
+            || await learnerService.ListAsync(organizationId, userId, cancellationToken) is not { } learners)
         {
             return Forbid();
         }
 
-        var learners = await learnerService.ListAsync(organizationId, cancellationToken);
         return learners.Select(LearnerDto.From).ToList();
     }
 

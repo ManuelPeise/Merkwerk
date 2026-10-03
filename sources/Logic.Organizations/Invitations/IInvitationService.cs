@@ -14,8 +14,8 @@ public interface IInvitationService
         string language,
         CancellationToken cancellationToken);
 
-    /// <summary>Open (pending or expired, not used, not withdrawn) invitations of the organization.</summary>
-    Task<IReadOnlyList<InvitationInfo>> ListAsync(long organizationId, CancellationToken cancellationToken);
+    /// <summary>Open (pending or expired, not used, not withdrawn) invitations of the organization; null if the acting user is no admin.</summary>
+    Task<IReadOnlyList<InvitationInfo>?> ListAsync(long organizationId, long actingUserId, CancellationToken cancellationToken);
 
     /// <summary>False if the invitation does not exist in this organization or the acting user is no admin.</summary>
     Task<bool> RevokeAsync(long organizationId, long actingUserId, long invitationId, CancellationToken cancellationToken);

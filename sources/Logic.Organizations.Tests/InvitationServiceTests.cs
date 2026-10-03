@@ -34,7 +34,9 @@ public sealed class InvitationServiceTests(SharedDatabaseFixture database)
         Assert.Equal(AuthRoles.Member, accepted.Session!.Role);
 
         _context.CurrentUser.OrganizationId = family.OrganizationId;
-        var members = await _context.RunAsync<IMemberService, IReadOnlyList<MemberInfo>>(s => s.ListAsync(family.OrganizationId, default));
+        var members = await _context.RunAsync<IMemberService, IReadOnlyList<MemberInfo>?>(s =>
+            s.ListAsync(family.OrganizationId, family.OwnerUserId, default));
+        Assert.NotNull(members);
         Assert.Contains(members, m => m.DisplayName == "Ben" && m.Role == OrganizationRole.Member);
     }
 
@@ -165,6 +167,35 @@ public sealed class InvitationServiceTests(SharedDatabaseFixture database)
         var token = _context.Mail.LinkValue(MailTemplate.Invitation, "token");
         Assert.Equal(InvitationLookupStatus.Found,
             (await _context.RunAsync<IInvitationService, InvitationDetailsResult>(s => s.GetDetailsAsync(token, default))).Status);
+    }
+
+    [Fact]
+    public async Task ListAsync_ByAdmin_ReturnsOpenInvitation()
+    {
+        var family = await _context.CreateFamilyAsync();
+        var invitation = await InviteAsync(family, $"{Guid.NewGuid():N}@example.org");
+
+        var open = await ListInvitationsAsync(family, family.OwnerUserId);
+
+        Assert.Equal(invitation.Id, Assert.Single(open!).Id);
+    }
+
+    [Fact]
+    public async Task ListAsync_ByMember_ReturnsNull()
+    {
+        var family = await _context.CreateFamilyAsync();
+        var (memberId, _) = await _context.CreateAccountAsync();
+        await _context.AddMemberAsync(family.OrganizationId, memberId, OrganizationRole.Member);
+        await InviteAsync(family, $"{Guid.NewGuid():N}@example.org");
+
+        Assert.Null(await ListInvitationsAsync(family, memberId));
+    }
+
+    private Task<IReadOnlyList<InvitationInfo>?> ListInvitationsAsync(Family family, long actingUserId)
+    {
+        _context.CurrentUser.OrganizationId = family.OrganizationId;
+        return _context.RunAsync<IInvitationService, IReadOnlyList<InvitationInfo>?>(s =>
+            s.ListAsync(family.OrganizationId, actingUserId, default));
     }
 
     private async Task<InvitationInfo> InviteAsync(Family family, string email, OrganizationRole role = OrganizationRole.Member)

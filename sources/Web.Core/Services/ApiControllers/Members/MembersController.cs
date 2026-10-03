@@ -13,14 +13,15 @@ public sealed class MembersController(IMemberService memberService) : ApiControl
     [Authorize(Policy = AuthorizationPolicies.Member)]
     [HttpGet]
     [ProducesResponseType<IReadOnlyList<MemberDto>>(StatusCodes.Status200OK)]
+    [ProducesResponseType<ProblemDetails>(StatusCodes.Status403Forbidden)]
     public async Task<ActionResult<IReadOnlyList<MemberDto>>> ListAsync(CancellationToken cancellationToken)
     {
-        if (CurrentOrganizationId is not { } organizationId)
+        if (CurrentOrganizationId is not { } organizationId || CurrentUserId is not { } userId
+            || await memberService.ListAsync(organizationId, userId, cancellationToken) is not { } members)
         {
             return Forbid();
         }
 
-        var members = await memberService.ListAsync(organizationId, cancellationToken);
         return members.Select(MemberDto.From).ToList();
     }
 

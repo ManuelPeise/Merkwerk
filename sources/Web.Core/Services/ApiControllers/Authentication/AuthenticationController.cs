@@ -174,14 +174,15 @@ public sealed class AuthenticationController(
         AdminResetPasswordRequestDto request,
         CancellationToken cancellationToken)
     {
-        if (CurrentOrganizationId is not { } organizationId
-            || !await memberService.IsMemberAsync(organizationId, request.UserId, cancellationToken))
+        if (CurrentOrganizationId is not { } organizationId || CurrentUserId is not { } userId)
         {
             return NotFound();
         }
 
-        var result = await accountService.IssueStartPasswordAsync(request.UserId, MailLanguage, cancellationToken);
-        return result.Succeeded ? NoContent() : NotFound();
+        return await memberService.IssueStartPasswordAsync(
+            organizationId, userId, request.UserId, MailLanguage, cancellationToken)
+            ? NoContent()
+            : NotFound();
     }
 
     /// <summary>400 with Identity's messages attached to one field (camelCase, like the automatic model validation).</summary>

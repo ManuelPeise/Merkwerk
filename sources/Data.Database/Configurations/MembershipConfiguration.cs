@@ -13,7 +13,7 @@ internal sealed class MembershipConfiguration : IEntityTypeConfiguration<Members
         builder.Property(m => m.Role).HasConversion<string>().HasMaxLength(20);
         builder.HasIndex(m => new { m.OrganizationId, m.UserId }).IsUnique();
         builder.HasIndex(m => m.UserId);
-        builder.HasOne<Organization>().WithMany().HasForeignKey(m => m.OrganizationId).OnDelete(DeleteBehavior.Cascade);
+        builder.HasOne(m => m.Organization).WithMany().HasForeignKey(m => m.OrganizationId).OnDelete(DeleteBehavior.Cascade);
         builder.HasOne<User>().WithMany().HasForeignKey(m => m.UserId).OnDelete(DeleteBehavior.Cascade);
     }
 }

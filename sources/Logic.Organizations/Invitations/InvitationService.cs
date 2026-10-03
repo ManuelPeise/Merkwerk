@@ -102,8 +102,17 @@ internal sealed partial class InvitationService(
         return new CreateInvitationResult(CreateInvitationStatus.Created, ToInfo(invitation, now));
     }
 
-    public async Task<IReadOnlyList<InvitationInfo>> ListAsync(long organizationId, CancellationToken cancellationToken)
+    public async Task<IReadOnlyList<InvitationInfo>?> ListAsync(
+        long organizationId,
+        long actingUserId,
+        CancellationToken cancellationToken)
     {
+        // Checked against the database, not just the role claim: a removed admin keeps the claim for up to 15 minutes.
+        if (!await members.IsAdminAsync(organizationId, actingUserId, cancellationToken))
+        {
+            return null;
+        }
+
         var now = timeProvider.GetUtcNow();
 
         await using var unitOfWork = unitOfWorkFactory.Create();
@@ -185,6 +194,7 @@ internal sealed partial class InvitationService(
         }
 
         long userId;
+        var accountCreated = false;
         if (currentUserId is { } signedIn)
         {
             var account = (await accounts.GetAccountsAsync([signedIn], cancellationToken)).SingleOrDefault();
@@ -223,6 +233,7 @@ internal sealed partial class InvitationService(
             }
 
             userId = newUserId;
+            accountCreated = true;
         }
 
         if (await unitOfWork.Memberships.FindAsync(invitation.OrganizationId, userId, cancellationToken) is null)
@@ -244,13 +255,28 @@ internal sealed partial class InvitationService(
         catch (DbUpdateException)
         {
             // Accepted twice at the same moment: the unique membership index stops the second one.
+            await DeleteCreatedAccountAsync();
             return new AcceptInvitationResult(AcceptInvitationStatus.Gone);
+        }
+        catch
+        {
+            await DeleteCreatedAccountAsync();
+            throw;
         }
 
         LogAccepted(invitation.Id, userId);
         return new AcceptInvitationResult(
             AcceptInvitationStatus.Success,
             Session: await sessions.SignInAsync(userId, cancellationToken));
+
+        // An account made for this invitation but left without its membership would block the address (409) for good.
+        async Task DeleteCreatedAccountAsync()
+        {
+            if (accountCreated)
+            {
+                await accounts.DeleteAccountAsync(userId, CancellationToken.None);
+            }
+        }
     }
 
     private bool IsUsable(Invitation invitation) =>

@@ -105,6 +105,7 @@ public sealed class LearnerServiceTests(SharedDatabaseFixture database)
         _context.RunAsync<ILearnerService, LearnerChangeResult>(s =>
             s.CreateAsync(family.OrganizationId, family.OwnerUserId, input, default));
 
-    private Task<IReadOnlyList<LearnerInfo>> ListAsync(Family family) =>
-        _context.RunAsync<ILearnerService, IReadOnlyList<LearnerInfo>>(s => s.ListAsync(family.OrganizationId, default));
+    private async Task<IReadOnlyList<LearnerInfo>> ListAsync(Family family) =>
+        (await _context.RunAsync<ILearnerService, IReadOnlyList<LearnerInfo>?>(s =>
+            s.ListAsync(family.OrganizationId, family.OwnerUserId, default)))!;
 }

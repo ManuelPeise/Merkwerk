@@ -44,14 +44,15 @@ public sealed class InvitationsController(IInvitationService invitationService, 
     [Authorize(Policy = AuthorizationPolicies.OrgAdmin)]
     [HttpGet]
     [ProducesResponseType<IReadOnlyList<InvitationDto>>(StatusCodes.Status200OK)]
+    [ProducesResponseType<ProblemDetails>(StatusCodes.Status403Forbidden)]
     public async Task<ActionResult<IReadOnlyList<InvitationDto>>> ListAsync(CancellationToken cancellationToken)
     {
-        if (CurrentOrganizationId is not { } organizationId)
+        if (CurrentOrganizationId is not { } organizationId || CurrentUserId is not { } userId
+            || await invitationService.ListAsync(organizationId, userId, cancellationToken) is not { } invitations)
         {
             return Forbid();
         }
 
-        var invitations = await invitationService.ListAsync(organizationId, cancellationToken);
         return invitations.Select(InvitationDto.From).ToList();
     }
 

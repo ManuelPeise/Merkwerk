@@ -11,4 +11,7 @@ public sealed class Membership : AOrganizationEntityBase
 
     /// <summary>Created the organization in the first-run setup. Cannot be removed.</summary>
     public bool IsOwner { get; set; }
+
+    /// <summary>Only set when a new organization is saved together with its first membership (first-run setup).</summary>
+    public Organization? Organization { get; set; }
 }

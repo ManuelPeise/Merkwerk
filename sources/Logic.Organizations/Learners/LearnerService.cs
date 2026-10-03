@@ -7,8 +7,16 @@ namespace Logic.Organizations.Learners;
 
 internal sealed class LearnerService(IUnitOfWorkFactory unitOfWorkFactory, IMemberService members) : ILearnerService
 {
-    public async Task<IReadOnlyList<LearnerInfo>> ListAsync(long organizationId, CancellationToken cancellationToken)
+    public async Task<IReadOnlyList<LearnerInfo>?> ListAsync(
+        long organizationId,
+        long actingUserId,
+        CancellationToken cancellationToken)
     {
+        if (!await members.IsMemberAsync(organizationId, actingUserId, cancellationToken))
+        {
+            return null;
+        }
+
         await using var unitOfWork = unitOfWorkFactory.Create();
         return await unitOfWork.Repository<Learner>().Query()
             .Where(l => l.OrganizationId == organizationId)

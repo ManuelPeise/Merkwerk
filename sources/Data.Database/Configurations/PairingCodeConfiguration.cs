@@ -17,6 +17,10 @@ internal sealed class PairingCodeConfiguration : IEntityTypeConfiguration<Pairin
 
         // Two devices with the same code at once: only the first may mark it used (UPDATE … WHERE UsedAt IS NULL).
         builder.Property(c => c.UsedAt).IsConcurrencyToken();
+
+        // A device and a new code of the family at once: marking the old code used and revoking it exclude each other
+        // (UPDATE … WHERE UsedAt IS NULL AND RevokedAt IS NULL), so a replaced code can no longer pair a device.
+        builder.Property(c => c.RevokedAt).IsConcurrencyToken();
         builder.HasOne<Organization>().WithMany().HasForeignKey(c => c.OrganizationId).OnDelete(DeleteBehavior.Cascade);
     }
 }

@@ -1,6 +1,9 @@
+using Data.Accessor.Abstractions;
 using Data.Database.Entities.Organizations;
 using Logic.Devices.Pairing;
 using Logic.Devices.Tests.Infrastructure;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace Logic.Devices.Tests;
 
@@ -104,6 +107,28 @@ public sealed class DeviceServiceTests(DevicesDatabaseFixture database)
 
         Assert.Equal(PairStatus.InvalidCode, withFirst.Status);
         Assert.Equal(PairStatus.Success, withSecond.Status);
+    }
+
+    [Fact]
+    public async Task PairAsync_CodeReplacedWhilePairing_CannotMarkTheOldCodeUsed()
+    {
+        // Arrange: the device has read the code as usable (first half of PairAsync) ...
+        var family = await _context.CreateFamilyAsync();
+        var code = await _context.CreatePairingCodeAsync(family);
+        _context.ActAsDevice();
+        await using var scope = _context.Services.CreateAsyncScope();
+        await using var unitOfWork = scope.ServiceProvider.GetRequiredService<IUnitOfWorkFactory>().Create();
+        var read = await unitOfWork.PairingCodes.FindUsableByHashAsync(
+            DeviceTokens.Hash(code.Code), _context.Time.GetUtcNow().UtcDateTime);
+
+        // ... and a parent creates a new code at the same moment, which revokes the old one.
+        await _context.CreatePairingCodeAsync(family);
+
+        // Act: the device marks its (now revoked) code used.
+        read!.UsedAt = _context.Time.GetUtcNow().UtcDateTime;
+
+        // Assert
+        await Assert.ThrowsAsync<DbUpdateConcurrencyException>(() => unitOfWork.SaveChangesAsync());
     }
 
     [Fact]

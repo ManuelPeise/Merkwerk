@@ -41,8 +41,14 @@ const DevicesSection: React.FC = () => {
                 return;
             }
 
+            if (result.error) {
+                // Keep the last known list: an empty one would claim that no device is paired.
+                setLoadErrorKey(result.error.messageKey);
+                return;
+            }
+
             setDevices(result.data ?? []);
-            setLoadErrorKey(result.error ? result.error.messageKey : null);
+            setLoadErrorKey(null);
         });
 
         return () => controller.abort();
@@ -98,7 +104,7 @@ const DevicesSection: React.FC = () => {
             {loadErrorKey && <Alert severity="error">{getResource(loadErrorKey)}</Alert>}
 
             {devices === null ? (
-                <LoadingIndicator />
+                !loadErrorKey && <LoadingIndicator />
             ) : devices.length === 0 ? (
                 <Typography color="text.secondary">{getResource('captionNoDevices')}</Typography>
             ) : (

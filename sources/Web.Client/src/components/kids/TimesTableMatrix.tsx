@@ -183,7 +183,7 @@ const TimesTableMatrix: React.FC<IProps> = (props) => {
                 <Paper
                     component="section"
                     variant="outlined"
-                    aria-label={getResource('captionDotArray', {
+                    aria-label={getResource('captionDotArrayDescription', {
                         groups: selectedRow,
                         dots: selectedColumn,
                     })}
@@ -191,7 +191,7 @@ const TimesTableMatrix: React.FC<IProps> = (props) => {
                 >
                     <Stack spacing={1.5}>
                         <Typography variant="h6" component="h2">
-                            {getResource('captionDotArray', {
+                            {getResource('captionDotArrayDescription', {
                                 groups: selectedRow,
                                 dots: selectedColumn,
                             })}

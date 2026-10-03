@@ -2,6 +2,7 @@ using System.Linq.Expressions;
 using Data.Database.Abstractions;
 using Data.Database.Converters;
 using Data.Database.Entities.Base;
+using Data.Database.Entities.Devices;
 using Data.Database.Entities.Identity;
 using Data.Database.Entities.Learners;
 using Data.Database.Entities.Organizations;
@@ -49,6 +50,12 @@ public class MerkwerkDbContext : IdentityUserContext<User, long>
     public DbSet<Invitation> Invitations => Set<Invitation>();
 
     public DbSet<Learner> Learners => Set<Learner>();
+
+    public DbSet<Device> Devices => Set<Device>();
+
+    public DbSet<PairingCode> PairingCodes => Set<PairingCode>();
+
+    public DbSet<LearnerSession> LearnerSessions => Set<LearnerSession>();
 
     /// <summary>Read by the query filter on every query (EF parameterizes context members).</summary>
     protected long? CurrentOrganizationId => _currentUser.OrganizationId;

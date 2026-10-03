@@ -14,6 +14,14 @@ public interface IUnitOfWork : IAsyncDisposable
 
     IInvitationRepository Invitations { get; }
 
+    ILearnerRepository Learners { get; }
+
+    IDeviceRepository Devices { get; }
+
+    IPairingCodeRepository PairingCodes { get; }
+
+    ILearnerSessionRepository LearnerSessions { get; }
+
     /// <summary>Repository for <typeparamref name="T"/>; returns the specialized one if it exists (e.g. <see cref="Organizations"/>).</summary>
     IRepository<T> Repository<T>()
         where T : AEntityBase;

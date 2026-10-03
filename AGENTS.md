@@ -26,7 +26,7 @@ practise on a tablet or phone. Deployment: self-hosted, the family instance runs
 | UI | **React 19 + TypeScript** (Vite, MUI, react-router-dom, axios, i18next) in `Web.Client` – adults `/admin`, children `/practice` (PWA) – ADR 015 |
 | API | ASP.NET Core **controllers** in `Web.Core` under `/api/v1`, OpenAPI + Swagger UI (development), errors as `ProblemDetails` |
 | Database | MySQL 8.4 LTS, EF Core 10, provider **MySql.EntityFrameworkCore** (Oracle). **No Pomelo.** |
-| Auth | ASP.NET Core Identity + **JWT** (access token 15 min, rotating refresh token stored hashed in the DB). Browsers: HttpOnly cookies `mw_access` / `mw_refresh` |
+| Auth | ASP.NET Core Identity + **JWT** (access token 15 min, rotating refresh token stored hashed in the DB). Browsers: HttpOnly cookies `mw_access` / `mw_refresh`. Children: paired device (`mw_device`, 180 days) + 8-hour session without password (LP-106) |
 | Mail | SMTP via MailKit in `Logic.Notifications` (LP-162); Mailpit catches all mails in development |
 | Tests | xUnit, NSubstitute, Testcontainers (MySQL); UI: ESLint/TypeScript now, Vitest planned |
 | Operations | Docker Compose (Caddy, app, MySQL), multi-arch images (amd64 + arm64). Development runs over plain HTTP |
@@ -44,6 +44,7 @@ sources/Merkwerk.slnx
   02 Logic   Logic.Authentication   Login, token issuing, refresh-token rotation, sessions (DI/ for registration)
              Logic.Notifications    Mails: IMailService (SMTP via MailKit), templates de/en, IPublicLinkBuilder
              Logic.Organizations    First-run setup, families, memberships, invitations, child profiles (LP-105)
+             Logic.Devices          Device pairing, paired devices, children's sessions on them (LP-106)
              Logic.Shared           Pure logic shared by modules (graders, generators) – no I/O
   03 Data    Data.Database          Entities, MerkwerkDbContext, configurations, interceptors, migrations
              Data.Accessor          Repositories and unit of work – the only way to reach the database
@@ -53,6 +54,7 @@ sources/Merkwerk.slnx
              Logic.Authentication.Tests  Unit tests of token issuing and session rotation
              Logic.Notifications.Tests   Template renderer, links; delivery into Mailpit (Testcontainers, needs Docker)
              Logic.Organizations.Tests   Setup, invitations, members, learners against MySQL (Testcontainers, needs Docker)
+             Logic.Devices.Tests         Pairing, devices, children's sessions against MySQL (Testcontainers, needs Docker)
 ```
 
 | Project | May reference |
@@ -62,7 +64,7 @@ sources/Merkwerk.slnx
 | Data.Accessor | Data.Database |
 | Logic.Notifications | Logic.Shared |
 | Logic.Authentication | Logic.Shared, Logic.Notifications, Data.Accessor |
-| Logic.* (e.g. Logic.Organizations) | Logic.Shared, Logic.Notifications, Logic.Authentication, Data.Accessor |
+| Logic.* (e.g. Logic.Organizations, Logic.Devices) | Logic.Shared, Logic.Notifications, Logic.Authentication, Data.Accessor |
 | Web.Core | Logic.*, Data.Accessor / Data.Database (the latter two for DI registration only) |
 | Web.Client | no .NET project – only the REST API |
 
@@ -82,7 +84,8 @@ sources/Merkwerk.slnx
 
 Business areas: `Organizations` (setup, memberships, invitations, child profiles – `Logic.Organizations`, LP-105), `Learners`, `Exercises`, `Assignments`, `Practice` (attempts, answers, learning state),
 `Progress`, `WordLists`, later `Sharing`, `Administration`. Authentication lives in `Logic.Authentication`
-(`IAuthSessionService`, `TokenService`, options) so it can grow (Identity, invitations, device pairing – LP-104 to LP-106).
+(`IAuthSessionService`, `TokenService`, options); device pairing and children's sessions live in `Logic.Devices`
+(`IDeviceService`, `ILearnerSessionService`, LP-106) and use `TokenService` for the learner tokens.
 Per module: `I<Name>Service` + implementation, validators, module-internal types, registration in a `DI/` extension.
 
 ## 5. Data access (ADR 004, 007, 008, 011, 012)
@@ -106,6 +109,9 @@ Per module: `I<Name>Service` + implementation, validators, module-internal types
   (IDs are sequential and guessable). Use `IgnoreQueryFilters()` only in the `Administration` module, with a comment explaining why.
   Exception (LP-105): named lookups in Data.Accessor that must work before an organization is known –
   `IMembershipRepository.FindPrimaryForUserAsync`/`FindAsync` (login, invitations) and `IInvitationRepository.FindByTokenHashAsync`.
+  Exception (LP-106): anonymous device requests – `IDeviceRepository.FindByTokenHashAsync`,
+  `IPairingCodeRepository.FindUsableByHashAsync`, `ILearnerSessionRepository.FindByTokenHashAsync` and
+  `ILearnerRepository.ListForDeviceAsync`/`FindForDeviceAsync` (filtered explicitly by the device's organization).
 - Exercise content (`Question.Payload`, `Question.Solution`, generator parameters) is stored in JSON columns with polymorphic types
   (`System.Text.Json`, type discriminator). A new question type = a new class, **no** migration.
 - Migrations: `dotnet ef migrations add <Name> -p Data.Database -s Web.Core` (run `dotnet tool restore` once – dotnet-ef is
@@ -145,6 +151,9 @@ touch targets ≥ 64×64 px, icons plus text and friendly feedback; no CDNs, no 
 - The default policy also rejects tokens with `must_change_password` (start password, LP-104); only endpoints with
   `[Authorize(Policy = AuthorizationPolicies.PasswordChangeAllowed)]` (me, change-password) accept them.
 - Mail language for an endpoint: `MailLanguage` from `ApiControllerBase` (Accept-Language, default `de`).
+- Children's tokens (role `Learner`, `sub` = learner id, claims `learner_id`, `device_id`) pass only the policies
+  `Learner` and `AnySession` (me); `CurrentUserId` is `null` for them (LP-106). Device endpoints identify the device by
+  the cookie `mw_device` and answer `403` (not `401`) for unpaired devices.
 
 ## 9. Security and privacy (non-negotiable)
 

@@ -19,6 +19,7 @@
   <ItemGroup>
     <ProjectReference Include="..\Web.Core\Web.Core.csproj" />
     <ProjectReference Include="..\Logic.Authentication\Logic.Authentication.csproj" />
+    <ProjectReference Include="..\Logic.Devices\Logic.Devices.csproj" />
     <ProjectReference Include="..\Logic.Notifications\Logic.Notifications.csproj" />
     <ProjectReference Include="..\Logic.Organizations\Logic.Organizations.csproj" />
     <ProjectReference Include="..\Logic.Shared\Logic.Shared.csproj" />

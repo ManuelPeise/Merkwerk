@@ -13,6 +13,7 @@ Authoritative: [`AGENTS.md`](../../AGENTS.md) and the ADRs in `docs/adr/`. Summa
 | --- | --- | --- |
 | `Web.Core` | Startup project. `Bundels/` (service registration, pipeline), `Services/ApiControllers/<Module>/` (controller + `Dtos/`), `Services/Cookies/` | `Logic.*` (and `Data.*` for DI registration only) |
 | `Logic.Authentication` | Login, token issuing, refresh-token rotation (`IAuthSessionService`, `TokenService`), `DI/` | `Logic.Shared`, `Data.Accessor` |
+| `Logic.Organizations`, `Logic.Devices` (other `Logic.*`) | Setup, families, invitations, child profiles (LP-105); device pairing and children's sessions (`IDeviceService`, `ILearnerSessionService`, LP-106), `DI/` | `Logic.Shared`, `Logic.Notifications`, `Logic.Authentication`, `Data.Accessor` |
 | `Logic.Shared` | Pure logic shared by modules (graders, generators); no I/O | – |
 | `Data.Database` | Entities, `MerkwerkDbContext`, configurations, interceptors, migrations | – |
 | `Data.Accessor` | Repositories, `IUnitOfWork`, `IUnitOfWorkFactory` – the only way to the database | `Data.Database` |
@@ -31,6 +32,9 @@ Authoritative: [`AGENTS.md`](../../AGENTS.md) and the ADRs in `docs/adr/`. Summa
 - Every endpoint has `[Authorize]` with a policy (`Learner`, `Member`, `OrgAdmin`, `InstanceAdmin`) except explicitly
   anonymous ones (login, setup, invitation details/accept, device pairing). Document responses with `[ProducesResponseType]`.
 - Auth cookies only through `AuthCookieWriter` (HttpOnly, SameSite=Strict, Secure outside development).
+- Children's tokens (role `Learner`, `sub` = learner id, claims `learner_id`, `device_id`) pass only the policies
+  `Learner` and `AnySession` (me); `CurrentUserId` is `null` for them (LP-106). Device endpoints identify the device by
+  the cookie `mw_device` and answer `403` (not `401`) for unpaired devices.
 
 ## Data access
 
@@ -38,6 +42,8 @@ Authoritative: [`AGENTS.md`](../../AGENTS.md) and the ADRs in `docs/adr/`. Summa
 - Time is UTC from `TimeProvider` – never `DateTime.Now`/`UtcNow`.
 - One unit of work per business operation (`await using var uow = _uowFactory.Create();`). Reads: `AsNoTracking()` +
   `Select` into DTOs. Tenant isolation: global query filter **plus** an explicit organisation check in the service.
+  `IgnoreQueryFilters()` only in `Administration` and in the named lookups listed in AGENTS.md §5 (LP-105 login/invitations,
+  LP-106 anonymous device requests – filtered explicitly by the device's organization).
 - Migrations: `dotnet ef migrations add <Name> -p Data.Database -s Web.Core`; small, schema and data never mixed,
   in a commit of their own.
 

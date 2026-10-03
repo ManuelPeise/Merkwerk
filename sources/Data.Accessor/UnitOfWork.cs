@@ -2,6 +2,8 @@ using Data.Accessor.Abstractions;
 using Data.Accessor.Repositories;
 using Data.Database;
 using Data.Database.Entities.Base;
+using Data.Database.Entities.Devices;
+using Data.Database.Entities.Learners;
 using Data.Database.Entities.Organizations;
 
 namespace Data.Accessor;
@@ -16,6 +18,14 @@ internal sealed class UnitOfWork(MerkwerkDbContext context) : IUnitOfWork
     public IMembershipRepository Memberships => (IMembershipRepository)Repository<Membership>();
 
     public IInvitationRepository Invitations => (IInvitationRepository)Repository<Invitation>();
+
+    public ILearnerRepository Learners => (ILearnerRepository)Repository<Learner>();
+
+    public IDeviceRepository Devices => (IDeviceRepository)Repository<Device>();
+
+    public IPairingCodeRepository PairingCodes => (IPairingCodeRepository)Repository<PairingCode>();
+
+    public ILearnerSessionRepository LearnerSessions => (ILearnerSessionRepository)Repository<LearnerSession>();
 
     public IRepository<T> Repository<T>()
         where T : AEntityBase
@@ -51,6 +61,26 @@ internal sealed class UnitOfWork(MerkwerkDbContext context) : IUnitOfWork
         if (typeof(T) == typeof(Invitation))
         {
             return new InvitationRepository(context);
+        }
+
+        if (typeof(T) == typeof(Learner))
+        {
+            return new LearnerRepository(context);
+        }
+
+        if (typeof(T) == typeof(Device))
+        {
+            return new DeviceRepository(context);
+        }
+
+        if (typeof(T) == typeof(PairingCode))
+        {
+            return new PairingCodeRepository(context);
+        }
+
+        if (typeof(T) == typeof(LearnerSession))
+        {
+            return new LearnerSessionRepository(context);
         }
 
         return new EntityRepository<T>(context);

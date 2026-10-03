@@ -1,6 +1,9 @@
 namespace Logic.Authentication;
 
-/// <summary>Result of a successful login or refresh: the tokens plus what the client may know about the user.</summary>
+/// <summary>
+/// Result of a successful login or refresh: the tokens plus what the client may know about the user.
+/// <see cref="AvatarId"/> is only set for children (LP-106).
+/// </summary>
 public sealed record AuthSession(
     string Name,
     string Role,
@@ -8,4 +11,5 @@ public sealed record AuthSession(
     string AccessToken,
     DateTimeOffset AccessTokenExpiresAt,
     string RefreshToken,
-    DateTimeOffset RefreshTokenExpiresAt);
+    DateTimeOffset RefreshTokenExpiresAt,
+    string? AvatarId = null);

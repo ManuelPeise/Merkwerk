@@ -45,9 +45,13 @@ public abstract class ApiControllerBase : ControllerBase
         return ValidationProblem(ModelState);
     }
 
-    /// <summary>Id of the signed-in adult (sub claim), or null for anonymous calls.</summary>
+    /// <summary>
+    /// Id of the signed-in adult (sub claim), or null for anonymous calls and children – a child's sub is a learner id
+    /// and must never be taken for a user id (LP-106).
+    /// </summary>
     protected long? CurrentUserId =>
-        long.TryParse(User.FindFirst(AuthClaims.Subject)?.Value, NumberStyles.None, CultureInfo.InvariantCulture, out var id)
+        !User.IsInRole(AuthRoles.Learner)
+        && long.TryParse(User.FindFirst(AuthClaims.Subject)?.Value, NumberStyles.None, CultureInfo.InvariantCulture, out var id)
             ? id
             : null;
 }

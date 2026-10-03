@@ -32,6 +32,9 @@ public static class AppConfigurationExtensions
         app.UseAuthentication();
         app.UseAuthorization();
 
+        // After routing (implicit) – endpoint policies such as device pairing (LP-106).
+        app.UseRateLimiter();
+
         app.MapControllers();
 
         return app;

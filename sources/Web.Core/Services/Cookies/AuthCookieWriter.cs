@@ -24,6 +24,16 @@ public sealed class AuthCookieWriter(IWebHostEnvironment environment)
         response.Cookies.Delete(AuthCookies.RefreshToken, CreateOptions(response.HttpContext, AuthCookies.RefreshTokenPath, expires: null));
     }
 
+    /// <summary>Device token of a paired device (LP-106); renewed with every child sign-in.</summary>
+    public void WriteDevice(HttpResponse response, string deviceToken, DateTimeOffset expiresAt) =>
+        response.Cookies.Append(
+            AuthCookies.DeviceToken,
+            deviceToken,
+            CreateOptions(response.HttpContext, AuthCookies.DeviceTokenPath, expiresAt));
+
+    public void DeleteDevice(HttpResponse response) =>
+        response.Cookies.Delete(AuthCookies.DeviceToken, CreateOptions(response.HttpContext, AuthCookies.DeviceTokenPath, expires: null));
+
     private CookieOptions CreateOptions(HttpContext context, string path, DateTimeOffset? expires) => new()
     {
         HttpOnly = true,

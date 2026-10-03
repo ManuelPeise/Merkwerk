@@ -14,7 +14,7 @@ assign exercises. Self-hosted, the family instance runs on a Raspberry Pi (ARM64
 | --- | --- | --- |
 | UI | `sources/Web.Client` | React 19, TypeScript, Vite, MUI, react-router-dom, axios, i18next (npm) |
 | API host | `sources/Web.Core` | ASP.NET Core (.NET 10), controllers under `/api/v1`, OpenAPI/Swagger |
-| Business logic | `sources/Logic.*` | `Logic.Authentication`, `Logic.Shared`, later more `Logic.*` modules |
+| Business logic | `sources/Logic.*` | `Logic.Authentication`, `Logic.Notifications`, `Logic.Organizations`, `Logic.Devices`, `Logic.Shared`, later more `Logic.*` modules |
 | Data | `sources/Data.Database`, `sources/Data.Accessor` | EF Core 10, MySQL 8.4 (MySql.EntityFrameworkCore, **no Pomelo**) |
 | Operations | `deploy/` | Docker Compose, Caddy, MySQL (dev: plain HTTP, no certificate) |
 
@@ -41,6 +41,7 @@ assign exercises. Self-hosted, the family instance runs on a Raspberry Pi (ARM64
 - Logs contain no personal data (no names, e-mail addresses, tokens, children's answers).
 - Auth: JWT in HttpOnly cookies (`mw_access`, `mw_refresh`), refresh-token rotation (ADR 013). The browser client never
   reads or stores tokens. The server's `[Authorize]` and tenant checks protect data – UI guards only improve the UX.
+  Children sign in without a password on a paired device (cookie `mw_device`, 180 days) with an 8-hour session (LP-106).
 
 ## Definition of Done
 

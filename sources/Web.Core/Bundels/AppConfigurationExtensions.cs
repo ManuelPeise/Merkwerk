@@ -25,6 +25,8 @@ public static class AppConfigurationExtensions
             app.UseHsts();
         }
 
+        app.UseCors();
+
         app.UseHttpsRedirection();
 
         app.UseAuthentication();

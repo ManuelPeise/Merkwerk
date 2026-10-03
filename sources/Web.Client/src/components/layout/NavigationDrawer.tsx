@@ -11,8 +11,7 @@ import {
 import { Link, matchPath, useLocation } from 'react-router-dom';
 import { useTranslation } from 'src/hooks/useTranslation';
 import { drawerWidth, headerHeight } from 'src/components/layout/layoutConstants';
-import { useAuthentication } from 'src/hooks/useAuthentication';
-import { isNavigationItemVisible, navigationItems } from 'src/navigation/navigationItems';
+import { navigationItems } from 'src/navigation/navigationItems';
 import { routes } from 'src/navigation/routes';
 
 interface IProps {
@@ -26,7 +25,6 @@ const NavigationDrawer: React.FC<IProps> = (props) => {
     const { variant, open, onClose } = props;
 
     const { getResource } = useTranslation();
-    const { status } = useAuthentication();
     const { pathname } = useLocation();
 
     const isActive = (path: string): boolean =>
@@ -47,23 +45,21 @@ const NavigationDrawer: React.FC<IProps> = (props) => {
             <Toolbar sx={{ minHeight: headerHeight }} />
             <Box component="nav" aria-label={getResource('labelMainNavigation')}>
                 <List>
-                    {navigationItems
-                        .filter((item) => isNavigationItemVisible(item, status))
-                        .map(({ path, labelKey, icon: Icon }) => (
-                            <ListItemButton
-                                key={path}
-                                component={Link}
-                                to={path}
-                                selected={isActive(path)}
-                                onClick={onClose}
-                                sx={{ minHeight: 64, mx: 1, borderRadius: 2 }}
-                            >
-                                <ListItemIcon>
-                                    <Icon />
-                                </ListItemIcon>
-                                <ListItemText primary={getResource(labelKey)} />
-                            </ListItemButton>
-                        ))}
+                    {navigationItems.map(({ path, labelKey, icon: Icon }) => (
+                        <ListItemButton
+                            key={path}
+                            component={Link}
+                            to={path}
+                            selected={isActive(path)}
+                            onClick={onClose}
+                            sx={{ minHeight: 64, mx: 1, borderRadius: 2 }}
+                        >
+                            <ListItemIcon>
+                                <Icon />
+                            </ListItemIcon>
+                            <ListItemText primary={getResource(labelKey)} />
+                        </ListItemButton>
+                    ))}
                 </List>
             </Box>
         </Drawer>

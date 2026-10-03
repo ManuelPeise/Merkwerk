@@ -29,6 +29,24 @@ public static class ServiceRegistrationExtensions
             return Task.CompletedTask;
         }));
 
+        services.AddCors(options =>
+        {
+            var allowedOrigins = configuration.GetSection("AllowedOrigins").Get<string[]>();
+
+            if (allowedOrigins == null || allowedOrigins.Length == 0)
+            {
+                throw new InvalidOperationException("No allowed origins configured for CORS. Please set 'Cors:AllowedOrigins' in appsettings.json.");
+            }
+
+            options.AddDefaultPolicy(builder =>
+            {
+                builder.WithOrigins(allowedOrigins)
+                    .AllowAnyHeader()
+                    .AllowAnyMethod()
+                    .AllowCredentials();
+            });
+        });
+
         services.AddMerkwerkAuthentication(configuration);
         services.AddMerkwerkLogicSharedServices(configuration);
 

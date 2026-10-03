@@ -53,7 +53,8 @@ flowchart LR
 - **Service** contains service-registration extensions and API authentication wiring; it is not the former API
   controller project.
 - **Logic.Authentication** contains authentication/session business logic. **Logic.Notifications** contains mail
-  abstractions, templates, and SMTP delivery.
+  abstractions, templates, and SMTP delivery. **Logic.Organizations** holds setup, memberships, invitations and child
+  profiles (LP-105); **Logic.Devices** holds device pairing and children's sessions (LP-106).
 - **Data.Accessor** is the application-facing repository/unit-of-work layer. **Data.Database** contains EF Core entities,
   configuration, interceptors, and migrations.
 - **Logic.Shared** is intended for pure shared graders and generators. Those exercise modules are not yet implemented.
@@ -99,6 +100,11 @@ npm run dev
 ```
 
 Vite listens at `http://localhost:65350` and proxies `/api` to `http://localhost:5138`. Development uses plain HTTP.
+
+To try the children's area (LP-106): add a child under **Familie**, create a pairing code under **Geräte**
+(`/admin/devices`) and enter it at `/practice/pair` – on a phone in the LAN, or in a second browser profile (the device
+cookie `mw_device` and the auth cookies are per browser profile). Pairing allows 5 attempts per minute and client
+address; more answer `429`.
 For the local TLS reverse proxy and LAN-device workflow, see the comments in `deploy/docker-compose.yml` and
 `deploy/Caddyfile.dev`.
 

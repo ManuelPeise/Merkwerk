@@ -1,0 +1,5 @@
+using System.ComponentModel.DataAnnotations;
+
+namespace Web.Core.Services.ApiControllers.Devices.Dtos;
+
+public sealed record DeviceSignInRequestDto([Range(1, long.MaxValue)] long LearnerId);

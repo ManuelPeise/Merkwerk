@@ -10,6 +10,7 @@ import PublicRoute from 'src/navigation/PublicRoute';
 import { routes } from 'src/navigation/routes';
 import AdminPage from 'src/pages/adminPage/AdminPage';
 import ConfirmEmailPage from 'src/pages/authentication/confirmEmailPage/ConfirmEmailPage';
+import DevicesPage from 'src/pages/devicesPage/DevicesPage';
 import ErrorPage from 'src/pages/errorPage/ErrorPage';
 import FamilyPage from 'src/pages/familyPage/FamilyPage';
 import ForgotPasswordPage from 'src/pages/authentication/forgotPasswordPage/ForgotPasswordPage';
@@ -68,6 +69,7 @@ export const router = createBrowserRouter([
                                 children: [
                                     { path: routes.admin, element: <AdminPage /> },
                                     { path: routes.family, element: <FamilyPage /> },
+                                    { path: routes.devices, element: <DevicesPage /> },
                                 ],
                             },
                         ],

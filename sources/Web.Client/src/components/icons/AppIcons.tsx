@@ -6,11 +6,13 @@ import DeleteOutlineIconMui from '@mui/icons-material/DeleteOutlined';
 import EditIconMui from '@mui/icons-material/Edit';
 import FaceIconMui from '@mui/icons-material/Face';
 import GroupsIconMui from '@mui/icons-material/Groups';
+import LinkOffIconMui from '@mui/icons-material/LinkOff';
 import LockResetIconMui from '@mui/icons-material/LockReset';
 import LogoutIconMui from '@mui/icons-material/Logout';
 import MenuIconMui from '@mui/icons-material/Menu';
 import SupervisorAccountIconMui from '@mui/icons-material/SupervisorAccount';
 import SwitchAccountIconMui from '@mui/icons-material/SwitchAccount';
+import TabletAndroidIconMui from '@mui/icons-material/TabletAndroid';
 import VisibilityIconMui from '@mui/icons-material/Visibility';
 import VisibilityOffIconMui from '@mui/icons-material/VisibilityOff';
 
@@ -20,6 +22,7 @@ export const LogoutIcon = LogoutIconMui;
 export const AdminIcon = SupervisorAccountIconMui;
 export const SwitchAccountIcon = SwitchAccountIconMui;
 export const FamilyIcon = GroupsIconMui;
+export const DevicesIcon = TabletAndroidIconMui;
 
 // Landing page
 export const ChildIcon = FaceIconMui;
@@ -36,3 +39,6 @@ export const AddIcon = AddIconMui;
 export const EditIcon = EditIconMui;
 export const DeleteIcon = DeleteOutlineIconMui;
 export const ResetPasswordIcon = LockResetIconMui;
+
+// Devices page
+export const UnpairIcon = LinkOffIconMui;

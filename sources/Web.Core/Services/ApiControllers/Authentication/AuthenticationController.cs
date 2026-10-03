@@ -1,6 +1,7 @@
 using Logic.Authentication;
 using Logic.Authentication.Accounts;
 using Logic.Authentication.Sessions;
+using Logic.Devices.Sessions;
 using Logic.Organizations.Members;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -12,12 +13,14 @@ namespace Web.Core.Services.ApiControllers.Authentication;
 
 /// <summary>
 /// Login, token refresh, logout and account operations (ADR 013, LP-104). Tokens travel only in HttpOnly cookies;
-/// the logic lives in Logic.Authentication, this controller does transport only.
+/// the logic lives in Logic.Authentication, this controller does transport only. Refresh and logout also serve
+/// children's sessions on paired devices (LP-106, Logic.Devices) – the client knows only one refresh path.
 /// </summary>
 public sealed class AuthenticationController(
     IAuthSessionService authSessionService,
     IAccountService accountService,
     IMemberService memberService,
+    ILearnerSessionService learnerSessionService,
     AuthCookieWriter cookieWriter) : ApiControllerBase
 {
     /// <summary>POST /api/v1/authentication/login – checks the credentials and sets the auth cookies.</summary>
@@ -57,7 +60,8 @@ public sealed class AuthenticationController(
         var refreshToken = Request.Cookies[AuthCookies.RefreshToken];
         var session = string.IsNullOrEmpty(refreshToken)
             ? null
-            : await authSessionService.RefreshAsync(refreshToken, cancellationToken);
+            : await authSessionService.RefreshAsync(refreshToken, cancellationToken)
+                ?? await learnerSessionService.RefreshAsync(refreshToken, cancellationToken);
 
         if (session is null)
         {
@@ -82,22 +86,27 @@ public sealed class AuthenticationController(
 
         if (!string.IsNullOrEmpty(refreshToken))
         {
+            // Adult chain or child session ("switch child") – each service ignores tokens it doesn't know.
             await authSessionService.LogoutAsync(refreshToken, cancellationToken);
+            await learnerSessionService.SignOutAsync(refreshToken, cancellationToken);
         }
 
         cookieWriter.Delete(Response);
         return NoContent();
     }
 
-    /// <summary>GET /api/v1/authentication/me – who is signed in? Lets the client restore its state after a reload.</summary>
-    [Authorize(Policy = AuthorizationPolicies.PasswordChangeAllowed)]
+    /// <summary>
+    /// GET /api/v1/authentication/me – who is signed in (adult or child)? Lets the client restore its state after a reload.
+    /// </summary>
+    [Authorize(Policy = AuthorizationPolicies.AnySession)]
     [HttpGet]
     [ProducesResponseType<CurrentUserDto>(StatusCodes.Status200OK)]
     [ProducesResponseType<ProblemDetails>(StatusCodes.Status401Unauthorized)]
     public ActionResult<CurrentUserDto> Me() => new CurrentUserDto(
         User.FindFirst(AuthClaims.Name)?.Value ?? string.Empty,
         User.FindFirst(AuthClaims.Role)?.Value ?? string.Empty,
-        User.HasClaim(AuthClaims.MustChangePassword, "true"));
+        User.HasClaim(AuthClaims.MustChangePassword, "true"),
+        User.FindFirst(AuthClaims.AvatarId)?.Value);
 
     /// <summary>POST /api/v1/authentication/forgot-password – mails a reset link if the account exists. Always 204.</summary>
     [AllowAnonymous]

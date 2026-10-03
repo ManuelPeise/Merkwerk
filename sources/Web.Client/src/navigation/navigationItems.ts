@@ -1,6 +1,6 @@
 import type { ComponentType } from 'react';
 import type { SvgIconProps } from '@mui/material';
-import { AdminIcon, FamilyIcon } from 'src/components/icons/AppIcons';
+import { AdminIcon, DevicesIcon, FamilyIcon } from 'src/components/icons/AppIcons';
 import type { LabelKey } from 'src/lib/translations/translationKeys';
 import { routes } from 'src/navigation/routes';
 
@@ -14,4 +14,5 @@ export type NavigationItem = {
 export const navigationItems: readonly NavigationItem[] = [
     { path: routes.admin, labelKey: 'labelNavigationAdmin', icon: AdminIcon },
     { path: routes.family, labelKey: 'labelNavigationFamily', icon: FamilyIcon },
+    { path: routes.devices, labelKey: 'labelNavigationDevices', icon: DevicesIcon },
 ];

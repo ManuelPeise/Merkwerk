@@ -22,3 +22,24 @@ export interface IDeviceProfile {
 export interface IDeviceSignInRequest {
     learnerId: number;
 }
+
+/** Six digits, valid for 10 minutes; pairingUrl goes into the QR code (LP-106). */
+export interface IPairingCode {
+    code: string;
+    /** ISO date-time. */
+    expiresAt: string;
+    pairingUrl: string;
+}
+
+/** A paired device in the parents' area. Times are ISO date-times (UTC). */
+export interface IDevice {
+    id: number;
+    name: string;
+    pairedAt: string;
+    lastSeenAt?: string | null;
+    expiresAt: string;
+}
+
+export interface IRevokeDeviceRequest {
+    id: number;
+}

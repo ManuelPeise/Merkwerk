@@ -2,6 +2,7 @@ using Data.Accessor.DI;
 using Data.Database.Abstractions;
 using Logic.Authentication;
 using Logic.Authentication.DI;
+using Logic.Devices.DI;
 using Logic.Notifications.DI;
 using Logic.Organizations.DI;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
@@ -69,6 +70,10 @@ public static class ServiceRegistrationExtensions
 
         // Families, invitations, members, child profiles (LP-105).
         services.AddMerkwerkOrganizations();
+
+        // Paired devices and children's sessions (LP-106); pairing is rate-limited.
+        services.AddMerkwerkDevices();
+        services.AddMerkwerkRateLimiting();
 
         // Mail via SMTP (LP-162): Mailpit in development, MAIL_* from deploy/.env in production.
         services.AddMerkwerkNotifications(configuration);

@@ -1,4 +1,4 @@
-import React from 'react';
+﻿import React from 'react';
 import { Alert, Stack } from '@mui/material';
 import { useNavigate } from 'react-router-dom';
 import FormButton from 'src/components/input/FormButton';
@@ -17,7 +17,7 @@ import {
     getPasswordError,
     getPasswordRepeatError,
 } from 'src/lib/auth/authValidation';
-import { testIds } from 'src/lib/testing/testIds';
+import { uiTestId, uiTestIdOf } from 'src/lib/testing/uiTestId';
 import type { NotificationKey } from 'src/lib/translations/translationKeys';
 import { utils } from 'src/lib/utils';
 import { routes } from 'src/navigation/routes';
@@ -47,6 +47,8 @@ const isSetupValid = (model: ISetupForm): boolean =>
     utils.validation.validatePassword(model.password) &&
     model.password === model.passwordRepeat &&
     model.privacyAccepted;
+
+const setupCardUiTestId = uiTestId('auth-setup-card');
 
 /** First start: creates the owner account and the family. Afterwards the user is signed in. */
 const SetupPage: React.FC = () => {
@@ -100,7 +102,7 @@ const SetupPage: React.FC = () => {
         }
 
         await reloadUser();
-        // Tell the SetupGate first – otherwise it would send /admin straight back to /setup.
+        // Tell the SetupGate first - otherwise it would send /admin straight back to /setup.
         markSetupDone();
         navigate(routes.admin, { replace: true });
     };
@@ -109,7 +111,7 @@ const SetupPage: React.FC = () => {
         <AuthCard
             title={getResource('captionSetup')}
             subtitle={getResource('captionSetupDescription')}
-            testId={testIds.auth.setup}
+            uiTestId={setupCardUiTestId}
         >
             <form onSubmit={handleSubmit} noValidate>
                 <Stack spacing={2}>
@@ -120,6 +122,7 @@ const SetupPage: React.FC = () => {
                         required
                         value={state.familyName}
                         errorText={fieldErrors.familyName}
+                        uiTestId={uiTestIdOf(setupCardUiTestId, 'family-name')}
                         onChange={(familyName) => update({ familyName })}
                     />
                     <FormTextField
@@ -129,6 +132,7 @@ const SetupPage: React.FC = () => {
                         required
                         value={state.displayName}
                         errorText={fieldErrors.displayName}
+                        uiTestId={uiTestIdOf(setupCardUiTestId, 'display-name')}
                         onChange={(displayName) => update({ displayName })}
                     />
                     <FormTextField
@@ -138,6 +142,7 @@ const SetupPage: React.FC = () => {
                         required
                         value={state.email}
                         errorText={fieldErrors.email ?? text(getEmailError(state.email))}
+                        uiTestId={uiTestIdOf(setupCardUiTestId, 'email')}
                         onChange={(email) => update({ email })}
                     />
                     <FormPasswordField
@@ -147,6 +152,7 @@ const SetupPage: React.FC = () => {
                         required
                         value={state.password}
                         errorText={fieldErrors.password ?? text(getPasswordError(state.password))}
+                        uiTestId={uiTestIdOf(setupCardUiTestId, 'password')}
                         onChange={(password) => update({ password })}
                     />
                     <FormPasswordField
@@ -158,6 +164,7 @@ const SetupPage: React.FC = () => {
                         errorText={text(
                             getPasswordRepeatError(state.password, state.passwordRepeat),
                         )}
+                        uiTestId={uiTestIdOf(setupCardUiTestId, 'password-repeat')}
                         onChange={(passwordRepeat) => update({ passwordRepeat })}
                     />
                     <FormCheckbox
@@ -171,6 +178,7 @@ const SetupPage: React.FC = () => {
                                 ? getResource('notificationPrivacyRequired')
                                 : undefined)
                         }
+                        uiTestId={uiTestIdOf(setupCardUiTestId, 'privacy-accepted')}
                         onChange={(privacyAccepted) => {
                             setIsPrivacyTouched(true);
                             update({ privacyAccepted });
@@ -180,6 +188,7 @@ const SetupPage: React.FC = () => {
                         label={getResource('labelCreateFamily')}
                         type="submit"
                         disabled={!isValid || isSubmitting}
+                        uiTestId={uiTestIdOf(setupCardUiTestId, 'submit')}
                     />
                 </Stack>
             </form>

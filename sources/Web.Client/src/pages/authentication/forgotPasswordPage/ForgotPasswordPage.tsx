@@ -1,4 +1,4 @@
-import React from 'react';
+﻿import React from 'react';
 import { Alert, Stack } from '@mui/material';
 import FormButton from 'src/components/input/FormButton';
 import FormLink from 'src/components/input/FormLink';
@@ -9,7 +9,7 @@ import { useTranslation } from 'src/hooks/useTranslation';
 import { authenticationApi } from 'src/lib/api/authentication/authenticationApi';
 import type { IForgotPasswordRequest } from 'src/lib/api/authentication/authenticationTypes';
 import { getEmailError } from 'src/lib/auth/authValidation';
-import { testIds } from 'src/lib/testing/testIds';
+import { uiTestId, uiTestIdOf } from 'src/lib/testing/uiTestId';
 import type { NotificationKey } from 'src/lib/translations/translationKeys';
 import { utils } from 'src/lib/utils';
 import { routes } from 'src/navigation/routes';
@@ -17,7 +17,9 @@ import { routes } from 'src/navigation/routes';
 const isForgotPasswordValid = (model: IForgotPasswordRequest): boolean =>
     utils.validation.validateEmail(model.email.trim());
 
-/** Always shows the same confirmation – it never reveals whether an account exists. */
+const forgotPasswordCardUiTestId = uiTestId('auth-forgot-password-card');
+
+/** Always shows the same confirmation - it never reveals whether an account exists. */
 const ForgotPasswordPage: React.FC = () => {
     const { getResource } = useTranslation();
     const { state, isValid, updateFormField } = useForm<IForgotPasswordRequest>(
@@ -55,11 +57,18 @@ const ForgotPasswordPage: React.FC = () => {
     const emailErrorKey = getEmailError(state.email);
 
     return (
-        <AuthCard title={getResource('captionForgotPassword')} testId={testIds.auth.forgotPassword}>
+        <AuthCard
+            title={getResource('captionForgotPassword')}
+            uiTestId={forgotPasswordCardUiTestId}
+        >
             {isSent ? (
                 <Stack spacing={2}>
                     <Alert severity="success">{getResource('notificationResetLinkSent')}</Alert>
-                    <FormLink to={routes.login} label={getResource('labelToLogin')} />
+                    <FormLink
+                        to={routes.login}
+                        label={getResource('labelToLogin')}
+                        uiTestId={uiTestIdOf(forgotPasswordCardUiTestId, 'to-login-link')}
+                    />
                 </Stack>
             ) : (
                 <form onSubmit={handleSubmit} noValidate>
@@ -72,14 +81,20 @@ const ForgotPasswordPage: React.FC = () => {
                             required
                             value={state.email}
                             errorText={emailErrorKey ? getResource(emailErrorKey) : undefined}
+                            uiTestId={uiTestIdOf(forgotPasswordCardUiTestId, 'email')}
                             onChange={(email) => updateFormField({ email })}
                         />
                         <FormButton
                             label={getResource('labelSendResetLink')}
                             type="submit"
                             disabled={!isValid || isSubmitting}
+                            uiTestId={uiTestIdOf(forgotPasswordCardUiTestId, 'submit')}
                         />
-                        <FormLink to={routes.login} label={getResource('labelToLogin')} />
+                        <FormLink
+                            to={routes.login}
+                            label={getResource('labelToLogin')}
+                            uiTestId={uiTestIdOf(forgotPasswordCardUiTestId, 'to-login-link')}
+                        />
                     </Stack>
                 </form>
             )}

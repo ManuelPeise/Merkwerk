@@ -1,4 +1,4 @@
-import React from 'react';
+﻿import React from 'react';
 import { Alert, Stack } from '@mui/material';
 import { useTranslation } from 'src/hooks/useTranslation';
 import AuthCard from 'src/components/layout/AuthCard';
@@ -11,7 +11,7 @@ import { useForm } from 'src/hooks/useForm';
 import type { ILoginRequest } from 'src/lib/api/authentication/authenticationTypes';
 import { problemTitles } from 'src/lib/api/problemTitles';
 import type { ApiError } from 'src/lib/api/types/apiError';
-import { testIds } from 'src/lib/testing/testIds';
+import { uiTestId, uiTestIdOf } from 'src/lib/testing/uiTestId';
 import type { NotificationKey } from 'src/lib/translations/translationKeys';
 import { getEmailError } from 'src/lib/auth/authValidation';
 import { routes } from 'src/navigation/routes';
@@ -19,6 +19,8 @@ import { utils } from 'src/lib/utils';
 
 const isLoginValid = (model: ILoginRequest): boolean =>
     utils.validation.validateEmail(model.email.trim()) && model.password !== '';
+
+const loginCardUiTestId = uiTestId('auth-login-card');
 
 /** 401 here means wrong credentials, not an expired session; 403 says why the correct password was not enough. */
 const getLoginErrorKey = (error: ApiError): NotificationKey => {
@@ -66,7 +68,7 @@ const LoginPage: React.FC = () => {
     const emailErrorKey = getEmailError(state.email);
 
     return (
-        <AuthCard title={getResource('captionLogin')} testId={testIds.auth.login}>
+        <AuthCard title={getResource('captionLogin')} uiTestId={loginCardUiTestId}>
             <form onSubmit={handleSubmit} noValidate>
                 <Stack spacing={2}>
                     {errorKey && <Alert severity="error">{getResource(errorKey)}</Alert>}
@@ -77,6 +79,7 @@ const LoginPage: React.FC = () => {
                         required
                         value={state.email}
                         errorText={emailErrorKey ? getResource(emailErrorKey) : undefined}
+                        uiTestId={uiTestIdOf(loginCardUiTestId, 'email')}
                         onChange={(email) => updateFormField({ email })}
                     />
                     <FormPasswordField
@@ -85,16 +88,19 @@ const LoginPage: React.FC = () => {
                         autoComplete="current-password"
                         required
                         value={state.password}
+                        uiTestId={uiTestIdOf(loginCardUiTestId, 'password')}
                         onChange={(password) => updateFormField({ password })}
                     />
                     <FormLink
                         to={routes.forgotPassword}
                         label={getResource('labelForgotPassword')}
+                        uiTestId={uiTestIdOf(loginCardUiTestId, 'forgot-password-link')}
                     />
                     <FormButton
                         label={getResource('labelLogin')}
                         type="submit"
                         disabled={!isValid || isSubmitting}
+                        uiTestId={uiTestIdOf(loginCardUiTestId, 'submit')}
                     />
                 </Stack>
             </form>

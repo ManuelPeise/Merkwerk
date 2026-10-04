@@ -1,4 +1,4 @@
-import React from 'react';
+﻿import React from 'react';
 import {
     Alert,
     Box,
@@ -16,7 +16,7 @@ import FormButton from 'src/components/input/FormButton';
 import { useTranslation } from 'src/hooks/useTranslation';
 import { devicesApi } from 'src/lib/api/devices/devicesApi';
 import type { IDevice } from 'src/lib/api/devices/devicesTypes';
-import { testIdOf, testIds } from 'src/lib/testing/testIds';
+import { uiTestId, uiTestIdOf } from 'src/lib/testing/uiTestId';
 import type { NotificationKey } from 'src/lib/translations/translationKeys';
 import ConfirmDialog from 'src/components/feedback/ConfirmDialog';
 
@@ -79,14 +79,14 @@ const DevicesSection: React.FC = () => {
             device.lastSeenAt
                 ? getResource('captionDeviceLastSeen', { date: formatDate(device.lastSeenAt) })
                 : getResource('captionDeviceNotUsedYet'),
-        ].join(' · ');
+        ].join(' Â· ');
 
     return (
         <Stack
             spacing={2}
             component="section"
             aria-labelledby="devices-heading"
-            data-testid={testIds.devices.pairedList}
+            data-testid={uiTestId('devices-paired-list-section')}
         >
             <Box
                 sx={{
@@ -99,7 +99,12 @@ const DevicesSection: React.FC = () => {
                 <Typography variant="h2" id="devices-heading">
                     {getResource('captionPairedDevices')}
                 </Typography>
-                <FormButton label={getResource('labelReload')} intent="cancel" onClick={reload} />
+                <FormButton
+                    label={getResource('labelReload')}
+                    intent="cancel"
+                    uiTestId={uiTestId('devices-reload-button')}
+                    onClick={reload}
+                />
             </Box>
 
             {feedback && (
@@ -110,7 +115,7 @@ const DevicesSection: React.FC = () => {
             {loadErrorKey && <Alert severity="error">{getResource(loadErrorKey)}</Alert>}
 
             {devices === null ? (
-                !loadErrorKey && <LoadingIndicator />
+                !loadErrorKey && <LoadingIndicator uiTestId={uiTestId('loading-devices-section')} />
             ) : devices.length === 0 ? (
                 <Typography color="text.secondary">{getResource('captionNoDevices')}</Typography>
             ) : (
@@ -119,7 +124,10 @@ const DevicesSection: React.FC = () => {
                         {devices.map((device) => (
                             <ListItem
                                 key={device.id}
-                                data-testid={testIds.devices.deviceItem(device.id)}
+                                data-testid={uiTestIdOf(
+                                    uiTestId('devices-paired-item'),
+                                    String(device.id),
+                                )}
                                 secondaryAction={
                                     <IconButton
                                         aria-label={getResource('labelRevokeDevice', {
@@ -145,7 +153,7 @@ const DevicesSection: React.FC = () => {
                     text={getResource('captionConfirmRevokeDevice', { name: toRevoke.name })}
                     confirmLabel={getResource('labelRevoke')}
                     disabled={isRevoking}
-                    testId={testIdOf(testIds.devices.pairedList, 'confirm-dialog')}
+                    uiTestId={uiTestId('devices-revoke-dialog')}
                     onConfirm={() => void handleRevoke(toRevoke)}
                     onCancel={() => setToRevoke(null)}
                 />

@@ -1,4 +1,4 @@
-import React from 'react';
+﻿import React from 'react';
 import {
     Alert,
     Box,
@@ -19,13 +19,13 @@ import { useTranslation } from 'src/hooks/useTranslation';
 import { subjectsApi } from 'src/lib/api/subjects/subjectsApi';
 import type { ISubject } from 'src/lib/api/subjects/subjectsTypes';
 import { getSubjectLanguageLabel } from 'src/lib/subjects/subjectStyles';
-import { testIds } from 'src/lib/testing/testIds';
+import { uiTestId, uiTestIdOf } from 'src/lib/testing/uiTestId';
 import type { NotificationKey } from 'src/lib/translations/translationKeys';
 import SubjectDialog from 'src/pages/subjectsPage/components/SubjectDialog';
 
 type DialogState = { kind: 'closed' } | { kind: 'edit'; subject?: ISubject };
 
-/** /admin/subjects – subjects with color and icon (LP-109). Every adult sees them, admins create and change them. */
+/** /admin/subjects - subjects with color and icon (LP-109). Every adult sees them, admins create and change them. */
 const SubjectsPage: React.FC = () => {
     const { getResource } = useTranslation();
     const isAdmin = useIsOrgAdmin();
@@ -64,7 +64,7 @@ const SubjectsPage: React.FC = () => {
     };
 
     return (
-        <Stack spacing={4} data-testid={testIds.subjects.page}>
+        <Stack spacing={4} data-testid={uiTestId('subjects-page')}>
             <Box
                 sx={{
                     display: 'flex',
@@ -82,6 +82,7 @@ const SubjectsPage: React.FC = () => {
                 {isAdmin && (
                     <FormButton
                         label={getResource('labelAddSubject')}
+                        uiTestId={uiTestId('subjects-add-button')}
                         onClick={() => setDialog({ kind: 'edit' })}
                     />
                 )}
@@ -90,16 +91,19 @@ const SubjectsPage: React.FC = () => {
             {errorKey && <Alert severity="error">{getResource(errorKey)}</Alert>}
 
             {subjects === null ? (
-                <LoadingIndicator />
+                <LoadingIndicator uiTestId={uiTestId('loading-subjects-page')} />
             ) : subjects.length === 0 ? (
                 <Typography color="text.secondary">{getResource('captionNoSubjects')}</Typography>
             ) : (
                 <Card>
-                    <List data-testid={testIds.subjects.list}>
+                    <List data-testid={uiTestId('subjects-list')}>
                         {subjects.map((subject) => (
                             <ListItem
                                 key={subject.id}
-                                data-testid={testIds.subjects.item(subject.id)}
+                                data-testid={uiTestIdOf(
+                                    uiTestId('subjects-item'),
+                                    String(subject.id),
+                                )}
                                 secondaryAction={
                                     isAdmin && (
                                         <IconButton
@@ -115,7 +119,15 @@ const SubjectsPage: React.FC = () => {
                             >
                                 <ListItemText
                                     disableTypography
-                                    primary={<SubjectBadge subject={subject} />}
+                                    primary={
+                                        <SubjectBadge
+                                            subject={subject}
+                                            uiTestId={uiTestIdOf(
+                                                uiTestId('subjects-badge'),
+                                                String(subject.id),
+                                            )}
+                                        />
+                                    }
                                     secondary={
                                         <Typography color="text.secondary" sx={{ mt: 0.5 }}>
                                             {languageOf(subject)}
@@ -134,7 +146,7 @@ const SubjectsPage: React.FC = () => {
                     subject={dialog.subject}
                     onClose={() => setDialog({ kind: 'closed' })}
                     onSaved={handleSaved}
-                    testId={testIds.subjects.dialog}
+                    uiTestId={uiTestId('subjects-edit-dialog')}
                 />
             )}
         </Stack>

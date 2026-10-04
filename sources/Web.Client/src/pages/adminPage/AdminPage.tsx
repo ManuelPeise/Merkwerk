@@ -1,9 +1,9 @@
-import React from 'react';
+﻿import React from 'react';
 import { Stack, Typography } from '@mui/material';
 import { useTranslation } from 'src/hooks/useTranslation';
 import { useAuthentication } from 'src/hooks/useAuthentication';
 
-/** Placeholder for the parents' area – only reachable when signed in (ProtectedRoute). */
+/** Placeholder for the parents' area - only reachable when signed in (ProtectedRoute). */
 const AdminPage: React.FC = () => {
     const { getResource } = useTranslation();
     const { user } = useAuthentication();

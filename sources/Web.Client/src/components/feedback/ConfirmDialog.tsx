@@ -1,4 +1,4 @@
-import React from 'react';
+﻿import React from 'react';
 import {
     Dialog,
     DialogActions,
@@ -9,7 +9,7 @@ import {
 } from '@mui/material';
 import FormButton from 'src/components/input/FormButton';
 import { useTranslation } from 'src/hooks/useTranslation';
-import { testIdOf } from 'src/lib/testing/testIds';
+import { uiTestIdOf } from 'src/lib/testing/uiTestId';
 
 interface IProps {
     open: boolean;
@@ -17,14 +17,14 @@ interface IProps {
     text: string;
     confirmLabel: string;
     disabled?: boolean;
-    testId?: string;
+    uiTestId: string;
     onConfirm: () => void;
     onCancel: () => void;
 }
 
 /** Asks before something that cannot be undone (delete a child, remove an adult, unpair a device). */
 const ConfirmDialog: React.FC<IProps> = (props) => {
-    const { open, title, text, confirmLabel, disabled, testId, onConfirm, onCancel } = props;
+    const { open, title, text, confirmLabel, disabled, uiTestId, onConfirm, onCancel } = props;
     const { getResource } = useTranslation();
 
     return (
@@ -35,7 +35,7 @@ const ConfirmDialog: React.FC<IProps> = (props) => {
             fullWidth
             slotProps={{
                 paper: {
-                    'data-testid': testId,
+                    'data-testid': uiTestId,
                 } as NonNullable<DialogProps['slotProps']>['paper'],
             }}
         >
@@ -47,13 +47,13 @@ const ConfirmDialog: React.FC<IProps> = (props) => {
                 <FormButton
                     label={getResource('labelCancel')}
                     intent="cancel"
-                    testId={testIdOf(testId, 'cancel')}
+                    uiTestId={uiTestIdOf(uiTestId, 'cancel')}
                     onClick={onCancel}
                 />
                 <FormButton
                     label={confirmLabel}
                     disabled={disabled}
-                    testId={testIdOf(testId, 'confirm')}
+                    uiTestId={uiTestIdOf(uiTestId, 'confirm')}
                     onClick={onConfirm}
                 />
             </DialogActions>

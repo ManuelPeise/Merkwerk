@@ -1,8 +1,8 @@
-import React from 'react';
+﻿import React from 'react';
 import { Box, Button } from '@mui/material';
 import { BackspaceIcon, CheckIcon } from 'src/components/icons/AppIcons';
 import { useTranslation } from 'src/hooks/useTranslation';
-import { testIdOf } from 'src/lib/testing/testIds';
+import { uiTestIdOf } from 'src/lib/testing/uiTestId';
 
 interface IProps {
     /** Digits typed so far. The keypad is controlled; it never shows the value itself. */
@@ -13,7 +13,7 @@ interface IProps {
     /** Maximum number of digits. Default 6. */
     maxLength?: number;
     disabled?: boolean;
-    testId?: string;
+    uiTestId: string;
 }
 
 const digitRows = [
@@ -29,7 +29,7 @@ const keySx = { minWidth: 64, minHeight: 64, fontSize: '1.75rem', fontWeight: 70
  * so the device keyboard never opens. Text keys come with icons (no colour-only meaning).
  */
 const NumberKeypad: React.FC<IProps> = (props) => {
-    const { value, onChange, onSubmit, maxLength = 6, disabled, testId } = props;
+    const { value, onChange, onSubmit, maxLength = 6, disabled, uiTestId } = props;
     const { getResource } = useTranslation();
 
     const pressDigit = (digit: string) => {
@@ -44,7 +44,7 @@ const NumberKeypad: React.FC<IProps> = (props) => {
             variant="outlined"
             disabled={disabled}
             onClick={() => pressDigit(digit)}
-            data-testid={testIdOf(testId, `key-${digit}`)}
+            data-testid={uiTestIdOf(uiTestId, `key-${digit}`)}
             sx={keySx}
         >
             {digit}
@@ -54,7 +54,7 @@ const NumberKeypad: React.FC<IProps> = (props) => {
     return (
         <Box
             role="group"
-            data-testid={testId}
+            data-testid={uiTestId}
             sx={{
                 display: 'grid',
                 gridTemplateColumns: 'repeat(3, minmax(64px, 1fr))',
@@ -69,7 +69,7 @@ const NumberKeypad: React.FC<IProps> = (props) => {
                 disabled={disabled || value === ''}
                 aria-label={getResource('labelDelete')}
                 onClick={() => onChange(value.slice(0, -1))}
-                data-testid={testIdOf(testId, 'backspace')}
+                data-testid={uiTestIdOf(uiTestId, 'backspace')}
                 sx={keySx}
             >
                 <BackspaceIcon />
@@ -80,7 +80,7 @@ const NumberKeypad: React.FC<IProps> = (props) => {
                 disabled={disabled || value === ''}
                 aria-label={getResource('labelDone')}
                 onClick={onSubmit}
-                data-testid={testIdOf(testId, 'submit')}
+                data-testid={uiTestIdOf(uiTestId, 'submit')}
                 sx={keySx}
             >
                 <CheckIcon />

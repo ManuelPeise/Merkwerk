@@ -1,4 +1,4 @@
-import React from 'react';
+﻿import React from 'react';
 import {
     Alert,
     Box,
@@ -24,7 +24,7 @@ import { invitationsApi } from 'src/lib/api/invitations/invitationsApi';
 import type { IInvitation } from 'src/lib/api/invitations/invitationsTypes';
 import { membersApi } from 'src/lib/api/members/membersApi';
 import type { IMember, OrganizationRole } from 'src/lib/api/members/membersTypes';
-import { testIdOf, testIds } from 'src/lib/testing/testIds';
+import { uiTestId, uiTestIdOf } from 'src/lib/testing/uiTestId';
 import type { LabelKey, NotificationKey } from 'src/lib/translations/translationKeys';
 import { utils } from 'src/lib/utils';
 import ConfirmDialog from 'src/components/feedback/ConfirmDialog';
@@ -183,7 +183,7 @@ const AdultsSection: React.FC<IProps> = (props) => {
             spacing={2}
             component="section"
             aria-labelledby="adults-heading"
-            data-testid={testIds.family.adults}
+            data-testid={uiTestId('family-adults-section')}
         >
             <Typography variant="h2" id="adults-heading">
                 {getResource('captionAdults')}
@@ -196,14 +196,17 @@ const AdultsSection: React.FC<IProps> = (props) => {
             )}
 
             {members === null ? (
-                <LoadingIndicator />
+                <LoadingIndicator uiTestId={uiTestId('loading-family-adults-section')} />
             ) : (
                 <Card>
                     <List>
                         {members.map((member) => (
                             <ListItem
                                 key={member.membershipId}
-                                data-testid={testIds.family.memberItem(member.membershipId)}
+                                data-testid={uiTestIdOf(
+                                    uiTestId('family-adult-member-item'),
+                                    String(member.membershipId),
+                                )}
                                 secondaryAction={
                                     isAdmin && (
                                         <Box sx={{ display: 'flex', gap: 1 }}>
@@ -275,6 +278,7 @@ const AdultsSection: React.FC<IProps> = (props) => {
                                 required
                                 value={email}
                                 errorText={emailError}
+                                uiTestId={uiTestId('family-adults-invite-email')}
                                 onChange={(value) => {
                                     setEmail(value);
                                     setEmailError(undefined);
@@ -302,7 +306,7 @@ const AdultsSection: React.FC<IProps> = (props) => {
                                     label={getResource('labelInvite')}
                                     type="submit"
                                     disabled={!isEmailValid || isBusy}
-                                    testId={testIdOf(testIds.family.adults, 'invite')}
+                                    uiTestId={uiTestId('family-adults-invite-button')}
                                 />
                             </Box>
                         </Stack>
@@ -321,7 +325,10 @@ const AdultsSection: React.FC<IProps> = (props) => {
                                 {invitations.map((invitation) => (
                                     <ListItem
                                         key={invitation.id}
-                                        data-testid={testIds.family.invitationItem(invitation.id)}
+                                        data-testid={uiTestIdOf(
+                                            uiTestId('family-invitation-item'),
+                                            String(invitation.id),
+                                        )}
                                         secondaryAction={
                                             <IconButton
                                                 aria-label={getResource('labelRevokeInvitation', {
@@ -368,7 +375,7 @@ const AdultsSection: React.FC<IProps> = (props) => {
                         confirm.kind === 'remove' ? 'labelRemove' : 'labelSendStartPassword',
                     )}
                     disabled={isBusy}
-                    testId={testIdOf(testIds.family.adults, 'confirm-dialog')}
+                    uiTestId={uiTestId('family-adults-confirm-dialog')}
                     onConfirm={() => void handleConfirm()}
                     onCancel={() => setConfirm({ kind: 'none' })}
                 />

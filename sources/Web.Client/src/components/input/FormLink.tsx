@@ -1,16 +1,16 @@
-import React from 'react';
+﻿import React from 'react';
 import { Link as MuiLink } from '@mui/material';
 import { Link } from 'react-router-dom';
 
 interface IProps {
     label: string;
     to: string;
-    testId?: string;
+    uiTestId: string;
 }
 
 /** Text link inside forms, e.g. "Forgot password?". */
 const FormLink: React.FC<IProps> = (props) => {
-    const { label, to, testId } = props;
+    const { label, to, uiTestId } = props;
 
     return (
         <MuiLink
@@ -22,7 +22,7 @@ const FormLink: React.FC<IProps> = (props) => {
                 alignItems: 'center',
                 minHeight: 48,
             }}
-            data-testid={testId}
+            data-testid={uiTestId}
         >
             {label}
         </MuiLink>

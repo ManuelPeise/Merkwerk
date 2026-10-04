@@ -1,4 +1,4 @@
-import React from 'react';
+﻿import React from 'react';
 import { Alert, Button, Stack } from '@mui/material';
 import { Link, useSearchParams } from 'react-router-dom';
 import FormButton from 'src/components/input/FormButton';
@@ -9,7 +9,7 @@ import { useTranslation } from 'src/hooks/useTranslation';
 import { authenticationApi } from 'src/lib/api/authentication/authenticationApi';
 import { getFieldErrors } from 'src/lib/api/getFieldErrors';
 import { getPasswordError, getPasswordRepeatError } from 'src/lib/auth/authValidation';
-import { testIds } from 'src/lib/testing/testIds';
+import { uiTestId, uiTestIdOf } from 'src/lib/testing/uiTestId';
 import type { NotificationKey } from 'src/lib/translations/translationKeys';
 import { utils } from 'src/lib/utils';
 import { routes } from 'src/navigation/routes';
@@ -22,7 +22,9 @@ interface IResetPasswordForm {
 const isResetPasswordValid = (model: IResetPasswordForm): boolean =>
     utils.validation.validatePassword(model.password) && model.password === model.passwordRepeat;
 
-/** /reset-password?email=…&token=… – the link from the reset mail. */
+const resetPasswordCardUiTestId = uiTestId('auth-reset-password-card');
+
+/** /reset-password?email=...&token=... - the link from the reset mail. */
 const ResetPasswordPage: React.FC = () => {
     const { getResource } = useTranslation();
     const [searchParams] = useSearchParams();
@@ -89,7 +91,7 @@ const ResetPasswordPage: React.FC = () => {
         return (
             <AuthCard
                 title={getResource('captionResetPassword')}
-                testId={testIds.auth.resetPassword}
+                uiTestId={resetPasswordCardUiTestId}
             >
                 <Stack spacing={2}>
                     <Alert severity="error">{getResource('notificationLinkExpired')}</Alert>
@@ -100,7 +102,7 @@ const ResetPasswordPage: React.FC = () => {
     }
 
     return (
-        <AuthCard title={getResource('captionResetPassword')} testId={testIds.auth.resetPassword}>
+        <AuthCard title={getResource('captionResetPassword')} uiTestId={resetPasswordCardUiTestId}>
             {isDone ? (
                 <Stack spacing={2}>
                     <Alert severity="success">{getResource('notificationPasswordChanged')}</Alert>
@@ -119,6 +121,7 @@ const ResetPasswordPage: React.FC = () => {
                             errorText={
                                 fieldErrors.newPassword ?? text(getPasswordError(state.password))
                             }
+                            uiTestId={uiTestIdOf(resetPasswordCardUiTestId, 'password')}
                             onChange={(password) => update({ password })}
                         />
                         <FormPasswordField
@@ -130,12 +133,14 @@ const ResetPasswordPage: React.FC = () => {
                             errorText={text(
                                 getPasswordRepeatError(state.password, state.passwordRepeat),
                             )}
+                            uiTestId={uiTestIdOf(resetPasswordCardUiTestId, 'password-repeat')}
                             onChange={(passwordRepeat) => update({ passwordRepeat })}
                         />
                         <FormButton
                             label={getResource('labelSetPassword')}
                             type="submit"
                             disabled={!isValid || isSubmitting}
+                            uiTestId={uiTestIdOf(resetPasswordCardUiTestId, 'submit')}
                         />
                     </Stack>
                 </form>

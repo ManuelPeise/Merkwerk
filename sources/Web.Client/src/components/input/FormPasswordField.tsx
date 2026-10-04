@@ -1,15 +1,15 @@
-import React from 'react';
+﻿import React from 'react';
 import { IconButton, InputAdornment, OutlinedInput } from '@mui/material';
 import { useTranslation } from 'src/hooks/useTranslation';
 import { VisibilityIcon, VisibilityOffIcon } from 'src/components/icons/AppIcons';
 import FormFieldContainer from 'src/components/input/FormFieldContainer';
 import type { IFormFieldProps } from 'src/components/input/types/formFieldProps';
-import { testIdOf } from 'src/lib/testing/testIds';
+import { uiTestIdOf } from 'src/lib/testing/uiTestId';
 
 interface IProps extends IFormFieldProps<string> {
     /** 'current-password' for logins, 'new-password' when setting a password. */
     autoComplete?: 'current-password' | 'new-password';
-    testId?: string;
+    uiTestId: string;
 }
 
 const FormPasswordField: React.FC<IProps> = (props) => {
@@ -22,7 +22,7 @@ const FormPasswordField: React.FC<IProps> = (props) => {
         errorText,
         helperText,
         autoComplete = 'current-password',
-        testId,
+        uiTestId,
         onChange,
     } = props;
 
@@ -39,7 +39,7 @@ const FormPasswordField: React.FC<IProps> = (props) => {
             required={required}
             errorText={errorText}
             helperText={helperText}
-            testId={testId}
+            uiTestId={uiTestId}
         >
             <OutlinedInput
                 id={inputId}
@@ -51,7 +51,7 @@ const FormPasswordField: React.FC<IProps> = (props) => {
                 onChange={(event) => onChange(event.target.value)}
                 inputProps={{
                     'aria-describedby': hasMessage ? `${inputId}-message` : undefined,
-                    'data-testid': testIdOf(testId, 'input'),
+                    'data-testid': uiTestIdOf(uiTestId, 'input'),
                 }}
                 endAdornment={
                     <InputAdornment position="end">

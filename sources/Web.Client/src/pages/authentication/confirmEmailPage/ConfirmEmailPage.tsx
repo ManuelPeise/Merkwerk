@@ -1,16 +1,16 @@
-import React from 'react';
+﻿import React from 'react';
 import { Alert, Button, Stack } from '@mui/material';
 import { Link, useSearchParams } from 'react-router-dom';
 import LoadingIndicator from 'src/components/feedback/LoadingIndicator';
 import AuthCard from 'src/components/layout/AuthCard';
 import { useTranslation } from 'src/hooks/useTranslation';
 import { authenticationApi } from 'src/lib/api/authentication/authenticationApi';
-import { testIds } from 'src/lib/testing/testIds';
+import { uiTestId } from 'src/lib/testing/uiTestId';
 import { routes } from 'src/navigation/routes';
 
 type ConfirmState = 'loading' | 'success' | 'failed';
 
-/** /confirm-email?userId=…&token=… – confirms the address as soon as the page opens. */
+/** /confirm-email?userId=...&token=... - confirms the address as soon as the page opens. */
 const ConfirmEmailPage: React.FC = () => {
     const { getResource } = useTranslation();
     const [searchParams] = useSearchParams();
@@ -37,9 +37,12 @@ const ConfirmEmailPage: React.FC = () => {
     }, [userId, token]);
 
     return (
-        <AuthCard title={getResource('captionConfirmEmail')} testId={testIds.auth.confirmEmail}>
+        <AuthCard
+            title={getResource('captionConfirmEmail')}
+            uiTestId={uiTestId('auth-confirm-email-card')}
+        >
             {confirmState === 'loading' ? (
-                <LoadingIndicator />
+                <LoadingIndicator uiTestId={uiTestId('loading-confirm-email-page')} />
             ) : (
                 <Stack spacing={2}>
                     <Alert severity={confirmState === 'success' ? 'success' : 'error'}>

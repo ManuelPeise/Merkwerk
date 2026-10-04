@@ -1,6 +1,6 @@
-import React from 'react';
+﻿import React from 'react';
 import { FormControl, FormHelperText, FormLabel } from '@mui/material';
-import { testIdOf } from 'src/lib/testing/testIds';
+import { uiTestIdOf } from 'src/lib/testing/uiTestId';
 
 interface IProps {
     label: string;
@@ -12,11 +12,11 @@ interface IProps {
     required?: boolean;
     errorText?: string;
     helperText?: string;
-    testId?: string;
+    uiTestId: string;
     children: React.ReactNode;
 }
 
-/** id of the message below a field – inputs reference it via aria-describedby. */
+/** id of the message below a field - inputs reference it via aria-describedby. */
 const toMessageId = (id: string) => `${id}-message`;
 
 /**
@@ -24,8 +24,17 @@ const toMessageId = (id: string) => `${id}-message`;
  * Disabled, required and error state reach the inputs through the FormControl context.
  */
 const FormFieldContainer: React.FC<IProps> = (props) => {
-    const { label, inputId, labelId, disabled, required, errorText, helperText, testId, children } =
-        props;
+    const {
+        label,
+        inputId,
+        labelId,
+        disabled,
+        required,
+        errorText,
+        helperText,
+        uiTestId,
+        children,
+    } = props;
 
     const message = errorText ?? helperText;
     const messageId = toMessageId(inputId ?? labelId ?? '');
@@ -36,7 +45,7 @@ const FormFieldContainer: React.FC<IProps> = (props) => {
             error={Boolean(errorText)}
             disabled={disabled}
             required={required}
-            data-testid={testId}
+            data-testid={uiTestId}
         >
             <FormLabel htmlFor={inputId} id={labelId} sx={{ mb: 1 }}>
                 {label}
@@ -45,7 +54,7 @@ const FormFieldContainer: React.FC<IProps> = (props) => {
             {message && (
                 <FormHelperText
                     id={messageId}
-                    data-testid={errorText ? testIdOf(testId, 'error') : undefined}
+                    data-testid={errorText ? uiTestIdOf(uiTestId, 'error') : undefined}
                 >
                     {message}
                 </FormHelperText>

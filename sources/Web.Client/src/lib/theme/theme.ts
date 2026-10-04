@@ -1,6 +1,6 @@
-import { createTheme } from '@mui/material';
+﻿import { createTheme } from '@mui/material';
 
-/** Subject colors (LP-109) – the same values as color.subject.* in shared/design-tokens/tokens.json. */
+/** Subject colors (LP-109) - the same values as color.subject.* in shared/design-tokens/tokens.json. */
 export interface ISubjectPalette {
     german: string;
     english: string;

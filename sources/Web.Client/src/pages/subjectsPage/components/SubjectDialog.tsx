@@ -1,4 +1,4 @@
-import React from 'react';
+﻿import React from 'react';
 import {
     Alert,
     Box,
@@ -27,7 +27,7 @@ import {
     subjectIcons,
     subjectLanguages,
 } from 'src/lib/subjects/subjectStyles';
-import { testIdOf } from 'src/lib/testing/testIds';
+import { uiTestIdOf } from 'src/lib/testing/uiTestId';
 import type { NotificationKey } from 'src/lib/translations/translationKeys';
 
 /** Mount it only while open (the form starts from the props). */
@@ -35,7 +35,7 @@ interface IProps {
     open: boolean;
     /** Edit this subject; without it a new one is created. */
     subject?: ISubject;
-    testId?: string;
+    uiTestId: string;
     onClose: () => void;
     onSaved: () => void;
 }
@@ -51,7 +51,7 @@ const toForm = (subject?: ISubject): ISubjectInput => ({
 
 /** Create or edit a subject: name, language for reading aloud, color and icon from the fixed choice (LP-109). */
 const SubjectDialog: React.FC<IProps> = (props) => {
-    const { open, subject, testId, onClose, onSaved } = props;
+    const { open, subject, uiTestId, onClose, onSaved } = props;
     const { getResource } = useTranslation();
 
     const [form, setForm] = React.useState<ISubjectInput>(() => toForm(subject));
@@ -96,7 +96,7 @@ const SubjectDialog: React.FC<IProps> = (props) => {
             fullWidth
             slotProps={{
                 paper: {
-                    'data-testid': testId,
+                    'data-testid': uiTestId,
                 } as NonNullable<DialogProps['slotProps']>['paper'],
             }}
         >
@@ -109,7 +109,11 @@ const SubjectDialog: React.FC<IProps> = (props) => {
                         {errorKey && <Alert severity="error">{getResource(errorKey)}</Alert>}
 
                         <Box sx={{ display: 'flex', justifyContent: 'center' }}>
-                            <SubjectBadge subject={{ ...form, name: name || '…' }} size="large" />
+                            <SubjectBadge
+                                subject={{ ...form, name: name || '...' }}
+                                size="large"
+                                uiTestId={uiTestIdOf(uiTestId, 'preview')}
+                            />
                         </Box>
 
                         <FormTextField
@@ -118,7 +122,7 @@ const SubjectDialog: React.FC<IProps> = (props) => {
                             required
                             value={form.name}
                             errorText={fieldErrors.name}
-                            testId={testIdOf(testId, 'name')}
+                            uiTestId={uiTestIdOf(uiTestId, 'name')}
                             onChange={(value) => setForm({ ...form, name: value })}
                         />
 
@@ -235,14 +239,14 @@ const SubjectDialog: React.FC<IProps> = (props) => {
                     <FormButton
                         label={getResource('labelCancel')}
                         intent="cancel"
-                        testId={testIdOf(testId, 'cancel')}
+                        uiTestId={uiTestIdOf(uiTestId, 'cancel')}
                         onClick={onClose}
                     />
                     <FormButton
                         label={getResource('labelSave')}
                         type="submit"
                         disabled={!isValid || isSaving}
-                        testId={testIdOf(testId, 'save')}
+                        uiTestId={uiTestIdOf(uiTestId, 'save')}
                     />
                 </DialogActions>
             </form>

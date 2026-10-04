@@ -2,6 +2,7 @@ import React from 'react';
 import { Navigate, Outlet, useLocation } from 'react-router-dom';
 import LoadingIndicator from 'src/components/feedback/LoadingIndicator';
 import { useAuthentication } from 'src/hooks/useAuthentication';
+import { uiTestId } from 'src/lib/testing/uiTestId';
 import { routes, type IRedirectState } from 'src/navigation/routes';
 
 interface IProps {
@@ -19,7 +20,7 @@ const ProtectedRoute: React.FC<IProps> = (props) => {
     const location = useLocation();
 
     if (status === 'loading') {
-        return <LoadingIndicator />;
+        return <LoadingIndicator uiTestId={uiTestId('loading-protected-route')} />;
     }
 
     if (!user) {

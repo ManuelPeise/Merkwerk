@@ -1,9 +1,9 @@
-import React from 'react';
+﻿import React from 'react';
 import { FormControl, OutlinedInput, Stack } from '@mui/material';
 import { useTranslation } from 'src/hooks/useTranslation';
 import FormFieldContainer from 'src/components/input/FormFieldContainer';
 import type { IFormFieldProps } from 'src/components/input/types/formFieldProps';
-import { testIdOf } from 'src/lib/testing/testIds';
+import { uiTestIdOf } from 'src/lib/testing/uiTestId';
 
 interface IProps extends IFormFieldProps<string> {
     /** Number of digits. Default 4. */
@@ -11,7 +11,7 @@ interface IProps extends IFormFieldProps<string> {
     /** Show dots instead of digits. Default true. */
     masked?: boolean;
     autoFocus?: boolean;
-    testId?: string;
+    uiTestId: string;
 }
 
 const nonDigits = /\D/g;
@@ -32,7 +32,7 @@ const FormPinField: React.FC<IProps> = (props) => {
         length = 4,
         masked = true,
         autoFocus,
-        testId,
+        uiTestId,
         onChange,
     } = props;
 
@@ -92,7 +92,7 @@ const FormPinField: React.FC<IProps> = (props) => {
             required={required}
             errorText={errorText}
             helperText={helperText}
-            testId={testId}
+            uiTestId={uiTestId}
         >
             <Stack
                 direction="row"
@@ -123,7 +123,7 @@ const FormPinField: React.FC<IProps> = (props) => {
                                 inputMode: 'numeric',
                                 pattern: '[0-9]*',
                                 autoComplete: index === 0 ? 'one-time-code' : 'off',
-                                'data-testid': testIdOf(testId, 'input'),
+                                'data-testid': uiTestIdOf(uiTestId, 'input'),
                                 'aria-label': getResource('labelPinDigit', {
                                     position: index + 1,
                                     length,

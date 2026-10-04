@@ -189,9 +189,11 @@ New top-level folders under `src/` only after asking.
 
 - Locator order: **role first** (`getByRole`), then **label** (`getByLabel`), and `data-testid` only where there is no
   unique/stable accessible name (lists, dialogs, repeated tiles, grouped sections).
-- All test IDs are defined centrally in `src/lib/testing/testIds.ts`. Do not hard-code test-id strings elsewhere.
-- Every new reusable component that can be part of interaction flows accepts optional `testId?: string` and forwards it
-  to a meaningful DOM root (`data-testid`); composite components derive sub-ids with `testIdOf(base, part)`.
+- Test IDs are assigned **at the usage site** as kebab-case literals through `uiTestId(...)` from
+  `src/lib/testing/uiTestId.ts` (no central registry object).
+- Every reusable component used in test flows takes a **required** `uiTestId` prop (`IUiTestIdProps`) and forwards it
+  to a meaningful DOM root (`data-testid`); composite components derive sub-ids with `uiTestIdOf(base, part)`.
+- `npm run lint` also runs `scripts/check-test-ids.mjs` (kebab-case + uniqueness checks for `uiTestId(...)` literals).
 - E2E tests live under `e2e/` and use shared helpers/fixtures from `e2e/support/`.
 - Run UI smoke tests with `npm run test:e2e` (or interactive mode via `npm run test:e2e:ui`).
 

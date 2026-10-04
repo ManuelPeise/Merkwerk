@@ -1,11 +1,11 @@
-import React from 'react';
+﻿import React from 'react';
 import { Alert, Box, Card, CardContent, Stack, Typography } from '@mui/material';
 import { toDataURL } from 'qrcode';
 import FormButton from 'src/components/input/FormButton';
 import { useTranslation } from 'src/hooks/useTranslation';
 import { devicesApi } from 'src/lib/api/devices/devicesApi';
 import type { IPairingCode } from 'src/lib/api/devices/devicesTypes';
-import { testIds } from 'src/lib/testing/testIds';
+import { uiTestId } from 'src/lib/testing/uiTestId';
 import type { NotificationKey } from 'src/lib/translations/translationKeys';
 
 const qrCodeSize = 240;
@@ -70,7 +70,7 @@ const PairingCodeSection: React.FC = () => {
             spacing={2}
             component="section"
             aria-labelledby="pairing-heading"
-            data-testid={testIds.devices.pairingCode}
+            data-testid={uiTestId('devices-pairing-code-section')}
         >
             <Typography variant="h2" id="pairing-heading">
                 {getResource('captionPairNewDevice')}
@@ -135,6 +135,7 @@ const PairingCodeSection: React.FC = () => {
                         pairingCode ? 'labelCreateNewPairingCode' : 'labelCreatePairingCode',
                     )}
                     disabled={isBusy}
+                    uiTestId={uiTestId('devices-create-pairing-code-button')}
                     onClick={() => void handleCreate()}
                 />
             </Box>

@@ -1,6 +1,6 @@
+import { expectUniqueTestIds } from './support/expectUniqueTestIds';
 import { expect, test, uniqueName } from './support/fixtures';
 import { t } from './support/i18n';
-import { testIds } from '../src/lib/testing/testIds';
 
 test.describe('subjects smoke', () => {
     test('shows standard subjects and creates a subject with color and icon', async ({
@@ -11,8 +11,9 @@ test.describe('subjects smoke', () => {
         const subjectName = uniqueName('Fach');
 
         await page.goto('/admin/subjects');
+        await expectUniqueTestIds(page);
 
-        const subjectItems = page.locator(`[data-testid^="${testIds.subjects.list}.item."]`);
+        const subjectItems = page.locator('[data-testid^="subjects-item-"]');
         await expect(subjectItems.first()).toBeVisible();
 
         await page.getByRole('button', { name: t('labelAddSubject') }).click();

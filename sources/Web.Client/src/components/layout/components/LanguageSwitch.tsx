@@ -1,14 +1,14 @@
-import React from 'react';
+﻿import React from 'react';
 import { ToggleButton, ToggleButtonGroup } from '@mui/material';
 import { useTranslation } from 'src/hooks/useTranslation';
 import { isSupportedLanguage } from 'src/lib/translations/i18n';
 
 interface IProps {
-    testId?: string;
+    uiTestId: string;
 }
 
 const LanguageSwitch: React.FC<IProps> = (props) => {
-    const { testId } = props;
+    const { uiTestId } = props;
     const { language, getResource, toggleLanguage } = useTranslation();
 
     const handleChange = (_event: React.MouseEvent<HTMLElement>, value: string | null) => {
@@ -24,7 +24,7 @@ const LanguageSwitch: React.FC<IProps> = (props) => {
             value={language}
             onChange={handleChange}
             aria-label={getResource('labelLanguage')}
-            data-testid={testId}
+            data-testid={uiTestId}
         >
             <ToggleButton
                 value="de"

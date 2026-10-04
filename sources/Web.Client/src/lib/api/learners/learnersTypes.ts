@@ -1,8 +1,8 @@
-/** Mirrors the C# DTOs of LearnersController (Web.Core). */
+﻿/** Mirrors the C# DTOs of LearnersController (Web.Core). */
 export interface ILearner {
     id: number;
     displayName: string;
-    /** 1–4. */
+    /** 1-4. */
     grade: number;
     avatarId: string;
 }

@@ -1,6 +1,6 @@
-import React from 'react';
+﻿import React from 'react';
 import { Checkbox, FormControl, FormControlLabel, FormHelperText } from '@mui/material';
-import { testIdOf } from 'src/lib/testing/testIds';
+import { uiTestIdOf } from 'src/lib/testing/uiTestId';
 
 interface IProps {
     /** Already translated; may contain a link. */
@@ -10,13 +10,13 @@ interface IProps {
     disabled?: boolean;
     required?: boolean;
     errorText?: string;
-    testId?: string;
+    uiTestId: string;
     onChange: (checked: boolean) => void;
 }
 
 /** Checkbox with the same error and required behaviour as the other form fields. */
 const FormCheckbox: React.FC<IProps> = (props) => {
-    const { label, checked, name, disabled, required, errorText, testId, onChange } = props;
+    const { label, checked, name, disabled, required, errorText, uiTestId, onChange } = props;
 
     const inputId = React.useId();
 
@@ -25,7 +25,7 @@ const FormCheckbox: React.FC<IProps> = (props) => {
             error={Boolean(errorText)}
             disabled={disabled}
             required={required}
-            data-testid={testId}
+            data-testid={uiTestId}
         >
             <FormControlLabel
                 label={label}
@@ -40,14 +40,17 @@ const FormCheckbox: React.FC<IProps> = (props) => {
                         slotProps={{
                             input: {
                                 'aria-describedby': errorText ? `${inputId}-message` : undefined,
-                                'data-testid': testIdOf(testId, 'input'),
+                                'data-testid': uiTestIdOf(uiTestId, 'input'),
                             } as React.InputHTMLAttributes<HTMLInputElement>,
                         }}
                     />
                 }
             />
             {errorText && (
-                <FormHelperText id={`${inputId}-message`} data-testid={testIdOf(testId, 'error')}>
+                <FormHelperText
+                    id={`${inputId}-message`}
+                    data-testid={uiTestIdOf(uiTestId, 'error')}
+                >
                     {errorText}
                 </FormHelperText>
             )}

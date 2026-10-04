@@ -1,4 +1,4 @@
-import axios from 'axios';
+﻿import axios from 'axios';
 import type { ApiError } from 'src/lib/api/types/apiError';
 import type { ProblemDetails } from 'src/lib/api/types/problemDetails';
 import type { NotificationKey } from 'src/lib/translations/translationKeys';
@@ -14,7 +14,7 @@ const messageKeyForStatus = (status: number): NotificationKey => {
         case 422:
             return 'notificationInvalidInput';
         case 401:
-            // apiClient already tried a refresh – the session is gone.
+            // apiClient already tried a refresh - the session is gone.
             return 'notificationSessionExpired';
         case 403:
             return 'notificationAccessDenied';

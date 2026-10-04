@@ -1,4 +1,4 @@
-import React from 'react';
+﻿import React from 'react';
 import {
     Alert,
     AvatarGroup,
@@ -21,7 +21,7 @@ import { groupsApi } from 'src/lib/api/groups/groupsApi';
 import type { IGroup } from 'src/lib/api/groups/groupsTypes';
 import { learnersApi } from 'src/lib/api/learners/learnersApi';
 import type { ILearner } from 'src/lib/api/learners/learnersTypes';
-import { testIds } from 'src/lib/testing/testIds';
+import { uiTestId, uiTestIdOf } from 'src/lib/testing/uiTestId';
 import type { NotificationKey } from 'src/lib/translations/translationKeys';
 import GroupDialog from 'src/pages/familyPage/components/GroupDialog';
 
@@ -98,7 +98,7 @@ const GroupsSection: React.FC<IProps> = (props) => {
             spacing={2}
             component="section"
             aria-labelledby="groups-heading"
-            data-testid={testIds.family.groups}
+            data-testid={uiTestId('family-groups-section')}
         >
             <Box
                 sx={{
@@ -114,6 +114,7 @@ const GroupsSection: React.FC<IProps> = (props) => {
                 {isAdmin && (
                     <FormButton
                         label={getResource('labelAddGroup')}
+                        uiTestId={uiTestId('family-add-group-button')}
                         onClick={() => setDialog({ kind: 'edit' })}
                     />
                 )}
@@ -122,7 +123,7 @@ const GroupsSection: React.FC<IProps> = (props) => {
             {errorKey && <Alert severity="error">{getResource(errorKey)}</Alert>}
 
             {groups === null ? (
-                <LoadingIndicator />
+                <LoadingIndicator uiTestId={uiTestId('loading-family-groups-section')} />
             ) : groups.length === 0 ? (
                 <Typography color="text.secondary">{getResource('captionNoGroups')}</Typography>
             ) : (
@@ -134,7 +135,10 @@ const GroupsSection: React.FC<IProps> = (props) => {
                             return (
                                 <ListItem
                                     key={group.id}
-                                    data-testid={testIds.family.groupItem(group.id)}
+                                    data-testid={uiTestIdOf(
+                                        uiTestId('family-group-item'),
+                                        String(group.id),
+                                    )}
                                     secondaryAction={
                                         isAdmin && (
                                             <Box sx={{ display: 'flex', gap: 1 }}>
@@ -180,6 +184,10 @@ const GroupsSection: React.FC<IProps> = (props) => {
                                                     avatarId={learner.avatarId}
                                                     name={learner.displayName}
                                                     size={40}
+                                                    uiTestId={uiTestIdOf(
+                                                        uiTestId('family-group-member-avatar'),
+                                                        String(learner.id),
+                                                    )}
                                                 />
                                             ))}
                                         </AvatarGroup>
@@ -198,7 +206,7 @@ const GroupsSection: React.FC<IProps> = (props) => {
                     learners={learners}
                     onClose={() => setDialog({ kind: 'closed' })}
                     onSaved={handleSaved}
-                    testId={testIds.family.groupDialog}
+                    uiTestId={uiTestId('family-group-edit-dialog')}
                 />
             )}
             {dialog.kind === 'delete' && (
@@ -208,7 +216,7 @@ const GroupsSection: React.FC<IProps> = (props) => {
                     text={getResource('captionConfirmDeleteGroup', { name: dialog.group.name })}
                     confirmLabel={getResource('labelDelete')}
                     disabled={isDeleting}
-                    testId={testIds.family.groupDialog}
+                    uiTestId={uiTestId('family-group-delete-dialog')}
                     onConfirm={() => void handleDelete(dialog.group)}
                     onCancel={() => setDialog({ kind: 'closed' })}
                 />

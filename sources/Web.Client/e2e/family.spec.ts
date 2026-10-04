@@ -1,6 +1,6 @@
+import { expectUniqueTestIds } from './support/expectUniqueTestIds';
 import { expect, test, uniqueName } from './support/fixtures';
 import { t } from './support/i18n';
-import { testIds } from '../src/lib/testing/testIds';
 
 test.describe('family smoke', () => {
     test('adds, edits and deletes a child and keeps group membership in sync', async ({
@@ -15,6 +15,7 @@ test.describe('family smoke', () => {
         const groupName = uniqueName('Gruppe');
 
         await page.goto('/admin/family');
+        await expectUniqueTestIds(page);
 
         await page.getByRole('button', { name: t('labelAddChild') }).click();
         await page.getByLabel(t('labelChildName')).fill(childOneName);
@@ -40,7 +41,7 @@ test.describe('family smoke', () => {
         await page.getByRole('button', { name: t('labelSave') }).click();
 
         const groupItem = page
-            .locator(`[data-testid^="${testIds.family.groups}.item."]`)
+            .locator('[data-testid^="family-group-item-"]')
             .filter({ hasText: groupName })
             .first();
         await expect(groupItem).toContainText(childOneEditedName);

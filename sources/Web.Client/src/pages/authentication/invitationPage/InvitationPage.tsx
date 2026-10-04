@@ -1,4 +1,4 @@
-import React from 'react';
+﻿import React from 'react';
 import { Alert, Button, Stack, Typography } from '@mui/material';
 import { Link, useLocation, useNavigate, useSearchParams } from 'react-router-dom';
 import LoadingIndicator from 'src/components/feedback/LoadingIndicator';
@@ -15,7 +15,7 @@ import { invitationsApi } from 'src/lib/api/invitations/invitationsApi';
 import type { IInvitationDetails } from 'src/lib/api/invitations/invitationsTypes';
 import { getPasswordError, getPasswordRepeatError } from 'src/lib/auth/authValidation';
 import { adultRoles } from 'src/lib/auth/roles';
-import { testIds } from 'src/lib/testing/testIds';
+import { uiTestId, uiTestIdOf } from 'src/lib/testing/uiTestId';
 import type { NotificationKey } from 'src/lib/translations/translationKeys';
 import { utils } from 'src/lib/utils';
 import { routes, type IRedirectState } from 'src/navigation/routes';
@@ -40,8 +40,10 @@ const isInvitationValid = (model: IInvitationForm): boolean =>
     model.password === model.passwordRepeat &&
     model.privacyAccepted;
 
+const invitationCardUiTestId = uiTestId('auth-invitation-card');
+
 /**
- * /invitation?token=… – an invited adult joins an existing family.
+ * /invitation?token=... - an invited adult joins an existing family.
  * - Not signed in: creates the account and signs in.
  * - Signed in as an adult (existing account): accepts with one click, the family is added to the account.
  * - Account for this e-mail already exists (409): asks to sign in first and comes back here afterwards.
@@ -160,12 +162,12 @@ const InvitationPage: React.FC = () => {
     };
 
     if (isLoading || status === 'loading') {
-        return <LoadingIndicator />;
+        return <LoadingIndicator uiTestId={uiTestId('loading-invitation-page')} />;
     }
 
     if (loadErrorKey || !invitation) {
         return (
-            <AuthCard title={getResource('captionInvitation')} testId={testIds.auth.invitation}>
+            <AuthCard title={getResource('captionInvitation')} uiTestId={invitationCardUiTestId}>
                 <Alert severity="error">
                     {getResource(loadErrorKey ?? 'notificationInvitationInvalid')}
                 </Alert>
@@ -180,7 +182,7 @@ const InvitationPage: React.FC = () => {
             <AuthCard
                 title={getResource('captionInvitation')}
                 subtitle={subtitle}
-                testId={testIds.auth.invitation}
+                uiTestId={invitationCardUiTestId}
             >
                 <Stack spacing={2}>
                     {errorKey && <Alert severity="error">{getResource(errorKey)}</Alert>}
@@ -190,6 +192,7 @@ const InvitationPage: React.FC = () => {
                     <FormButton
                         label={getResource('labelAcceptInvitation')}
                         disabled={isSubmitting}
+                        uiTestId={uiTestIdOf(invitationCardUiTestId, 'accept-existing-account')}
                         onClick={() => void accept(true)}
                     />
                 </Stack>
@@ -202,7 +205,7 @@ const InvitationPage: React.FC = () => {
             <AuthCard
                 title={getResource('captionInvitation')}
                 subtitle={subtitle}
-                testId={testIds.auth.invitation}
+                uiTestId={invitationCardUiTestId}
             >
                 <Stack spacing={2}>
                     <Alert severity="info">
@@ -225,7 +228,7 @@ const InvitationPage: React.FC = () => {
         <AuthCard
             title={getResource('captionInvitation')}
             subtitle={subtitle}
-            testId={testIds.auth.invitation}
+            uiTestId={invitationCardUiTestId}
         >
             <form onSubmit={handleSubmit} noValidate>
                 <Stack spacing={2}>
@@ -236,6 +239,7 @@ const InvitationPage: React.FC = () => {
                         type="email"
                         disabled
                         value={invitation.email}
+                        uiTestId={uiTestIdOf(invitationCardUiTestId, 'email')}
                         onChange={() => undefined}
                     />
                     <FormTextField
@@ -245,6 +249,7 @@ const InvitationPage: React.FC = () => {
                         required
                         value={state.displayName}
                         errorText={fieldErrors.displayName}
+                        uiTestId={uiTestIdOf(invitationCardUiTestId, 'display-name')}
                         onChange={(displayName) => update({ displayName })}
                     />
                     <FormPasswordField
@@ -254,6 +259,7 @@ const InvitationPage: React.FC = () => {
                         required
                         value={state.password}
                         errorText={fieldErrors.password ?? text(getPasswordError(state.password))}
+                        uiTestId={uiTestIdOf(invitationCardUiTestId, 'password')}
                         onChange={(password) => update({ password })}
                     />
                     <FormPasswordField
@@ -265,6 +271,7 @@ const InvitationPage: React.FC = () => {
                         errorText={text(
                             getPasswordRepeatError(state.password, state.passwordRepeat),
                         )}
+                        uiTestId={uiTestIdOf(invitationCardUiTestId, 'password-repeat')}
                         onChange={(passwordRepeat) => update({ passwordRepeat })}
                     />
                     <FormCheckbox
@@ -278,6 +285,7 @@ const InvitationPage: React.FC = () => {
                                 ? getResource('notificationPrivacyRequired')
                                 : undefined)
                         }
+                        uiTestId={uiTestIdOf(invitationCardUiTestId, 'privacy-accepted')}
                         onChange={(privacyAccepted) => {
                             setIsPrivacyTouched(true);
                             update({ privacyAccepted });
@@ -287,6 +295,7 @@ const InvitationPage: React.FC = () => {
                         label={getResource('labelAcceptInvitation')}
                         type="submit"
                         disabled={!isValid || isSubmitting}
+                        uiTestId={uiTestIdOf(invitationCardUiTestId, 'submit')}
                     />
                 </Stack>
             </form>

@@ -1,4 +1,4 @@
-import React from 'react';
+﻿import React from 'react';
 import {
     Alert,
     Box,
@@ -21,7 +21,7 @@ import { useTranslation } from 'src/hooks/useTranslation';
 import { getFieldErrors } from 'src/lib/api/getFieldErrors';
 import { learnersApi } from 'src/lib/api/learners/learnersApi';
 import type { ILearner } from 'src/lib/api/learners/learnersTypes';
-import { testIdOf } from 'src/lib/testing/testIds';
+import { uiTestIdOf } from 'src/lib/testing/uiTestId';
 import type { NotificationKey } from 'src/lib/translations/translationKeys';
 
 /** Mount it only while open (the form starts from the props). */
@@ -29,7 +29,7 @@ interface IProps {
     open: boolean;
     /** Edit this child; without it a new one is created. */
     learner?: ILearner;
-    testId?: string;
+    uiTestId: string;
     onClose: () => void;
     onSaved: () => void;
 }
@@ -49,9 +49,9 @@ const toForm = (learner?: ILearner): ILearnerForm => ({
     avatarId: learner?.avatarId ?? avatarIds[0],
 });
 
-/** Create or edit a child: first name or nickname, grade, built-in picture – nothing else (privacy). */
+/** Create or edit a child: first name or nickname, grade, built-in picture - nothing else (privacy). */
 const LearnerDialog: React.FC<IProps> = (props) => {
-    const { open, learner, testId, onClose, onSaved } = props;
+    const { open, learner, uiTestId, onClose, onSaved } = props;
     const { getResource } = useTranslation();
 
     const [form, setForm] = React.useState<ILearnerForm>(() => toForm(learner));
@@ -98,7 +98,7 @@ const LearnerDialog: React.FC<IProps> = (props) => {
             fullWidth
             slotProps={{
                 paper: {
-                    'data-testid': testId,
+                    'data-testid': uiTestId,
                 } as NonNullable<DialogProps['slotProps']>['paper'],
             }}
         >
@@ -116,7 +116,7 @@ const LearnerDialog: React.FC<IProps> = (props) => {
                             value={form.displayName}
                             errorText={fieldErrors.displayName}
                             helperText={getResource('captionChildNameHint')}
-                            testId={testIdOf(testId, 'name')}
+                            uiTestId={uiTestIdOf(uiTestId, 'name')}
                             onChange={(displayName) => setForm({ ...form, displayName })}
                         />
                         <Box>
@@ -177,6 +177,10 @@ const LearnerDialog: React.FC<IProps> = (props) => {
                                                 avatarId={avatarId}
                                                 name={name || '?'}
                                                 size={56}
+                                                uiTestId={uiTestIdOf(
+                                                    uiTestId,
+                                                    `avatar-${index + 1}`,
+                                                )}
                                             />
                                         </IconButton>
                                     );
@@ -189,14 +193,14 @@ const LearnerDialog: React.FC<IProps> = (props) => {
                     <FormButton
                         label={getResource('labelCancel')}
                         intent="cancel"
-                        testId={testIdOf(testId, 'cancel')}
+                        uiTestId={uiTestIdOf(uiTestId, 'cancel')}
                         onClick={onClose}
                     />
                     <FormButton
                         label={getResource('labelSave')}
                         type="submit"
                         disabled={!isValid || isSaving}
-                        testId={testIdOf(testId, 'save')}
+                        uiTestId={uiTestIdOf(uiTestId, 'save')}
                     />
                 </DialogActions>
             </form>

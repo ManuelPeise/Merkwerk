@@ -1,4 +1,4 @@
-import type { OrganizationRole } from 'src/lib/api/members/membersTypes';
+﻿import type { OrganizationRole } from 'src/lib/api/members/membersTypes';
 
 /** Mirrors the C# DTOs of InvitationsController (Web.Core). */
 export interface IInvitationDetails {
@@ -11,7 +11,7 @@ export interface IInvitationDetails {
 
 /**
  * New account: displayName, password and privacyAccepted are required.
- * Already signed in (existing account): only the token – the server adds the membership to the current user.
+ * Already signed in (existing account): only the token - the server adds the membership to the current user.
  */
 export interface IInvitationAcceptRequest {
     token: string;

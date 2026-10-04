@@ -1,4 +1,5 @@
 import { loginAsAdult } from './support/api';
+import { expectUniqueTestIds } from './support/expectUniqueTestIds';
 import { expect, owner, test } from './support/fixtures';
 import { t } from './support/i18n';
 
@@ -7,6 +8,7 @@ test.describe('auth smoke', () => {
         void admin;
         await page.getByRole('button', { name: t('labelLogout') }).click();
         await expect(page).toHaveURL(/\/login$/);
+        await expectUniqueTestIds(page);
 
         await page.getByLabel(t('labelEmail')).fill(owner.email);
         await page.getByLabel(t('labelPassword')).fill('wrong-password');
@@ -25,6 +27,7 @@ test.describe('auth smoke', () => {
         void admin;
         await page.goto('/admin');
         await expect(page).toHaveURL(/\/admin$/);
+        await expectUniqueTestIds(page);
 
         await page.reload();
 
@@ -39,6 +42,7 @@ test.describe('auth smoke', () => {
 
         await expect(page).toHaveURL(/\/login$/);
         await expect(page.getByRole('heading', { name: t('captionLogin') })).toBeVisible();
+        await expectUniqueTestIds(page);
 
         await loginAsAdult(page.request, { email: owner.email, password: owner.password });
         await page.goto('/admin');

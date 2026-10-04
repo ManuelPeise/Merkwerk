@@ -12,6 +12,8 @@ import AdminPage from 'src/pages/adminPage/AdminPage';
 import ConfirmEmailPage from 'src/pages/authentication/confirmEmailPage/ConfirmEmailPage';
 import DevicesPage from 'src/pages/devicesPage/DevicesPage';
 import ErrorPage from 'src/pages/errorPage/ErrorPage';
+import ExerciseEditorPage from 'src/pages/exerciseEditorPage/ExerciseEditorPage';
+import ExercisesPage from 'src/pages/exercisesPage/ExercisesPage';
 import FamilyPage from 'src/pages/familyPage/FamilyPage';
 import ForgotPasswordPage from 'src/pages/authentication/forgotPasswordPage/ForgotPasswordPage';
 import InvitationPage from 'src/pages/authentication/invitationPage/InvitationPage';
@@ -72,6 +74,11 @@ export const router = createBrowserRouter([
                                     { path: routes.family, element: <FamilyPage /> },
                                     { path: routes.devices, element: <DevicesPage /> },
                                     { path: routes.subjects, element: <SubjectsPage /> },
+                                    { path: routes.exercises, element: <ExercisesPage /> },
+                                    {
+                                        path: routes.exerciseEditor,
+                                        element: <ExerciseEditorPage />,
+                                    },
                                 ],
                             },
                         ],

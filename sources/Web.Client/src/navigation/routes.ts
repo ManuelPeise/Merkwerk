@@ -10,10 +10,16 @@ export const routes = {
     family: '/admin/family',
     devices: '/admin/devices',
     subjects: '/admin/subjects',
+    exercises: '/admin/exercises',
+    /** :id = exercise id or "new" - build links with toExerciseEditor. */
+    exerciseEditor: '/admin/exercises/:id',
     practice: '/practice',
     practicePair: '/practice/pair',
     practiceProfiles: '/practice/profiles',
 } as const;
+
+/** Link to the exercise editor (LP-112); 'new' creates an exercise. */
+export const toExerciseEditor = (id: number | 'new'): string => `${routes.exercises}/${id}`;
 
 /** Location state for the pairing page, e.g. when a paired device was revoked. */
 export interface IPairState {

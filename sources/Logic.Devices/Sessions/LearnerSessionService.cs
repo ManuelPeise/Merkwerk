@@ -9,18 +9,31 @@ using Shared.Models.Devices;
 
 namespace Logic.Devices.Sessions;
 
-internal sealed class LearnerSessionService(
-    IUnitOfWorkFactory unitOfWorkFactory,
-    DeviceService devices,
-    TokenService tokenService,
-    TimeProvider timeProvider) : ILearnerSessionService
+internal sealed class LearnerSessionService : ILearnerSessionService
 {
+    private readonly IUnitOfWorkFactory _unitOfWorkFactory;
+    private readonly DeviceService _devices;
+    private readonly TokenService _tokenService;
+    private readonly TimeProvider _timeProvider;
+
+    public LearnerSessionService(
+        IUnitOfWorkFactory unitOfWorkFactory,
+        DeviceService devices,
+        TokenService tokenService,
+        TimeProvider timeProvider)
+    {
+        _unitOfWorkFactory = unitOfWorkFactory;
+        _devices = devices;
+        _tokenService = tokenService;
+        _timeProvider = timeProvider;
+    }
+
     public async Task<LearnerSignInResult> SignInAsync(string deviceToken, long learnerId, CancellationToken cancellationToken)
     {
-        var now = timeProvider.GetUtcNow();
+        var now = _timeProvider.GetUtcNow();
 
-        await using var unitOfWork = unitOfWorkFactory.Create();
-        var device = await devices.FindActiveDeviceAsync(unitOfWork, deviceToken, cancellationToken);
+        await using var unitOfWork = _unitOfWorkFactory.Create();
+        var device = await _devices.FindActiveDeviceAsync(unitOfWork, deviceToken, cancellationToken);
 
         if (device is null)
         {
@@ -64,9 +77,9 @@ internal sealed class LearnerSessionService(
             return null;
         }
 
-        var now = timeProvider.GetUtcNow().UtcDateTime;
+        var now = _timeProvider.GetUtcNow().UtcDateTime;
 
-        await using var unitOfWork = unitOfWorkFactory.Create();
+        await using var unitOfWork = _unitOfWorkFactory.Create();
         var session = await unitOfWork.LearnerSessions.FindByTokenHashAsync(DeviceTokens.Hash(refreshToken), cancellationToken);
 
         if (session is not { RevokedAt: null, Device: { RevokedAt: null } device, Learner: { } learner }
@@ -87,19 +100,19 @@ internal sealed class LearnerSessionService(
             return;
         }
 
-        await using var unitOfWork = unitOfWorkFactory.Create();
+        await using var unitOfWork = _unitOfWorkFactory.Create();
         var session = await unitOfWork.LearnerSessions.FindByTokenHashAsync(DeviceTokens.Hash(refreshToken), cancellationToken);
 
         if (session is { RevokedAt: null })
         {
-            session.RevokedAt = timeProvider.GetUtcNow().UtcDateTime;
+            session.RevokedAt = _timeProvider.GetUtcNow().UtcDateTime;
             await unitOfWork.SaveChangesAsync(cancellationToken);
         }
     }
 
     private AuthSession CreateSession(LearnerEntity learner, DeviceEntity device, string refreshToken, DateTimeOffset sessionEndsAt)
     {
-        var (accessToken, accessExpiresAt) = tokenService.CreateLearnerAccessToken(
+        var (accessToken, accessExpiresAt) = _tokenService.CreateLearnerAccessToken(
             learner.Id, learner.DisplayName, learner.AvatarId, device.OrganizationId, device.Id, sessionEndsAt);
 
         return new AuthSession(

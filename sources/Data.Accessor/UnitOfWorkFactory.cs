@@ -5,7 +5,14 @@ using Microsoft.EntityFrameworkCore;
 namespace Data.Accessor;
 
 /// <summary>Every unit of work gets a fresh DbContext from the (scoped) context factory – no long-lived contexts.</summary>
-internal sealed class UnitOfWorkFactory(IDbContextFactory<MerkwerkDbContext> contextFactory) : IUnitOfWorkFactory
+internal sealed class UnitOfWorkFactory : IUnitOfWorkFactory
 {
-    public IUnitOfWork Create() => new UnitOfWork(contextFactory.CreateDbContext());
+    private readonly IDbContextFactory<MerkwerkDbContext> _contextFactory;
+
+    public UnitOfWorkFactory(IDbContextFactory<MerkwerkDbContext> contextFactory)
+    {
+        _contextFactory = contextFactory;
+    }
+
+    public IUnitOfWork Create() => new UnitOfWork(_contextFactory.CreateDbContext());
 }

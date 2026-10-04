@@ -14,18 +14,41 @@ using Shared.Models.Organizations;
 
 namespace Logic.Organizations.Invitations;
 
-internal sealed partial class InvitationService(
-    IUnitOfWorkFactory unitOfWorkFactory,
-    IAccountService accounts,
-    IAuthSessionService sessions,
-    IMemberService members,
-    IMailService mailService,
-    IPublicLinkBuilder links,
-    IMailDateFormatter dates,
-    TimeProvider timeProvider,
-    ILogger<InvitationService> logger) : IInvitationService
+internal sealed partial class InvitationService : IInvitationService
 {
     public static readonly TimeSpan Lifetime = TimeSpan.FromDays(7);
+
+    private readonly IUnitOfWorkFactory _unitOfWorkFactory;
+    private readonly IAccountService _accounts;
+    private readonly IAuthSessionService _sessions;
+    private readonly IMemberService _members;
+    private readonly IMailService _mailService;
+    private readonly IPublicLinkBuilder _links;
+    private readonly IMailDateFormatter _dates;
+    private readonly TimeProvider _timeProvider;
+    private readonly ILogger<InvitationService> _logger;
+
+    public InvitationService(
+        IUnitOfWorkFactory unitOfWorkFactory,
+        IAccountService accounts,
+        IAuthSessionService sessions,
+        IMemberService members,
+        IMailService mailService,
+        IPublicLinkBuilder links,
+        IMailDateFormatter dates,
+        TimeProvider timeProvider,
+        ILogger<InvitationService> logger)
+    {
+        _unitOfWorkFactory = unitOfWorkFactory;
+        _accounts = accounts;
+        _sessions = sessions;
+        _members = members;
+        _mailService = mailService;
+        _links = links;
+        _dates = dates;
+        _timeProvider = timeProvider;
+        _logger = logger;
+    }
 
     public async Task<CreateInvitationResult> CreateAsync(
         long organizationId,
@@ -35,24 +58,24 @@ internal sealed partial class InvitationService(
         string language,
         CancellationToken cancellationToken)
     {
-        if (!await members.IsAdminAsync(organizationId, actingUserId, cancellationToken))
+        if (!await _members.IsAdminAsync(organizationId, actingUserId, cancellationToken))
         {
             return new CreateInvitationResult(CreateInvitationStatus.Forbidden);
         }
 
         var normalizedEmail = email.Trim();
-        if (await accounts.FindUserIdByEmailAsync(normalizedEmail, cancellationToken) is { } existingUserId
-            && await members.IsMemberAsync(organizationId, existingUserId, cancellationToken))
+        if (await _accounts.FindUserIdByEmailAsync(normalizedEmail, cancellationToken) is { } existingUserId
+            && await _members.IsMemberAsync(organizationId, existingUserId, cancellationToken))
         {
             return new CreateInvitationResult(CreateInvitationStatus.AlreadyMember);
         }
 
-        var inviter = (await accounts.GetAccountsAsync([actingUserId], cancellationToken)).Single();
+        var inviter = (await _accounts.GetAccountsAsync([actingUserId], cancellationToken)).Single();
         var token = Convert.ToBase64String(RandomNumberGenerator.GetBytes(32)).TrimEnd('=').Replace('+', '-').Replace('/', '_');
-        var now = timeProvider.GetUtcNow();
+        var now = _timeProvider.GetUtcNow();
         var expiresAt = now.Add(Lifetime);
 
-        await using var unitOfWork = unitOfWorkFactory.Create();
+        await using var unitOfWork = _unitOfWorkFactory.Create();
         var organization = await unitOfWork.Organizations.GetByIdAsync(organizationId, cancellationToken)
             ?? throw new InvalidOperationException($"Organization {organizationId} does not exist.");
 
@@ -81,15 +104,15 @@ internal sealed partial class InvitationService(
 
         try
         {
-            await mailService.SendAsync(
+            await _mailService.SendAsync(
                 new MailMessageRequest(normalizedEmail, normalizedEmail, MailTemplate.Invitation, language,
                     new Dictionary<string, string>
                     {
                         ["Name"] = normalizedEmail,
                         ["InvitedBy"] = inviter.DisplayName,
                         ["OrganizationName"] = organization.Name,
-                        ["Link"] = links.Build("/invitation", ("token", token)),
-                        ["ExpiresAt"] = dates.Format(expiresAt, language),
+                        ["Link"] = _links.Build("/invitation", ("token", token)),
+                        ["ExpiresAt"] = _dates.Format(expiresAt, language),
                     }),
                 cancellationToken);
         }
@@ -108,14 +131,14 @@ internal sealed partial class InvitationService(
         CancellationToken cancellationToken)
     {
         // Checked against the database, not just the role claim: a removed admin keeps the claim for up to 15 minutes.
-        if (!await members.IsAdminAsync(organizationId, actingUserId, cancellationToken))
+        if (!await _members.IsAdminAsync(organizationId, actingUserId, cancellationToken))
         {
             return null;
         }
 
-        var now = timeProvider.GetUtcNow();
+        var now = _timeProvider.GetUtcNow();
 
-        await using var unitOfWork = unitOfWorkFactory.Create();
+        await using var unitOfWork = _unitOfWorkFactory.Create();
         var open = await unitOfWork.Invitations.Query()
             .Where(i => i.OrganizationId == organizationId && i.AcceptedAt == null && i.RevokedAt == null)
             .OrderByDescending(i => i.Id)
@@ -130,12 +153,12 @@ internal sealed partial class InvitationService(
         long invitationId,
         CancellationToken cancellationToken)
     {
-        if (!await members.IsAdminAsync(organizationId, actingUserId, cancellationToken))
+        if (!await _members.IsAdminAsync(organizationId, actingUserId, cancellationToken))
         {
             return false;
         }
 
-        await using var unitOfWork = unitOfWorkFactory.Create();
+        await using var unitOfWork = _unitOfWorkFactory.Create();
         var invitation = await unitOfWork.Invitations.GetByIdAsync(invitationId, cancellationToken);
 
         // Explicit tenant check in addition to the query filter (ADR 007).
@@ -144,14 +167,14 @@ internal sealed partial class InvitationService(
             return false;
         }
 
-        invitation.RevokedAt ??= timeProvider.GetUtcNow().UtcDateTime;
+        invitation.RevokedAt ??= _timeProvider.GetUtcNow().UtcDateTime;
         await unitOfWork.SaveChangesAsync(cancellationToken);
         return true;
     }
 
     public async Task<InvitationDetailsResult> GetDetailsAsync(string token, CancellationToken cancellationToken)
     {
-        await using var unitOfWork = unitOfWorkFactory.Create();
+        await using var unitOfWork = _unitOfWorkFactory.Create();
         var invitation = await unitOfWork.Invitations.FindByTokenHashAsync(Hash(token), cancellationToken);
 
         if (invitation is null)
@@ -180,7 +203,7 @@ internal sealed partial class InvitationService(
         long? currentUserId,
         CancellationToken cancellationToken)
     {
-        await using var unitOfWork = unitOfWorkFactory.Create();
+        await using var unitOfWork = _unitOfWorkFactory.Create();
         var invitation = await unitOfWork.Invitations.FindByTokenHashAsync(Hash(request.Token), cancellationToken);
 
         if (invitation is null)
@@ -197,7 +220,7 @@ internal sealed partial class InvitationService(
         var accountCreated = false;
         if (currentUserId is { } signedIn)
         {
-            var account = (await accounts.GetAccountsAsync([signedIn], cancellationToken)).SingleOrDefault();
+            var account = (await _accounts.GetAccountsAsync([signedIn], cancellationToken)).SingleOrDefault();
             if (account is null || !string.Equals(account.Email, invitation.Email, StringComparison.OrdinalIgnoreCase))
             {
                 return new AcceptInvitationResult(AcceptInvitationStatus.EmailMismatch);
@@ -207,7 +230,7 @@ internal sealed partial class InvitationService(
         }
         else
         {
-            if (await accounts.FindUserIdByEmailAsync(invitation.Email, cancellationToken) is not null)
+            if (await _accounts.FindUserIdByEmailAsync(invitation.Email, cancellationToken) is not null)
             {
                 return new AcceptInvitationResult(AcceptInvitationStatus.AccountExists);
             }
@@ -219,7 +242,7 @@ internal sealed partial class InvitationService(
             }
 
             // The link reached this address, so it counts as confirmed.
-            var created = await accounts.CreateAccountAsync(
+            var created = await _accounts.CreateAccountAsync(
                 new NewAccount(invitation.Email, request.DisplayName!.Trim(), request.Password!, EmailConfirmed: true,
                     PrivacyPolicy.CurrentVersion),
                 cancellationToken);
@@ -246,7 +269,7 @@ internal sealed partial class InvitationService(
             });
         }
 
-        invitation.AcceptedAt = timeProvider.GetUtcNow().UtcDateTime;
+        invitation.AcceptedAt = _timeProvider.GetUtcNow().UtcDateTime;
 
         try
         {
@@ -267,14 +290,14 @@ internal sealed partial class InvitationService(
         LogAccepted(invitation.Id, userId);
         return new AcceptInvitationResult(
             AcceptInvitationStatus.Success,
-            Session: await sessions.SignInAsync(userId, cancellationToken));
+            Session: await _sessions.SignInAsync(userId, cancellationToken));
 
         // An account made for this invitation but left without its membership would block the address (409) for good.
         async Task DeleteCreatedAccountAsync()
         {
             if (accountCreated)
             {
-                await accounts.DeleteAccountAsync(userId, CancellationToken.None);
+                await _accounts.DeleteAccountAsync(userId, CancellationToken.None);
             }
         }
     }
@@ -282,7 +305,7 @@ internal sealed partial class InvitationService(
     private bool IsUsable(InvitationEntity invitation) =>
         invitation.AcceptedAt is null
         && invitation.RevokedAt is null
-        && invitation.ExpiresAt > timeProvider.GetUtcNow().UtcDateTime;
+        && invitation.ExpiresAt > _timeProvider.GetUtcNow().UtcDateTime;
 
     private static InvitationInfo ToInfo(InvitationEntity invitation, DateTimeOffset now) => new(
         invitation.Id,

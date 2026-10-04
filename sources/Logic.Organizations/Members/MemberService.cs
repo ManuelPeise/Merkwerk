@@ -6,8 +6,17 @@ using Shared.Models.Organizations;
 
 namespace Logic.Organizations.Members;
 
-internal sealed class MemberService(IUnitOfWorkFactory unitOfWorkFactory, IAccountService accounts) : IMemberService
+internal sealed class MemberService : IMemberService
 {
+    private readonly IUnitOfWorkFactory _unitOfWorkFactory;
+    private readonly IAccountService _accounts;
+
+    public MemberService(IUnitOfWorkFactory unitOfWorkFactory, IAccountService accounts)
+    {
+        _unitOfWorkFactory = unitOfWorkFactory;
+        _accounts = accounts;
+    }
+
     public async Task<IReadOnlyList<MemberInfo>?> ListAsync(
         long organizationId,
         long actingUserId,
@@ -19,13 +28,13 @@ internal sealed class MemberService(IUnitOfWorkFactory unitOfWorkFactory, IAccou
             return null;
         }
 
-        await using var unitOfWork = unitOfWorkFactory.Create();
+        await using var unitOfWork = _unitOfWorkFactory.Create();
         var memberships = await unitOfWork.Memberships.Query()
             .Where(m => m.OrganizationId == organizationId)
             .OrderBy(m => m.Id)
             .ToListAsync(cancellationToken);
 
-        var accountsById = (await accounts.GetAccountsAsync(memberships.Select(m => m.UserId).ToList(), cancellationToken))
+        var accountsById = (await _accounts.GetAccountsAsync(memberships.Select(m => m.UserId).ToList(), cancellationToken))
             .ToDictionary(a => a.UserId);
 
         return memberships
@@ -46,7 +55,7 @@ internal sealed class MemberService(IUnitOfWorkFactory unitOfWorkFactory, IAccou
             return RemoveMemberStatus.NotFound;
         }
 
-        await using var unitOfWork = unitOfWorkFactory.Create();
+        await using var unitOfWork = _unitOfWorkFactory.Create();
         var membership = await unitOfWork.Memberships.GetByIdAsync(membershipId, cancellationToken);
 
         if (membership is null || membership.OrganizationId != organizationId)
@@ -82,18 +91,18 @@ internal sealed class MemberService(IUnitOfWorkFactory unitOfWorkFactory, IAccou
             return false;
         }
 
-        return (await accounts.IssueStartPasswordAsync(targetUserId, language, cancellationToken)).Succeeded;
+        return (await _accounts.IssueStartPasswordAsync(targetUserId, language, cancellationToken)).Succeeded;
     }
 
     public async Task<bool> IsMemberAsync(long organizationId, long userId, CancellationToken cancellationToken)
     {
-        await using var unitOfWork = unitOfWorkFactory.Create();
+        await using var unitOfWork = _unitOfWorkFactory.Create();
         return await unitOfWork.Memberships.FindAsync(organizationId, userId, cancellationToken) is not null;
     }
 
     public async Task<bool> IsAdminAsync(long organizationId, long userId, CancellationToken cancellationToken)
     {
-        await using var unitOfWork = unitOfWorkFactory.Create();
+        await using var unitOfWork = _unitOfWorkFactory.Create();
         var membership = await unitOfWork.Memberships.FindAsync(organizationId, userId, cancellationToken);
         return membership?.Role == OrganizationRole.OrgAdmin;
     }

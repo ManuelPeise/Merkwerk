@@ -5,9 +5,13 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Data.Accessor.Repositories;
 
-internal sealed class LearnerRepository(MerkwerkDbContext context)
-    : EntityRepository<LearnerEntity>(context), ILearnerRepository
+internal sealed class LearnerRepository : EntityRepository<LearnerEntity>, ILearnerRepository
 {
+    public LearnerRepository(MerkwerkDbContext context)
+        : base(context)
+    {
+    }
+
     public async Task<IReadOnlyList<LearnerEntity>> ListForDeviceAsync(long organizationId, CancellationToken cancellationToken = default) =>
         // IgnoreQueryFilters: the device request carries no organization claim; the family is filtered explicitly
         // (AGENTS.md §5, documented exception).

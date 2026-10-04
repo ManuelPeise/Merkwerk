@@ -5,9 +5,13 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Data.Accessor.Repositories;
 
-internal sealed class LearnerSessionRepository(MerkwerkDbContext context)
-    : EntityRepository<LearnerSessionEntity>(context), ILearnerSessionRepository
+internal sealed class LearnerSessionRepository : EntityRepository<LearnerSessionEntity>, ILearnerSessionRepository
 {
+    public LearnerSessionRepository(MerkwerkDbContext context)
+        : base(context)
+    {
+    }
+
     public Task<LearnerSessionEntity?> FindByTokenHashAsync(string tokenHash, CancellationToken cancellationToken = default) =>
         // IgnoreQueryFilters: a refresh has no valid access token, hence no organization (AGENTS.md §5, documented exception).
         Set.IgnoreQueryFilters()

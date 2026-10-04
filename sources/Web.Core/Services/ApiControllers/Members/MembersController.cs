@@ -8,8 +8,15 @@ using Web.Core.Services.Authorization;
 namespace Web.Core.Services.ApiControllers.Members;
 
 /// <summary>Adults of the family (LP-105).</summary>
-public sealed class MembersController(IMemberService memberService) : ApiControllerBase
+public sealed class MembersController : ApiControllerBase
 {
+    private readonly IMemberService _memberService;
+
+    public MembersController(IMemberService memberService)
+    {
+        _memberService = memberService;
+    }
+
     /// <summary>GET /api/v1/members/list</summary>
     [Authorize(Policy = AuthorizationPolicies.Member)]
     [HttpGet]
@@ -18,7 +25,7 @@ public sealed class MembersController(IMemberService memberService) : ApiControl
     public async Task<ActionResult<IReadOnlyList<MemberDto>>> ListAsync(CancellationToken cancellationToken)
     {
         if (CurrentOrganizationId is not { } organizationId || CurrentUserId is not { } userId
-            || await memberService.ListAsync(organizationId, userId, cancellationToken) is not { } members)
+            || await _memberService.ListAsync(organizationId, userId, cancellationToken) is not { } members)
         {
             return Forbid();
         }
@@ -39,7 +46,7 @@ public sealed class MembersController(IMemberService memberService) : ApiControl
             return Forbid();
         }
 
-        return await memberService.RemoveAsync(organizationId, userId, request.MembershipId, cancellationToken) switch
+        return await _memberService.RemoveAsync(organizationId, userId, request.MembershipId, cancellationToken) switch
         {
             RemoveMemberStatus.Success => NoContent(),
             RemoveMemberStatus.IsOwner => Problem(statusCode: StatusCodes.Status409Conflict, title: "The owner cannot be removed"),

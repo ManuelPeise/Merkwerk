@@ -7,19 +7,28 @@ using Shared.Models.Organizations;
 
 namespace Logic.Organizations.Learners;
 
-internal sealed class LearnerService(IUnitOfWorkFactory unitOfWorkFactory, IMemberService members) : ILearnerService
+internal sealed class LearnerService : ILearnerService
 {
+    private readonly IUnitOfWorkFactory _unitOfWorkFactory;
+    private readonly IMemberService _members;
+
+    public LearnerService(IUnitOfWorkFactory unitOfWorkFactory, IMemberService members)
+    {
+        _unitOfWorkFactory = unitOfWorkFactory;
+        _members = members;
+    }
+
     public async Task<IReadOnlyList<LearnerInfo>?> ListAsync(
         long organizationId,
         long actingUserId,
         CancellationToken cancellationToken)
     {
-        if (!await members.IsMemberAsync(organizationId, actingUserId, cancellationToken))
+        if (!await _members.IsMemberAsync(organizationId, actingUserId, cancellationToken))
         {
             return null;
         }
 
-        await using var unitOfWork = unitOfWorkFactory.Create();
+        await using var unitOfWork = _unitOfWorkFactory.Create();
         return await unitOfWork.Repository<LearnerEntity>().Query()
             .Where(l => l.OrganizationId == organizationId)
             .OrderBy(l => l.DisplayName)
@@ -33,7 +42,7 @@ internal sealed class LearnerService(IUnitOfWorkFactory unitOfWorkFactory, IMemb
         LearnerInput input,
         CancellationToken cancellationToken)
     {
-        if (!await members.IsAdminAsync(organizationId, actingUserId, cancellationToken))
+        if (!await _members.IsAdminAsync(organizationId, actingUserId, cancellationToken))
         {
             return new LearnerChangeResult(LearnerChangeStatus.NotFound);
         }
@@ -44,7 +53,7 @@ internal sealed class LearnerService(IUnitOfWorkFactory unitOfWorkFactory, IMemb
             return new LearnerChangeResult(LearnerChangeStatus.Invalid, Errors: errors);
         }
 
-        await using var unitOfWork = unitOfWorkFactory.Create();
+        await using var unitOfWork = _unitOfWorkFactory.Create();
         var learners = unitOfWork.Repository<LearnerEntity>();
         var count = await learners.Query().CountAsync(l => l.OrganizationId == organizationId, cancellationToken);
 
@@ -68,7 +77,7 @@ internal sealed class LearnerService(IUnitOfWorkFactory unitOfWorkFactory, IMemb
         LearnerInput input,
         CancellationToken cancellationToken)
     {
-        if (!await members.IsAdminAsync(organizationId, actingUserId, cancellationToken))
+        if (!await _members.IsAdminAsync(organizationId, actingUserId, cancellationToken))
         {
             return new LearnerChangeResult(LearnerChangeStatus.NotFound);
         }
@@ -79,7 +88,7 @@ internal sealed class LearnerService(IUnitOfWorkFactory unitOfWorkFactory, IMemb
             return new LearnerChangeResult(LearnerChangeStatus.Invalid, Errors: errors);
         }
 
-        await using var unitOfWork = unitOfWorkFactory.Create();
+        await using var unitOfWork = _unitOfWorkFactory.Create();
         var learner = await unitOfWork.Repository<LearnerEntity>().GetByIdAsync(learnerId, cancellationToken);
 
         // Explicit tenant check in addition to the query filter (ADR 007).
@@ -99,12 +108,12 @@ internal sealed class LearnerService(IUnitOfWorkFactory unitOfWorkFactory, IMemb
         long learnerId,
         CancellationToken cancellationToken)
     {
-        if (!await members.IsAdminAsync(organizationId, actingUserId, cancellationToken))
+        if (!await _members.IsAdminAsync(organizationId, actingUserId, cancellationToken))
         {
             return LearnerChangeStatus.NotFound;
         }
 
-        await using var unitOfWork = unitOfWorkFactory.Create();
+        await using var unitOfWork = _unitOfWorkFactory.Create();
         var learners = unitOfWork.Repository<LearnerEntity>();
         var learner = await learners.GetByIdAsync(learnerId, cancellationToken);
 

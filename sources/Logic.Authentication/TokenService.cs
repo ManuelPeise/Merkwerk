@@ -9,9 +9,18 @@ using Microsoft.IdentityModel.Tokens;
 namespace Logic.Authentication;
 
 /// <summary>Creates signed access tokens and random refresh tokens.</summary>
-public sealed class TokenService(IOptions<JwtOptions> options, TimeProvider timeProvider)
+public sealed class TokenService
 {
     private readonly JsonWebTokenHandler _handler = new();
+
+    private readonly IOptions<JwtOptions> _options;
+    private readonly TimeProvider _timeProvider;
+
+    public TokenService(IOptions<JwtOptions> options, TimeProvider timeProvider)
+    {
+        _options = options;
+        _timeProvider = timeProvider;
+    }
 
     public (string Token, DateTimeOffset ExpiresAt) CreateAccessToken(
         string userId,
@@ -73,8 +82,8 @@ public sealed class TokenService(IOptions<JwtOptions> options, TimeProvider time
 
     private (string Token, DateTimeOffset ExpiresAt) CreateToken(List<Claim> claims, DateTimeOffset? notAfter)
     {
-        var settings = options.Value;
-        var now = timeProvider.GetUtcNow();
+        var settings = _options.Value;
+        var now = _timeProvider.GetUtcNow();
         var expiresAt = now.AddMinutes(settings.AccessTokenMinutes);
 
         if (notAfter is { } limit && limit < expiresAt)

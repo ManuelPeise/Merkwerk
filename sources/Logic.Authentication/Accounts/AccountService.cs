@@ -16,15 +16,7 @@ namespace Logic.Authentication.Accounts;
 /// <summary>
 /// Account operations with mails (LP-104). Logs never contain e-mail addresses or tokens – only user ids and outcomes.
 /// </summary>
-internal sealed partial class AccountService(
-    UserManager<UserEntity> userManager,
-    AuthSessionService sessions,
-    RefreshTokenStore refreshTokens,
-    IMailService mailService,
-    IPublicLinkBuilder links,
-    IMailDateFormatter dates,
-    TimeProvider timeProvider,
-    ILogger<AccountService> logger) : IAccountService
+internal sealed partial class AccountService : IAccountService
 {
     private const int StartPasswordLength = 12;
 
@@ -33,24 +25,53 @@ internal sealed partial class AccountService(
 
     private const string InvalidTokenError = "The link is invalid or has expired.";
 
+    private readonly UserManager<UserEntity> _userManager;
+    private readonly AuthSessionService _sessions;
+    private readonly RefreshTokenStore _refreshTokens;
+    private readonly IMailService _mailService;
+    private readonly IPublicLinkBuilder _links;
+    private readonly IMailDateFormatter _dates;
+    private readonly TimeProvider _timeProvider;
+    private readonly ILogger<AccountService> _logger;
+
+    public AccountService(
+        UserManager<UserEntity> userManager,
+        AuthSessionService sessions,
+        RefreshTokenStore refreshTokens,
+        IMailService mailService,
+        IPublicLinkBuilder links,
+        IMailDateFormatter dates,
+        TimeProvider timeProvider,
+        ILogger<AccountService> logger)
+    {
+        _userManager = userManager;
+        _sessions = sessions;
+        _refreshTokens = refreshTokens;
+        _mailService = mailService;
+        _links = links;
+        _dates = dates;
+        _timeProvider = timeProvider;
+        _logger = logger;
+    }
+
     public async Task RequestPasswordResetAsync(string email, string language, CancellationToken cancellationToken)
     {
-        var user = await userManager.FindByEmailAsync(email);
+        var user = await _userManager.FindByEmailAsync(email);
 
         if (user is null || !user.EmailConfirmed)
         {
             return;
         }
 
-        var token = await userManager.GeneratePasswordResetTokenAsync(user);
-        var link = links.Build("/reset-password", ("email", user.Email!), ("token", TokenEncoding.EncodeForUrl(token)));
-        var expiresAt = timeProvider.GetUtcNow().Add(AccountTokenLifetimes.LinkToken);
+        var token = await _userManager.GeneratePasswordResetTokenAsync(user);
+        var link = _links.Build("/reset-password", ("email", user.Email!), ("token", TokenEncoding.EncodeForUrl(token)));
+        var expiresAt = _timeProvider.GetUtcNow().Add(AccountTokenLifetimes.LinkToken);
 
         await TrySendAsync(user, MailTemplate.PasswordReset, language, new Dictionary<string, string>
         {
             ["Name"] = user.DisplayName,
             ["Link"] = link,
-            ["ExpiresAt"] = dates.Format(expiresAt, language),
+            ["ExpiresAt"] = _dates.Format(expiresAt, language),
         }, cancellationToken);
     }
 
@@ -60,7 +81,7 @@ internal sealed partial class AccountService(
         string newPassword,
         CancellationToken cancellationToken)
     {
-        var user = await userManager.FindByEmailAsync(email);
+        var user = await _userManager.FindByEmailAsync(email);
         var decoded = TokenEncoding.DecodeFromUrl(token);
 
         if (user is null || decoded is null)
@@ -68,7 +89,7 @@ internal sealed partial class AccountService(
             return AccountResult.Failed(InvalidTokenError);
         }
 
-        var result = await userManager.ResetPasswordAsync(user, decoded, newPassword);
+        var result = await _userManager.ResetPasswordAsync(user, decoded, newPassword);
 
         // Identity checks the token before the password rules. A wrong token must answer exactly like an unknown
         // address, otherwise this anonymous endpoint tells which addresses are registered.
@@ -81,10 +102,10 @@ internal sealed partial class AccountService(
 
         user.MustChangePassword = false;
         user.StartPasswordExpiresAt = null;
-        await userManager.UpdateAsync(user);
-        await userManager.SetLockoutEndDateAsync(user, null);
-        await userManager.ResetAccessFailedCountAsync(user);
-        await refreshTokens.RevokeAllAsync(user.Id, cancellationToken);
+        await _userManager.UpdateAsync(user);
+        await _userManager.SetLockoutEndDateAsync(user, null);
+        await _userManager.ResetAccessFailedCountAsync(user);
+        await _refreshTokens.RevokeAllAsync(user.Id, cancellationToken);
 
         LogPasswordReset(user.Id);
         return AccountResult.Success();
@@ -93,8 +114,8 @@ internal sealed partial class AccountService(
     public async Task SendEmailConfirmationAsync(long userId, string language, CancellationToken cancellationToken)
     {
         var user = await FindAsync(userId) ?? throw new InvalidOperationException($"User {userId} does not exist.");
-        var token = await userManager.GenerateEmailConfirmationTokenAsync(user);
-        var link = links.Build(
+        var token = await _userManager.GenerateEmailConfirmationTokenAsync(user);
+        var link = _links.Build(
             "/confirm-email",
             ("userId", user.Id.ToString(CultureInfo.InvariantCulture)),
             ("token", TokenEncoding.EncodeForUrl(token)));
@@ -118,7 +139,7 @@ internal sealed partial class AccountService(
             return AccountResult.Failed(InvalidTokenError);
         }
 
-        var result = await userManager.ConfirmEmailAsync(user, decoded);
+        var result = await _userManager.ConfirmEmailAsync(user, decoded);
         return result.Succeeded ? AccountResult.Success() : AccountResult.Failed(InvalidTokenError);
     }
 
@@ -135,7 +156,7 @@ internal sealed partial class AccountService(
             return AccountResult.Failed("The account does not exist.");
         }
 
-        var result = await userManager.ChangePasswordAsync(user, currentPassword, newPassword);
+        var result = await _userManager.ChangePasswordAsync(user, currentPassword, newPassword);
 
         if (!result.Succeeded)
         {
@@ -144,11 +165,11 @@ internal sealed partial class AccountService(
 
         user.MustChangePassword = false;
         user.StartPasswordExpiresAt = null;
-        await userManager.UpdateAsync(user);
-        await refreshTokens.RevokeAllAsync(user.Id, cancellationToken);
+        await _userManager.UpdateAsync(user);
+        await _refreshTokens.RevokeAllAsync(user.Id, cancellationToken);
 
         LogPasswordChanged(user.Id);
-        return AccountResult.Success(await sessions.IssueSessionAsync(user, Guid.NewGuid(), cancellationToken));
+        return AccountResult.Success(await _sessions.IssueSessionAsync(user, Guid.NewGuid(), cancellationToken));
     }
 
     public async Task<AccountResult> IssueStartPasswordAsync(long userId, string language, CancellationToken cancellationToken)
@@ -161,18 +182,18 @@ internal sealed partial class AccountService(
         }
 
         var startPassword = RandomNumberGenerator.GetString(StartPasswordAlphabet, StartPasswordLength);
-        var expiresAt = timeProvider.GetUtcNow().Add(AccountTokenLifetimes.StartPassword);
+        var expiresAt = _timeProvider.GetUtcNow().Add(AccountTokenLifetimes.StartPassword);
 
-        if (await userManager.HasPasswordAsync(user))
+        if (await _userManager.HasPasswordAsync(user))
         {
-            var removed = await userManager.RemovePasswordAsync(user);
+            var removed = await _userManager.RemovePasswordAsync(user);
             if (!removed.Succeeded)
             {
                 return ToFailure(removed);
             }
         }
 
-        var added = await userManager.AddPasswordAsync(user, startPassword);
+        var added = await _userManager.AddPasswordAsync(user, startPassword);
         if (!added.Succeeded)
         {
             return ToFailure(added);
@@ -180,17 +201,17 @@ internal sealed partial class AccountService(
 
         user.MustChangePassword = true;
         user.StartPasswordExpiresAt = expiresAt.UtcDateTime;
-        await userManager.UpdateAsync(user);
-        await userManager.UpdateSecurityStampAsync(user);
-        await userManager.SetLockoutEndDateAsync(user, null);
-        await userManager.ResetAccessFailedCountAsync(user);
-        await refreshTokens.RevokeAllAsync(user.Id, cancellationToken);
+        await _userManager.UpdateAsync(user);
+        await _userManager.UpdateSecurityStampAsync(user);
+        await _userManager.SetLockoutEndDateAsync(user, null);
+        await _userManager.ResetAccessFailedCountAsync(user);
+        await _refreshTokens.RevokeAllAsync(user.Id, cancellationToken);
 
         await TrySendAsync(user, MailTemplate.OneTimeCode, language, new Dictionary<string, string>
         {
             ["Name"] = user.DisplayName,
             ["Code"] = startPassword,
-            ["ExpiresAt"] = dates.Format(expiresAt, language),
+            ["ExpiresAt"] = _dates.Format(expiresAt, language),
         }, cancellationToken);
 
         LogStartPasswordIssued(user.Id);
@@ -206,10 +227,10 @@ internal sealed partial class AccountService(
             EmailConfirmed = account.EmailConfirmed,
             DisplayName = account.DisplayName,
             PrivacyPolicyVersion = account.PrivacyPolicyVersion,
-            PrivacyAcceptedAt = timeProvider.GetUtcNow().UtcDateTime,
+            PrivacyAcceptedAt = _timeProvider.GetUtcNow().UtcDateTime,
         };
 
-        var result = await userManager.CreateAsync(user, account.Password);
+        var result = await _userManager.CreateAsync(user, account.Password);
         return result.Succeeded ? AccountResult.Created(user.Id) : ToFailure(result);
     }
 
@@ -217,22 +238,22 @@ internal sealed partial class AccountService(
     {
         if (await FindAsync(userId) is { } user)
         {
-            await userManager.DeleteAsync(user);
+            await _userManager.DeleteAsync(user);
         }
     }
 
     public async Task<long?> FindUserIdByEmailAsync(string email, CancellationToken cancellationToken) =>
-        (await userManager.FindByEmailAsync(email))?.Id;
+        (await _userManager.FindByEmailAsync(email))?.Id;
 
     public async Task<IReadOnlyList<AccountInfo>> GetAccountsAsync(
         IReadOnlyCollection<long> userIds,
         CancellationToken cancellationToken) =>
-        await userManager.Users
+        await _userManager.Users
             .Where(u => userIds.Contains(u.Id))
             .Select(u => new AccountInfo(u.Id, u.DisplayName, u.Email ?? string.Empty))
             .ToListAsync(cancellationToken);
 
-    private Task<UserEntity?> FindAsync(long userId) => userManager.FindByIdAsync(userId.ToString(CultureInfo.InvariantCulture));
+    private Task<UserEntity?> FindAsync(long userId) => _userManager.FindByIdAsync(userId.ToString(CultureInfo.InvariantCulture));
 
     /// <summary>A failed mail must not turn into an error the caller could use to probe for accounts.</summary>
     private async Task TrySendAsync(
@@ -244,7 +265,7 @@ internal sealed partial class AccountService(
     {
         try
         {
-            await mailService.SendAsync(
+            await _mailService.SendAsync(
                 new MailMessageRequest(user.Email!, user.DisplayName, template, language, values),
                 cancellationToken);
         }

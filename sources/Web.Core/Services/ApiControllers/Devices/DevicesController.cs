@@ -17,11 +17,22 @@ namespace Web.Core.Services.ApiControllers.Devices;
 /// anonymous for the authentication middleware and check the cookie in the service. An unpaired device gets 403 –
 /// not 401, which would make the client try a token refresh.
 /// </summary>
-public sealed class DevicesController(
-    IDeviceService deviceService,
-    ILearnerSessionService learnerSessionService,
-    AuthCookieWriter cookieWriter) : ApiControllerBase
+public sealed class DevicesController : ApiControllerBase
 {
+    private readonly IDeviceService _deviceService;
+    private readonly ILearnerSessionService _learnerSessionService;
+    private readonly AuthCookieWriter _cookieWriter;
+
+    public DevicesController(
+        IDeviceService deviceService,
+        ILearnerSessionService learnerSessionService,
+        AuthCookieWriter cookieWriter)
+    {
+        _deviceService = deviceService;
+        _learnerSessionService = learnerSessionService;
+        _cookieWriter = cookieWriter;
+    }
+
     /// <summary>POST /api/v1/devices/pairing-code – six digits, 10 minutes, single use; replaces the family's open code.</summary>
     [Authorize(Policy = AuthorizationPolicies.Member)]
     [HttpPost]
@@ -30,7 +41,7 @@ public sealed class DevicesController(
     public async Task<ActionResult<PairingCodeDto>> PairingCodeAsync(CancellationToken cancellationToken)
     {
         if (CurrentOrganizationId is not { } organizationId || CurrentUserId is not { } userId
-            || await deviceService.CreatePairingCodeAsync(organizationId, userId, cancellationToken) is not { } code)
+            || await _deviceService.CreatePairingCodeAsync(organizationId, userId, cancellationToken) is not { } code)
         {
             return Forbid();
         }
@@ -49,14 +60,14 @@ public sealed class DevicesController(
         PairDeviceRequestDto request,
         CancellationToken cancellationToken)
     {
-        var result = await deviceService.PairAsync(request.Code, request.DeviceName ?? string.Empty, cancellationToken);
+        var result = await _deviceService.PairAsync(request.Code, request.DeviceName ?? string.Empty, cancellationToken);
 
         if (result.Status != PairStatus.Success)
         {
             return Problem(statusCode: StatusCodes.Status400BadRequest, title: "Invalid pairing code");
         }
 
-        cookieWriter.WriteDevice(Response, result.DeviceToken!, result.DeviceTokenExpiresAt!.Value);
+        _cookieWriter.WriteDevice(Response, result.DeviceToken!, result.DeviceTokenExpiresAt!.Value);
         return new PairDeviceResponseDto(result.FamilyName!);
     }
 
@@ -73,11 +84,11 @@ public sealed class DevicesController(
             return new DeviceStatusDto(IsPaired: false);
         }
 
-        var status = await deviceService.GetStatusAsync(deviceToken, cancellationToken);
+        var status = await _deviceService.GetStatusAsync(deviceToken, cancellationToken);
 
         if (status is null)
         {
-            cookieWriter.DeleteDevice(Response);
+            _cookieWriter.DeleteDevice(Response);
             return new DeviceStatusDto(IsPaired: false);
         }
 
@@ -91,7 +102,7 @@ public sealed class DevicesController(
     [ProducesResponseType<ProblemDetails>(StatusCodes.Status403Forbidden)]
     public async Task<ActionResult<IReadOnlyList<DeviceProfileDto>>> ProfilesAsync(CancellationToken cancellationToken)
     {
-        var profiles = await deviceService.ListProfilesAsync(Request.Cookies[AuthCookies.DeviceToken] ?? string.Empty, cancellationToken);
+        var profiles = await _deviceService.ListProfilesAsync(Request.Cookies[AuthCookies.DeviceToken] ?? string.Empty, cancellationToken);
 
         if (profiles is null)
         {
@@ -113,13 +124,13 @@ public sealed class DevicesController(
     public async Task<ActionResult<SessionDto>> SignInAsync(DeviceSignInRequestDto request, CancellationToken cancellationToken)
     {
         var deviceToken = Request.Cookies[AuthCookies.DeviceToken] ?? string.Empty;
-        var result = await learnerSessionService.SignInAsync(deviceToken, request.LearnerId, cancellationToken);
+        var result = await _learnerSessionService.SignInAsync(deviceToken, request.LearnerId, cancellationToken);
 
         switch (result.Status)
         {
             case LearnerSignInStatus.Success:
-                cookieWriter.Write(Response, result.Session!);
-                cookieWriter.WriteDevice(Response, deviceToken, result.DeviceTokenExpiresAt!.Value);
+                _cookieWriter.Write(Response, result.Session!);
+                _cookieWriter.WriteDevice(Response, deviceToken, result.DeviceTokenExpiresAt!.Value);
                 return SessionDto.From(result.Session!);
             case LearnerSignInStatus.DeviceNotPaired:
                 return DeviceNotPaired();
@@ -136,7 +147,7 @@ public sealed class DevicesController(
     public async Task<ActionResult<IReadOnlyList<DeviceDto>>> ListAsync(CancellationToken cancellationToken)
     {
         if (CurrentOrganizationId is not { } organizationId || CurrentUserId is not { } userId
-            || await deviceService.ListAsync(organizationId, userId, cancellationToken) is not { } devices)
+            || await _deviceService.ListAsync(organizationId, userId, cancellationToken) is not { } devices)
         {
             return Forbid();
         }
@@ -156,14 +167,14 @@ public sealed class DevicesController(
             return NotFound();
         }
 
-        return await deviceService.RevokeAsync(organizationId, userId, request.Id, cancellationToken)
+        return await _deviceService.RevokeAsync(organizationId, userId, request.Id, cancellationToken)
             ? NoContent()
             : NotFound();
     }
 
     private ObjectResult DeviceNotPaired()
     {
-        cookieWriter.DeleteDevice(Response);
+        _cookieWriter.DeleteDevice(Response);
         return Problem(statusCode: StatusCodes.Status403Forbidden, title: "Device not paired");
     }
 }

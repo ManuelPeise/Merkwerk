@@ -14,15 +14,26 @@ namespace Logic.Notifications.Smtp;
 /// Sends mails with MailKit, one connection per mail (LP-162). Logs template, language and outcome –
 /// never the recipient's address.
 /// </summary>
-internal sealed partial class SmtpMailService(
-    MailTemplateRenderer renderer,
-    IOptions<MailOptions> options,
-    ILogger<SmtpMailService> logger) : IMailService
+internal sealed partial class SmtpMailService : IMailService
 {
+    private readonly MailTemplateRenderer _renderer;
+    private readonly IOptions<MailOptions> _options;
+    private readonly ILogger<SmtpMailService> _logger;
+
+    public SmtpMailService(
+        MailTemplateRenderer renderer,
+        IOptions<MailOptions> options,
+        ILogger<SmtpMailService> logger)
+    {
+        _renderer = renderer;
+        _options = options;
+        _logger = logger;
+    }
+
     public async Task SendAsync(MailMessageRequest request, CancellationToken cancellationToken)
     {
-        var settings = options.Value;
-        var rendered = renderer.Render(request.Template, request.Language, request.Values);
+        var settings = _options.Value;
+        var rendered = _renderer.Render(request.Template, request.Language, request.Values);
         using var message = CreateMessage(settings, request, rendered);
 
         try

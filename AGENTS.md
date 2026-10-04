@@ -179,7 +179,9 @@ touch targets ≥ 64×64 px, icons plus text and friendly feedback; no CDNs, no 
 - Prefixes: interfaces `I…`, abstract base classes `A…` (e.g. `AEntityBase`).
 - Async methods end in `Async` and take a `CancellationToken` as the last parameter.
 - `sealed` for classes not designed for inheritance; `record` for DTOs.
-- Primary constructors for DI are fine. No service locator, no static state.
+- Classes with injected dependencies use a constructor that assigns `private readonly` fields with an underscore
+  prefix (`private readonly IMyService _myService;`) – no primary constructors for DI. Records, DTOs and test classes
+  may keep primary constructors. No service locator, no static state.
 - Options classes with `SectionName`, bound with `ValidateOnStart`.
 - No warnings in commits (`TreatWarningsAsErrors` in Release, set in `sources/Directory.Build.props`).
 - PowerShell scripts (`*.ps1`): ASCII only, or save as UTF-8 **with BOM**. Windows PowerShell 5.1 reads UTF-8 without BOM

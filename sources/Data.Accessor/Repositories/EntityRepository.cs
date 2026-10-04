@@ -6,10 +6,15 @@ using Microsoft.EntityFrameworkCore;
 namespace Data.Accessor.Repositories;
 
 /// <summary>Default repository; specialized repositories derive from it.</summary>
-internal class EntityRepository<T>(MerkwerkDbContext context) : IRepository<T>
+internal class EntityRepository<T> : IRepository<T>
     where T : AEntityBase
 {
-    protected DbSet<T> Set { get; } = context.Set<T>();
+    public EntityRepository(MerkwerkDbContext context)
+    {
+        Set = context.Set<T>();
+    }
+
+    protected DbSet<T> Set { get; }
 
     public Task<T?> GetByIdAsync(long id, CancellationToken cancellationToken = default) =>
         Set.FirstOrDefaultAsync(entity => entity.Id == id, cancellationToken);

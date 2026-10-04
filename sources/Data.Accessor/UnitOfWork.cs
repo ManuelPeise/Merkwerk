@@ -8,10 +8,17 @@ using Data.Database.Entities.Organizations;
 
 namespace Data.Accessor;
 
-internal sealed class UnitOfWork(MerkwerkDbContext context) : IUnitOfWork
+internal sealed class UnitOfWork : IUnitOfWork
 {
     // One repository instance per entity type and unit of work.
     private readonly Dictionary<Type, object> _repositories = [];
+
+    private readonly MerkwerkDbContext _context;
+
+    public UnitOfWork(MerkwerkDbContext context)
+    {
+        _context = context;
+    }
 
     public IOrganizationRepository Organizations => (IOrganizationRepository)Repository<OrganizationEntity>();
 
@@ -40,9 +47,9 @@ internal sealed class UnitOfWork(MerkwerkDbContext context) : IUnitOfWork
     }
 
     public Task<int> SaveChangesAsync(CancellationToken cancellationToken = default) =>
-        context.SaveChangesAsync(cancellationToken);
+        _context.SaveChangesAsync(cancellationToken);
 
-    public ValueTask DisposeAsync() => context.DisposeAsync();
+    public ValueTask DisposeAsync() => _context.DisposeAsync();
 
     /// <summary>Register every specialized repository here, so both access paths return the same instance.</summary>
     private object CreateRepository<T>()
@@ -50,39 +57,39 @@ internal sealed class UnitOfWork(MerkwerkDbContext context) : IUnitOfWork
     {
         if (typeof(T) == typeof(OrganizationEntity))
         {
-            return new OrganizationRepository(context);
+            return new OrganizationRepository(_context);
         }
 
         if (typeof(T) == typeof(MembershipEntity))
         {
-            return new MembershipRepository(context);
+            return new MembershipRepository(_context);
         }
 
         if (typeof(T) == typeof(InvitationEntity))
         {
-            return new InvitationRepository(context);
+            return new InvitationRepository(_context);
         }
 
         if (typeof(T) == typeof(LearnerEntity))
         {
-            return new LearnerRepository(context);
+            return new LearnerRepository(_context);
         }
 
         if (typeof(T) == typeof(DeviceEntity))
         {
-            return new DeviceRepository(context);
+            return new DeviceRepository(_context);
         }
 
         if (typeof(T) == typeof(PairingCodeEntity))
         {
-            return new PairingCodeRepository(context);
+            return new PairingCodeRepository(_context);
         }
 
         if (typeof(T) == typeof(LearnerSessionEntity))
         {
-            return new LearnerSessionRepository(context);
+            return new LearnerSessionRepository(_context);
         }
 
-        return new EntityRepository<T>(context);
+        return new EntityRepository<T>(_context);
     }
 }

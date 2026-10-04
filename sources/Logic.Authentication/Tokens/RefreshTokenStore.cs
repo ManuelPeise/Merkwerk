@@ -7,15 +7,26 @@ using Microsoft.Extensions.Options;
 namespace Logic.Authentication.Tokens;
 
 /// <summary>Refresh tokens in the database, hashed, rotated and revocable (ADR 013, LP-104).</summary>
-internal sealed class RefreshTokenStore(
-    IUnitOfWorkFactory unitOfWorkFactory,
-    IOptions<JwtOptions> options,
-    TimeProvider timeProvider)
+internal sealed class RefreshTokenStore
 {
+    private readonly IUnitOfWorkFactory _unitOfWorkFactory;
+    private readonly IOptions<JwtOptions> _options;
+    private readonly TimeProvider _timeProvider;
+
+    public RefreshTokenStore(
+        IUnitOfWorkFactory unitOfWorkFactory,
+        IOptions<JwtOptions> options,
+        TimeProvider timeProvider)
+    {
+        _unitOfWorkFactory = unitOfWorkFactory;
+        _options = options;
+        _timeProvider = timeProvider;
+    }
+
     /// <summary>Token of a new login, starting the given chain.</summary>
     public async Task<IssuedRefreshToken> IssueAsync(long userId, Guid chainId, CancellationToken cancellationToken)
     {
-        await using var unitOfWork = unitOfWorkFactory.Create();
+        await using var unitOfWork = _unitOfWorkFactory.Create();
         var issued = Add(unitOfWork, userId, chainId);
         await unitOfWork.SaveChangesAsync(cancellationToken);
         return issued;
@@ -48,7 +59,7 @@ internal sealed class RefreshTokenStore(
     {
         var hash = TokenEncoding.Hash(token);
 
-        await using var unitOfWork = unitOfWorkFactory.Create();
+        await using var unitOfWork = _unitOfWorkFactory.Create();
         var tokens = unitOfWork.Repository<RefreshTokenEntity>();
         var chainId = await tokens.Query()
             .Where(t => t.TokenHash == hash)
@@ -57,7 +68,7 @@ internal sealed class RefreshTokenStore(
 
         if (chainId is { } chain)
         {
-            await RevokeWhereAsync(tokens, t => t.ChainId == chain, timeProvider.GetUtcNow().UtcDateTime, cancellationToken);
+            await RevokeWhereAsync(tokens, t => t.ChainId == chain, _timeProvider.GetUtcNow().UtcDateTime, cancellationToken);
             await unitOfWork.SaveChangesAsync(cancellationToken);
         }
     }
@@ -65,26 +76,26 @@ internal sealed class RefreshTokenStore(
     /// <summary>Revokes every token of the chain (e.g. the user was locked out meanwhile).</summary>
     public async Task RevokeChainAsync(Guid chainId, CancellationToken cancellationToken)
     {
-        await using var unitOfWork = unitOfWorkFactory.Create();
+        await using var unitOfWork = _unitOfWorkFactory.Create();
         await RevokeWhereAsync(
-            unitOfWork.Repository<RefreshTokenEntity>(), t => t.ChainId == chainId, timeProvider.GetUtcNow().UtcDateTime, cancellationToken);
+            unitOfWork.Repository<RefreshTokenEntity>(), t => t.ChainId == chainId, _timeProvider.GetUtcNow().UtcDateTime, cancellationToken);
         await unitOfWork.SaveChangesAsync(cancellationToken);
     }
 
     /// <summary>Ends every session of the user (password reset, password change, start password).</summary>
     public async Task RevokeAllAsync(long userId, CancellationToken cancellationToken)
     {
-        await using var unitOfWork = unitOfWorkFactory.Create();
+        await using var unitOfWork = _unitOfWorkFactory.Create();
         await RevokeWhereAsync(
-            unitOfWork.Repository<RefreshTokenEntity>(), t => t.UserId == userId, timeProvider.GetUtcNow().UtcDateTime, cancellationToken);
+            unitOfWork.Repository<RefreshTokenEntity>(), t => t.UserId == userId, _timeProvider.GetUtcNow().UtcDateTime, cancellationToken);
         await unitOfWork.SaveChangesAsync(cancellationToken);
     }
 
     private async Task<IssuedRefreshToken?> TryRotateAsync(string hash, CancellationToken cancellationToken)
     {
-        var now = timeProvider.GetUtcNow().UtcDateTime;
+        var now = _timeProvider.GetUtcNow().UtcDateTime;
 
-        await using var unitOfWork = unitOfWorkFactory.Create();
+        await using var unitOfWork = _unitOfWorkFactory.Create();
         var tokens = unitOfWork.Repository<RefreshTokenEntity>();
         var stored = await tokens.QueryTracked().SingleOrDefaultAsync(t => t.TokenHash == hash, cancellationToken);
 
@@ -123,7 +134,7 @@ internal sealed class RefreshTokenStore(
         DateTime now,
         CancellationToken cancellationToken)
     {
-        if (now - revokedAt > TimeSpan.FromSeconds(options.Value.RefreshTokenReuseSeconds))
+        if (now - revokedAt > TimeSpan.FromSeconds(_options.Value.RefreshTokenReuseSeconds))
         {
             return false;
         }
@@ -136,7 +147,7 @@ internal sealed class RefreshTokenStore(
     private IssuedRefreshToken Add(IUnitOfWork unitOfWork, long userId, Guid chainId)
     {
         var token = TokenService.CreateRefreshToken();
-        var expiresAt = timeProvider.GetUtcNow().AddDays(options.Value.RefreshTokenDays);
+        var expiresAt = _timeProvider.GetUtcNow().AddDays(_options.Value.RefreshTokenDays);
 
         unitOfWork.Repository<RefreshTokenEntity>().Add(new RefreshTokenEntity
         {

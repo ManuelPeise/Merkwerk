@@ -5,9 +5,13 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Data.Accessor.Repositories;
 
-internal sealed class MembershipRepository(MerkwerkDbContext context)
-    : EntityRepository<MembershipEntity>(context), IMembershipRepository
+internal sealed class MembershipRepository : EntityRepository<MembershipEntity>, IMembershipRepository
 {
+    public MembershipRepository(MerkwerkDbContext context)
+        : base(context)
+    {
+    }
+
     public Task<MembershipEntity?> FindPrimaryForUserAsync(long userId, CancellationToken cancellationToken = default) =>
         // IgnoreQueryFilters: the session does not know its organization yet (AGENTS.md §5, documented exception).
         Set.IgnoreQueryFilters()

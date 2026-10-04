@@ -13,15 +13,30 @@ namespace Web.Core.Services.ApiControllers.Authentication;
 /// <summary>
 /// Login, token refresh, logout and account operations (ADR 013, LP-104). Tokens travel only in HttpOnly cookies;
 /// the logic lives in Logic.Authentication, this controller does transport only. Refresh and logout also serve
-/// children's sessions on paired devices (LP-106, Logic.Devices) – the client knows only one refresh path.
+/// children's sessions on paired devices (LP-106) through ISessionService – the client knows only one refresh path.
 /// </summary>
-public sealed class AuthenticationController(
-    IAuthSessionService authSessionService,
-    IAccountService accountService,
-    IMemberService memberService,
-    ILearnerSessionService learnerSessionService,
-    AuthCookieWriter cookieWriter) : ApiControllerBase
+public sealed class AuthenticationController : ApiControllerBase
 {
+    private readonly IAuthSessionService _authSessionService;
+    private readonly IAccountService _accountService;
+    private readonly IMemberService _memberService;
+    private readonly ISessionService _sessionService;
+    private readonly AuthCookieWriter _cookieWriter;
+
+    public AuthenticationController(
+        IAuthSessionService authSessionService,
+        IAccountService accountService,
+        IMemberService memberService,
+        ISessionService sessionService,
+        AuthCookieWriter cookieWriter)
+    {
+        _authSessionService = authSessionService;
+        _accountService = accountService;
+        _memberService = memberService;
+        _sessionService = sessionService;
+        _cookieWriter = cookieWriter;
+    }
+
     /// <summary>POST /api/v1/authentication/login – checks the credentials and sets the auth cookies.</summary>
     [AllowAnonymous]
     [HttpPost]
@@ -31,12 +46,12 @@ public sealed class AuthenticationController(
     [ProducesResponseType<ProblemDetails>(StatusCodes.Status403Forbidden)]
     public async Task<ActionResult<SessionDto>> LoginAsync(LoginRequestDto request, CancellationToken cancellationToken)
     {
-        var result = await authSessionService.LoginAsync(request.Email, request.Password, cancellationToken);
+        var result = await _authSessionService.LoginAsync(request.Email, request.Password, cancellationToken);
 
         switch (result.Status)
         {
             case LoginStatus.Success:
-                cookieWriter.Write(Response, result.Session!);
+                _cookieWriter.Write(Response, result.Session!);
                 return SessionDto.From(result.Session!);
             case LoginStatus.EmailNotConfirmed:
                 return Problem(statusCode: StatusCodes.Status403Forbidden, title: "E-mail not confirmed");
@@ -59,16 +74,15 @@ public sealed class AuthenticationController(
         var refreshToken = Request.Cookies[AuthCookies.RefreshToken];
         var session = string.IsNullOrEmpty(refreshToken)
             ? null
-            : await authSessionService.RefreshAsync(refreshToken, cancellationToken)
-                ?? await learnerSessionService.RefreshAsync(refreshToken, cancellationToken);
+            : await _sessionService.RefreshAsync(refreshToken, cancellationToken);
 
         if (session is null)
         {
-            cookieWriter.Delete(Response);
+            _cookieWriter.Delete(Response);
             return Unauthorized();
         }
 
-        cookieWriter.Write(Response, session);
+        _cookieWriter.Write(Response, session);
         return SessionDto.From(session);
     }
 
@@ -85,12 +99,10 @@ public sealed class AuthenticationController(
 
         if (!string.IsNullOrEmpty(refreshToken))
         {
-            // Adult chain or child session ("switch child") – each service ignores tokens it doesn't know.
-            await authSessionService.LogoutAsync(refreshToken, cancellationToken);
-            await learnerSessionService.SignOutAsync(refreshToken, cancellationToken);
+            await _sessionService.LogoutAsync(refreshToken, cancellationToken);
         }
 
-        cookieWriter.Delete(Response);
+        _cookieWriter.Delete(Response);
         return NoContent();
     }
 
@@ -114,7 +126,7 @@ public sealed class AuthenticationController(
     [ProducesResponseType<ProblemDetails>(StatusCodes.Status400BadRequest)]
     public async Task<IActionResult> ForgotPasswordAsync(ForgotPasswordRequestDto request, CancellationToken cancellationToken)
     {
-        await accountService.RequestPasswordResetAsync(request.Email, MailLanguage, cancellationToken);
+        await _accountService.RequestPasswordResetAsync(request.Email, MailLanguage, cancellationToken);
         return NoContent();
     }
 
@@ -125,7 +137,7 @@ public sealed class AuthenticationController(
     [ProducesResponseType<ValidationProblemDetails>(StatusCodes.Status400BadRequest)]
     public async Task<IActionResult> ResetPasswordAsync(ResetPasswordRequestDto request, CancellationToken cancellationToken)
     {
-        var result = await accountService.ResetPasswordAsync(request.Email, request.Token, request.NewPassword, cancellationToken);
+        var result = await _accountService.ResetPasswordAsync(request.Email, request.Token, request.NewPassword, cancellationToken);
         return result.Succeeded ? NoContent() : FieldProblem(nameof(request.NewPassword), result);
     }
 
@@ -136,7 +148,7 @@ public sealed class AuthenticationController(
     [ProducesResponseType<ValidationProblemDetails>(StatusCodes.Status400BadRequest)]
     public async Task<IActionResult> ConfirmEmailAsync(ConfirmEmailRequestDto request, CancellationToken cancellationToken)
     {
-        var result = await accountService.ConfirmEmailAsync(request.UserId, request.Token, cancellationToken);
+        var result = await _accountService.ConfirmEmailAsync(request.UserId, request.Token, cancellationToken);
         return result.Succeeded ? NoContent() : FieldProblem(nameof(request.Token), result);
     }
 
@@ -158,7 +170,7 @@ public sealed class AuthenticationController(
             return Unauthorized();
         }
 
-        var result = await accountService.ChangePasswordAsync(
+        var result = await _accountService.ChangePasswordAsync(
             userId, request.CurrentPassword, request.NewPassword, cancellationToken);
 
         if (!result.Succeeded)
@@ -166,7 +178,7 @@ public sealed class AuthenticationController(
             return FieldProblem(nameof(request.NewPassword), result);
         }
 
-        cookieWriter.Write(Response, result.Session!);
+        _cookieWriter.Write(Response, result.Session!);
         return SessionDto.From(result.Session!);
     }
 
@@ -187,7 +199,7 @@ public sealed class AuthenticationController(
             return NotFound();
         }
 
-        return await memberService.IssueStartPasswordAsync(
+        return await _memberService.IssueStartPasswordAsync(
             organizationId, userId, request.UserId, MailLanguage, cancellationToken)
             ? NoContent()
             : NotFound();

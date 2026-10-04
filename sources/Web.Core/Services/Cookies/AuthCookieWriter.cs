@@ -3,8 +3,15 @@ using Shared.Models.Authentication;
 namespace Web.Core.Services.Cookies;
 
 /// <summary>Writes and deletes the HttpOnly auth cookies (transport only, ADR 013).</summary>
-public sealed class AuthCookieWriter(IWebHostEnvironment environment)
+public sealed class AuthCookieWriter
 {
+    private readonly IWebHostEnvironment _environment;
+
+    public AuthCookieWriter(IWebHostEnvironment environment)
+    {
+        _environment = environment;
+    }
+
     public void Write(HttpResponse response, AuthSession session)
     {
         response.Cookies.Append(
@@ -39,7 +46,7 @@ public sealed class AuthCookieWriter(IWebHostEnvironment environment)
         HttpOnly = true,
         // Production always runs behind TLS (Caddy). Development runs over plain HTTP (localhost, phones on the LAN),
         // where browsers would drop Secure cookies.
-        Secure = context.Request.IsHttps || !environment.IsDevelopment(),
+        Secure = context.Request.IsHttps || !_environment.IsDevelopment(),
         SameSite = SameSiteMode.Strict,
         Path = path,
         Expires = expires,

@@ -199,3 +199,6 @@ $RECYCLE.BIN/
 *.swp
 *.orig
 *.rej
+
+# Work instructions for GitHub Copilot (one file per ticket) – local only, never committed
+copilot-tickets/

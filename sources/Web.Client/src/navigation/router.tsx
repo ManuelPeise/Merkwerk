@@ -20,6 +20,7 @@ import LoginPage from 'src/pages/authentication/loginPage/LoginPage';
 import ProfilesPage from 'src/pages/profilesPage/ProfilesPage';
 import ResetPasswordPage from 'src/pages/authentication/resetPasswordPage/ResetPasswordPage';
 import SetupPage from 'src/pages/authentication/setupPage/SetupPage';
+import SubjectsPage from 'src/pages/subjectsPage/SubjectsPage';
 import PairDevicePage from 'src/pages/pairDevicePage/PairDevicePage';
 import PracticeHomePage from 'src/pages/practiceHomePage/PracticeHomePage';
 
@@ -70,6 +71,7 @@ export const router = createBrowserRouter([
                                     { path: routes.admin, element: <AdminPage /> },
                                     { path: routes.family, element: <FamilyPage /> },
                                     { path: routes.devices, element: <DevicesPage /> },
+                                    { path: routes.subjects, element: <SubjectsPage /> },
                                 ],
                             },
                         ],

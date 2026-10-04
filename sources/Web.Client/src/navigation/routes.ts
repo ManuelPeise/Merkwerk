@@ -9,6 +9,7 @@ export const routes = {
     admin: '/admin',
     family: '/admin/family',
     devices: '/admin/devices',
+    subjects: '/admin/subjects',
     practice: '/practice',
     practicePair: '/practice/pair',
     practiceProfiles: '/practice/profiles',

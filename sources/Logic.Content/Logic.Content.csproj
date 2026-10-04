@@ -1,0 +1,21 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+  </PropertyGroup>
+
+  <!-- Learning content: subjects (LP-109), from LP-110 on exercises, check rules and generators (approved 2026-10-04).
+       Membership checks go through IMemberService (Logic.Shared.Interfaces), never through Logic.Organizations. No ASP.NET Core. -->
+  <ItemGroup>
+    <ProjectReference Include="..\Data.Accessor\Data.Accessor.csproj" />
+    <ProjectReference Include="..\Logic.Shared\Logic.Shared.csproj" />
+    <ProjectReference Include="..\Shared\Shared.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <InternalsVisibleTo Include="Logic.Content.Tests" />
+  </ItemGroup>
+
+</Project>

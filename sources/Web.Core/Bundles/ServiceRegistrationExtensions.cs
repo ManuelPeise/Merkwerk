@@ -2,6 +2,7 @@ using Data.Accessor.DI;
 using Data.Database.Abstractions;
 using Logic.Authentication;
 using Logic.Authentication.DI;
+using Logic.Content.DI;
 using Logic.Devices.DI;
 using Logic.Notifications.DI;
 using Logic.Organizations.DI;
@@ -70,6 +71,7 @@ public static class ServiceRegistrationExtensions
 
         // Families, invitations, members, child profiles (LP-105).
         services.AddMerkwerkOrganizations();
+        services.AddMerkwerkContent();
 
         // Paired devices and children's sessions (LP-106); pairing is rate-limited.
         services.AddMerkwerkDevices();

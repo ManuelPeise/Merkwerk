@@ -16,6 +16,7 @@ Merkwerk/
 │  ├─ Logic.Notifications/        mail templates and SMTP service
 │  ├─ Logic.Organizations/        setup, families, invitations, child profiles
 │  ├─ Logic.Devices/              device pairing and children's sessions
+│  ├─ Logic.Content/              subjects, later exercises, check rules and generators
 │  ├─ Logic.Shared/               service interfaces (Interfaces/); pure exercise logic is planned
 │  ├─ Shared/                     enums and service models, no references
 │  ├─ Data.Database/              EF Core model, configuration, and migrations
@@ -38,7 +39,7 @@ Merkwerk/
 ```mermaid
 flowchart LR
     Client["Web.Client<br/>React UI"] -->|"HTTP /api/v1"| Host["Web.Core<br/>API host"]
-    Host --> Logic["Logic.Authentication<br/>Logic.Organizations<br/>Logic.Devices<br/>Logic.Notifications"]
+    Host --> Logic["Logic.Authentication<br/>Logic.Organizations<br/>Logic.Devices<br/>Logic.Content<br/>Logic.Notifications"]
     Logic --> LogicShared["Logic.Shared<br/>service interfaces"]
     Logic --> Accessor["Data.Accessor"]
     Accessor --> Database["Data.Database"]
@@ -52,7 +53,8 @@ flowchart LR
   OpenAPI) belong here; `Bundles/` holds service registration, the request pipeline and the startup migration.
 - **Logic.Authentication** contains authentication/session business logic. **Logic.Notifications** contains mail
   abstractions, templates, and SMTP delivery. **Logic.Organizations** holds setup, memberships, invitations and child
-  profiles (LP-105); **Logic.Devices** holds device pairing and children's sessions (LP-106).
+  profiles (LP-105); **Logic.Devices** holds device pairing and children's sessions (LP-106); **Logic.Content** holds
+  subjects (LP-109) and later exercises.
 - **Data.Accessor** is the application-facing repository/unit-of-work layer. **Data.Database** contains EF Core entities,
   configuration, interceptors, and migrations.
 - **Logic.Shared** holds the service interfaces (`Logic.Shared.Interfaces`) and later the pure graders and generators.

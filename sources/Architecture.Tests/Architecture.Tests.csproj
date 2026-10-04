@@ -19,6 +19,7 @@
   <ItemGroup>
     <ProjectReference Include="..\Web.Core\Web.Core.csproj" />
     <ProjectReference Include="..\Logic.Authentication\Logic.Authentication.csproj" />
+    <ProjectReference Include="..\Logic.Content\Logic.Content.csproj" />
     <ProjectReference Include="..\Logic.Devices\Logic.Devices.csproj" />
     <ProjectReference Include="..\Logic.Notifications\Logic.Notifications.csproj" />
     <ProjectReference Include="..\Logic.Organizations\Logic.Organizations.csproj" />
@@ -30,6 +31,11 @@
 
   <ItemGroup>
     <FrameworkReference Include="Microsoft.AspNetCore.App" />
+  </ItemGroup>
+
+  <!-- Design tokens for the subject color check (LP-109). -->
+  <ItemGroup>
+    <None Include="..\..\shared\design-tokens\tokens.json" Link="DesignTokens\tokens.json" CopyToOutputDirectory="PreserveNewest" />
   </ItemGroup>
 
   <ItemGroup>

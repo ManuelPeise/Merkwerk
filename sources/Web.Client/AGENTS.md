@@ -56,6 +56,7 @@ src/
       components/          Parts used only by layouts (LanguageSwitch)
     kids/                  Children's UI: AvatarImage, ProfileTile, NumberKeypad, DotArray, TimesTableMatrix
     feedback/              LoadingIndicator, ConfirmDialog (shared by admin pages), …
+    subjects/              SubjectBadge – the only way a subject is shown (color + icon + name), adults and children
     providers/             Context providers and their contexts (authentication, setup) – context in its own .ts file
     icons/                 AppIcons – the only place that imports @mui/icons-material
     typography/            Text building blocks (Caption)
@@ -64,9 +65,10 @@ src/
   lib/
     api/                   apiClient, StatelessApi, toApiError, getFieldErrors + one folder per backend module
                            (<module>Api.ts, <module>Types.ts): authentication, setup, invitations, members,
-                           learners, devices
+                           learners, devices, subjects
     auth/                  roles.ts (role constants), authValidation.ts (field checks for auth forms)
-    theme/                 MUI theme (design direction A, LP-008)
+    subjects/              subjectStyles.ts: fixed choice of subject colors, icons, languages (mirrors SubjectRules.cs)
+    theme/                 MUI theme (design direction A, LP-008), incl. palette.subject.* (subject colors)
     translations/          i18n.ts, i18next.d.ts, translationKeys.ts, resources/<lang>/<namespace>.<lang>.json
     utils.ts               Small pure helpers (validation, …)
 scripts/                   Node scripts used by npm scripts

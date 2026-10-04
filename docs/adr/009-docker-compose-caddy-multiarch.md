@@ -10,7 +10,7 @@ The family instance runs on a Raspberry Pi (ARM64); development happens on Windo
 
 ## Decision
 
-Three containers via Docker Compose: `proxy` (Caddy, HTTPS with `tls internal` on the home network), `app` (.NET 10) and `db` (MySQL 8.4). CI builds images for amd64 and arm64 on tags `v*` and publishes them to GitHub Container Registry. Migrations run via an EF migration bundle before the app starts.
+Three containers via Docker Compose: `proxy` (Caddy, HTTPS with `tls internal` on the home network), `app` (.NET 10) and `db` (MySQL 8.4). CI builds images for amd64 and arm64 on tags `v*` and publishes them to GitHub Container Registry. Migrations run via an EF migration bundle before the app starts (superseded by [016](016-migrations-at-startup.md): the app applies pending migrations itself at startup).
 
 ## Alternatives considered
 

@@ -11,18 +11,18 @@ Merkwerk/
 ├─ sources/
 │  ├─ Merkwerk.slnx
 │  ├─ Web.Client/                 React/TypeScript single-page application
-│  ├─ Web.Core/                   ASP.NET Core API host and controllers
-│  ├─ Service/                    API and authentication registration
+│  ├─ Web.Core/                   ASP.NET Core API host: Bundles/ (registration, pipeline, startup migration), controllers
 │  ├─ Logic.Authentication/       sign-in, token, and session services
-│  ├─ Logic.Notifications/        mail abstractions, templates, and SMTP service
-│  ├─ Logic.Shared/               pure shared-logic project; exercise logic is planned
+│  ├─ Logic.Notifications/        mail templates and SMTP service
+│  ├─ Logic.Organizations/        setup, families, invitations, child profiles
+│  ├─ Logic.Devices/              device pairing and children's sessions
+│  ├─ Logic.Shared/               service interfaces (Interfaces/); pure exercise logic is planned
+│  ├─ Shared/                     enums and service models, no references
 │  ├─ Data.Database/              EF Core model, configuration, and migrations
 │  ├─ Data.Accessor/              repositories and unit-of-work implementation
 │  ├─ Architecture.Tests/
 │  ├─ Data.IntegrationTests/
-│  ├─ Logic.Authentication.Tests/
-│  ├─ Logic.Notifications.Tests/
-│  └─ Tsts.UnitTests/             test project in the solution
+│  └─ Logic.*.Tests/              unit tests per logic project
 ├─ shared/
 │  ├─ grading-cases/              JSON fixtures (currently free-text examples)
 │  └─ design-tokens/              design reference values
@@ -38,31 +38,31 @@ Merkwerk/
 ```mermaid
 flowchart LR
     Client["Web.Client<br/>React UI"] -->|"HTTP /api/v1"| Host["Web.Core<br/>API host"]
-    Host --> Service["Service<br/>registration"]
-    Host --> Auth["Logic.Authentication"]
-    Host --> Notifications["Logic.Notifications"]
-    Host --> Accessor["Data.Accessor"]
+    Host --> Logic["Logic.Authentication<br/>Logic.Organizations<br/>Logic.Devices<br/>Logic.Notifications"]
+    Logic --> LogicShared["Logic.Shared<br/>service interfaces"]
+    Logic --> Accessor["Data.Accessor"]
     Accessor --> Database["Data.Database"]
-    LogicShared["Logic.Shared<br/>shared pure logic"]
+    LogicShared --> Shared["Shared<br/>enums, models"]
+    Database --> Shared
 ```
 
 - **Web.Client** is a standalone TypeScript application. It does not reference .NET projects; it communicates with
   `Web.Core` over the REST API.
 - **Web.Core** is the ASP.NET Core host. Controllers and HTTP concerns (cookies, status codes, authorization, and
-  OpenAPI) belong here.
-- **Service** contains service-registration extensions and API authentication wiring; it is not the former API
-  controller project.
+  OpenAPI) belong here; `Bundles/` holds service registration, the request pipeline and the startup migration.
 - **Logic.Authentication** contains authentication/session business logic. **Logic.Notifications** contains mail
   abstractions, templates, and SMTP delivery. **Logic.Organizations** holds setup, memberships, invitations and child
   profiles (LP-105); **Logic.Devices** holds device pairing and children's sessions (LP-106).
 - **Data.Accessor** is the application-facing repository/unit-of-work layer. **Data.Database** contains EF Core entities,
   configuration, interceptors, and migrations.
-- **Logic.Shared** is intended for pure shared graders and generators. Those exercise modules are not yet implemented.
+- **Logic.Shared** holds the service interfaces (`Logic.Shared.Interfaces`) and later the pure graders and generators.
+  **Shared** holds enums (`Shared.Enums`) and service models (`Shared.Models`) and references nothing. The full
+  dependency table is in [AGENTS.md](../AGENTS.md) §3 and enforced by `Architecture.Tests`.
 - **Architecture.Tests** enforces dependency boundaries. `Data.IntegrationTests` exercises database behavior against
   MySQL through Testcontainers.
 
-The API currently has authentication endpoints. Other UI client modules and pages may be ahead of their matching
-backend endpoints; confirm endpoint availability in `Web.Core/Services/ApiControllers` before relying on them.
+The API has endpoints for authentication, setup, invitations, members, learners and devices; confirm endpoint
+availability in `Web.Core/Services/ApiControllers` before relying on one.
 
 ## Local development
 
@@ -75,15 +75,7 @@ database connection string and JWT signing key as `Web.Core` user secrets:
 .\deploy\setup-local.ps1
 ```
 
-Apply the migrations once (and after pulling new ones):
-
-```powershell
-cd sources
-dotnet tool restore
-dotnet ef database update -p Data.Database -s Web.Core
-```
-
-Then run the API. On a fresh database the web client opens the first-run setup (`/setup`), which creates your
+Then run the API – it applies pending migrations itself when it starts (ADR 016), also after you pull new ones. On a fresh database the web client opens the first-run setup (`/setup`), which creates your
 account and family (LP-105):
 
 ```powershell
@@ -131,15 +123,28 @@ npm run format:check
 npm run build
 ```
 
-Database integration tests and local database services require Docker. The app does not apply migrations at startup.
-Restore the pinned EF tool once with `dotnet tool restore`, then generate a migration from `sources` as needed:
+Database integration tests and local database services require Docker. The app applies pending migrations at startup
+in every environment (ADR 016); existing data stays. Restore the pinned EF tool once with `dotnet tool restore`, then
+generate a migration from `sources` as needed:
 
 ```powershell
 dotnet ef migrations add <Name> -p Data.Database -s Web.Core
-dotnet ef database update -p Data.Database -s Web.Core
+dotnet ef database update -p Data.Database -s Web.Core   # optional – applies it without starting the app
 ```
 
-Production applies migrations using the dedicated migration image before starting the new app version.
+### Migration reset (LP-164)
+
+Before the first release all migrations were squashed into a single new `InitializeDatabase` migration. A local
+database created with the old migrations no longer matches the migration history and must be recreated once (all local
+data is lost):
+
+```powershell
+cd sources
+dotnet ef database drop -p Data.Database -s Web.Core --force
+dotnet run --project Web.Core --launch-profile http   # creates the schema at startup
+```
+
+The web client then opens the first-run setup again.
 
 ## Deployment
 
@@ -149,7 +154,7 @@ Production applies migrations using the dedicated migration image before startin
 | --- | --- | --- |
 | `proxy` | Caddy reverse proxy with an internal TLS certificate | 80, 443 |
 | `app` | ASP.NET Core runtime image | Internal port 8080 |
-| `migrate` | One-shot EF migration bundle (Compose profile `migrate`) | None |
+| `migrate` | Optional one-shot EF migration bundle (Compose profile `migrate`); the app also migrates at startup | None |
 | `db` | MySQL 8.4 with `utf8mb4` and `utf8mb4_0900_ai_ci` | 127.0.0.1:3306 |
 | `mailpit` | Development-only SMTP catcher (profile `dev`) | 127.0.0.1:1025, 127.0.0.1:8025 |
 | `proxy-dev` | Development HTTPS proxy for LAN testing (profile `dev`) | 8443 |

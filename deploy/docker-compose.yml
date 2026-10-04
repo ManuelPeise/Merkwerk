@@ -1,6 +1,6 @@
 # Merkwerk – runtime stack (ADR 009)
 # Local development:  docker compose -f deploy/docker-compose.yml up -d db
-# Raspberry Pi:       docker compose pull && docker compose run --rm migrate && docker compose up -d
+# Raspberry Pi:       docker compose pull && docker compose up -d   (the app applies pending migrations at startup, ADR 016)
 
 name: merkwerk
 
@@ -46,7 +46,7 @@ services:
       db:
         condition: service_healthy
 
-  # One-shot: applies EF Core migrations (run before starting a new app version)
+  # Optional one-shot: applies EF Core migrations without starting the app (the app also migrates at startup, ADR 016)
   migrate:
     image: ghcr.io/${GHCR_OWNER}/merkwerk-migrations:${APP_VERSION:-latest}
     profiles: ["migrate"]

@@ -3,6 +3,7 @@ using Data.Database.Abstractions;
 using Data.Database.Converters;
 using Data.Database.Entities.Base;
 using Data.Database.Entities.Devices;
+using Data.Database.Entities.Groups;
 using Data.Database.Entities.Identity;
 using Data.Database.Entities.Learners;
 using Data.Database.Entities.Organizations;
@@ -56,6 +57,10 @@ public class MerkwerkDbContext : IdentityUserContext<UserEntity, long>
     public DbSet<PairingCodeEntity> PairingCodes => Set<PairingCodeEntity>();
 
     public DbSet<LearnerSessionEntity> LearnerSessions => Set<LearnerSessionEntity>();
+
+    public DbSet<GroupEntity> Groups => Set<GroupEntity>();
+
+    public DbSet<GroupLearnerEntity> GroupLearners => Set<GroupLearnerEntity>();
 
     /// <summary>Read by the query filter on every query (EF parameterizes context members).</summary>
     protected long? CurrentOrganizationId => _currentUser.OrganizationId;

@@ -192,5 +192,20 @@
   "labelSubjectIconGlobe": "Welt",
   "labelSubjectIconLanguage": "Sprachen",
   "labelSubjectIconPuzzle": "Puzzle",
-  "labelSubjectIconStar": "Stern"
+  "labelSubjectIconStar": "Stern",
+  "captionGroups": "Gruppen",
+  "captionNoGroups": "Noch keine Gruppen. Mit Gruppen weist du später Übungen mehreren Kindern auf einmal zu.",
+  "captionGroupEmpty": "Noch keine Kinder in dieser Gruppe",
+  "labelAddGroup": "Gruppe anlegen",
+  "captionAddGroup": "Neue Gruppe",
+  "captionEditGroup": "Gruppe bearbeiten",
+  "labelEditGroup": "{{name}} bearbeiten",
+  "labelDeleteGroup": "{{name}} löschen",
+  "captionConfirmDeleteGroup": "Die Gruppe „{{name}}“ wird gelöscht. Die Kinder bleiben erhalten.",
+  "labelGroupName": "Name der Gruppe",
+  "captionGroupNameHint": "Zum Beispiel „Grundschule“ oder „Beide“.",
+  "labelGroupChildren": "Kinder in der Gruppe",
+  "captionGroupNoChildren": "Lege zuerst Kinder an – dann kannst du sie hier auswählen.",
+  "notificationGroupLimitReached": "Eine Familie kann höchstens 20 Gruppen haben.",
+  "notificationGroupChildrenChanged": "Die Kinder der Familie haben sich geändert. Bitte schließe den Dialog und versuche es noch einmal."
 }

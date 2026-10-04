@@ -90,7 +90,7 @@ sources/Merkwerk.slnx
 
 ## 4. Modules
 
-Business areas: `Organizations` (setup, memberships, invitations, child profiles – `Logic.Organizations`, LP-105), `Content`
+Business areas: `Organizations` (setup, memberships, invitations, child profiles, groups – `Logic.Organizations`, LP-105/LP-108), `Content`
 (subjects, later exercises – `Logic.Content`, LP-109), `Learners`, `Exercises`, `Assignments`, `Practice` (attempts, answers, learning state),
 `Progress`, `WordLists`, later `Sharing`, `Administration`. Authentication lives in `Logic.Authentication`
 (`IAuthSessionService`, `TokenService`, options); device pairing and children's sessions live in `Logic.Devices`
@@ -190,6 +190,8 @@ Roles hang on the membership (`MembershipEntity.Role`), never on the user. An ad
 | Create and change subjects (instance-wide; later the instance admin, LP-203) | – | no | yes |
 | Create and assign exercises, see results (from LP-110) | – | yes | yes |
 | Create, change and delete children | – | no | yes |
+| See groups of children | – | yes | yes |
+| Create, rename and delete groups, put children into them (LP-108) | – | no | yes |
 | Invite adults, revoke invitations, remove members, issue start passwords | – | no | yes |
 | Export and delete data (LP-209) | – | no | yes |
 

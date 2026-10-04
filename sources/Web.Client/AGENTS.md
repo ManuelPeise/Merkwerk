@@ -65,7 +65,7 @@ src/
   lib/
     api/                   apiClient, StatelessApi, toApiError, getFieldErrors + one folder per backend module
                            (<module>Api.ts, <module>Types.ts): authentication, setup, invitations, members,
-                           learners, devices, subjects
+                           learners, groups, devices, subjects
     auth/                  roles.ts (role constants), authValidation.ts (field checks for auth forms)
     subjects/              subjectStyles.ts: fixed choice of subject colors, icons, languages (mirrors SubjectRules.cs)
     theme/                 MUI theme (design direction A, LP-008), incl. palette.subject.* (subject colors)

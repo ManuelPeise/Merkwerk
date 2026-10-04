@@ -1,3 +1,4 @@
+using Logic.Organizations.Groups;
 using Logic.Organizations.Invitations;
 using Logic.Organizations.Learners;
 using Logic.Organizations.Members;
@@ -10,7 +11,7 @@ namespace Logic.Organizations.DI;
 
 public static class ServiceCollectionExtensions
 {
-    /// <summary>Setup, invitations, members and child profiles (LP-105). Needs Data.Accessor, Logic.Authentication and Logic.Notifications.</summary>
+    /// <summary>Setup, invitations, members, child profiles (LP-105) and groups (LP-108). Needs Data.Accessor, Logic.Authentication and Logic.Notifications.</summary>
     public static IServiceCollection AddMerkwerkOrganizations(this IServiceCollection services)
     {
         services.TryAddSingleton(TimeProvider.System);
@@ -19,6 +20,7 @@ public static class ServiceCollectionExtensions
         services.AddScoped<IInvitationService, InvitationService>();
         services.AddScoped<IMemberService, MemberService>();
         services.AddScoped<ILearnerService, LearnerService>();
+        services.AddScoped<IGroupService, GroupService>();
 
         return services;
     }

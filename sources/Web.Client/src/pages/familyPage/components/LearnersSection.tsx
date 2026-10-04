@@ -24,13 +24,18 @@ import LearnerDialog from 'src/pages/familyPage/components/LearnerDialog';
 
 interface IProps {
     isAdmin: boolean;
+    /** Called after a child was added, changed or deleted (the groups show the children too). */
+    onChanged?: () => void;
 }
 
-type DialogState = { kind: 'closed' } | { kind: 'edit'; learner?: ILearner } | { kind: 'delete'; learner: ILearner };
+type DialogState =
+    | { kind: 'closed' }
+    | { kind: 'edit'; learner?: ILearner }
+    | { kind: 'delete'; learner: ILearner };
 
 /** Children of the family: list, and for admins add, edit and delete. */
 const LearnersSection: React.FC<IProps> = (props) => {
-    const { isAdmin } = props;
+    const { isAdmin, onChanged } = props;
     const { getResource } = useTranslation();
 
     const [learners, setLearners] = React.useState<ILearner[] | null>(null);
@@ -56,7 +61,10 @@ const LearnersSection: React.FC<IProps> = (props) => {
         return () => controller.abort();
     }, [reloadKey]);
 
-    const reload = () => setReloadKey((key) => key + 1);
+    const reload = () => {
+        setReloadKey((key) => key + 1);
+        onChanged?.();
+    };
 
     const handleSaved = () => {
         setDialog({ kind: 'closed' });
@@ -77,7 +85,14 @@ const LearnersSection: React.FC<IProps> = (props) => {
 
     return (
         <Stack spacing={2} component="section" aria-labelledby="children-heading">
-            <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 2 }}>
+            <Box
+                sx={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'space-between',
+                    gap: 2,
+                }}
+            >
                 <Typography variant="h2" id="children-heading">
                     {getResource('captionChildren')}
                 </Typography>
@@ -116,7 +131,9 @@ const LearnersSection: React.FC<IProps> = (props) => {
                                                 aria-label={getResource('labelDeleteChild', {
                                                     name: learner.displayName,
                                                 })}
-                                                onClick={() => setDialog({ kind: 'delete', learner })}
+                                                onClick={() =>
+                                                    setDialog({ kind: 'delete', learner })
+                                                }
                                             >
                                                 <DeleteIcon />
                                             </IconButton>
@@ -133,7 +150,9 @@ const LearnersSection: React.FC<IProps> = (props) => {
                                 </ListItemAvatar>
                                 <ListItemText
                                     primary={learner.displayName}
-                                    secondary={getResource('captionGrade', { grade: learner.grade })}
+                                    secondary={getResource('captionGrade', {
+                                        grade: learner.grade,
+                                    })}
                                 />
                             </ListItem>
                         ))}
@@ -153,7 +172,9 @@ const LearnersSection: React.FC<IProps> = (props) => {
                 <ConfirmDialog
                     open
                     title={getResource('labelDeleteChild', { name: dialog.learner.displayName })}
-                    text={getResource('captionConfirmDeleteChild', { name: dialog.learner.displayName })}
+                    text={getResource('captionConfirmDeleteChild', {
+                        name: dialog.learner.displayName,
+                    })}
                     confirmLabel={getResource('labelDelete')}
                     disabled={isDeleting}
                     onConfirm={() => void handleDelete(dialog.learner)}

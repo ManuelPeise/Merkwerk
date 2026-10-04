@@ -44,6 +44,11 @@ public sealed class EndpointPolicyTests
         ["Learners.Update"] = AuthorizationPolicies.OrgAdmin,
         ["Learners.Delete"] = AuthorizationPolicies.OrgAdmin,
 
+        ["Groups.List"] = AuthorizationPolicies.Member,
+        ["Groups.Create"] = AuthorizationPolicies.OrgAdmin,
+        ["Groups.Update"] = AuthorizationPolicies.OrgAdmin,
+        ["Groups.Delete"] = AuthorizationPolicies.OrgAdmin,
+
         // Subjects are instance-wide; the family's admin maintains them (LP-109, later the instance admin).
         ["Subjects.List"] = AuthorizationPolicies.Member,
         ["Subjects.Create"] = AuthorizationPolicies.OrgAdmin,

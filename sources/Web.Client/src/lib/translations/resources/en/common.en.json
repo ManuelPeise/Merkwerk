@@ -192,5 +192,20 @@
   "labelSubjectIconGlobe": "World",
   "labelSubjectIconLanguage": "Languages",
   "labelSubjectIconPuzzle": "Puzzle",
-  "labelSubjectIconStar": "Star"
+  "labelSubjectIconStar": "Star",
+  "captionGroups": "Groups",
+  "captionNoGroups": "No groups yet. Later, groups let you assign exercises to several children at once.",
+  "captionGroupEmpty": "No children in this group yet",
+  "labelAddGroup": "Add group",
+  "captionAddGroup": "New group",
+  "captionEditGroup": "Edit group",
+  "labelEditGroup": "Edit {{name}}",
+  "labelDeleteGroup": "Delete {{name}}",
+  "captionConfirmDeleteGroup": "The group \"{{name}}\" will be deleted. The children stay.",
+  "labelGroupName": "Group name",
+  "captionGroupNameHint": "For example \"Primary school\" or \"Both\".",
+  "labelGroupChildren": "Children in the group",
+  "captionGroupNoChildren": "Add children first – then you can choose them here.",
+  "notificationGroupLimitReached": "A family can have at most 20 groups.",
+  "notificationGroupChildrenChanged": "The children of the family have changed. Please close the dialog and try again."
 }

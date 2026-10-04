@@ -1,0 +1,48 @@
+{
+  "description": "No right gap gives no points",
+  "question": {
+    "payload": {
+      "type": "cloze",
+      "prompt": "Setze ein.",
+      "parts": [
+        "",
+        "+",
+        "=",
+        ""
+      ]
+    },
+    "solution": {
+      "type": "cloze",
+      "gaps": [
+        [
+          "1"
+        ],
+        [
+          "2"
+        ],
+        [
+          "3"
+        ]
+      ]
+    }
+  },
+  "response": {
+    "type": "cloze",
+    "gaps": [
+      "2",
+      "3",
+      "4"
+    ]
+  },
+  "expected": {
+    "isCorrect": false,
+    "points": 0,
+    "maxPoints": 3,
+    "hint": "none",
+    "parts": [
+      false,
+      false,
+      false
+    ]
+  }
+}

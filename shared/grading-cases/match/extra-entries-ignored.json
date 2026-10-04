@@ -1,0 +1,47 @@
+{
+  "description": "Entries beyond the last left entry are ignored",
+  "question": {
+    "payload": {
+      "type": "match",
+      "prompt": "Ordne zu.",
+      "left": [
+        "dog",
+        "cat",
+        "mouse"
+      ],
+      "right": [
+        "Maus",
+        "Hund",
+        "Katze"
+      ]
+    },
+    "solution": {
+      "type": "match",
+      "rightIndexForLeft": [
+        1,
+        2,
+        0
+      ]
+    }
+  },
+  "response": {
+    "type": "match",
+    "rightIndexForLeft": [
+      1,
+      2,
+      0,
+      0
+    ]
+  },
+  "expected": {
+    "isCorrect": true,
+    "points": 3,
+    "maxPoints": 3,
+    "hint": "none",
+    "parts": [
+      true,
+      true,
+      true
+    ]
+  }
+}

@@ -1,29 +1,44 @@
 # Grading cases
 
-This directory holds JSON examples for grader behavior shared between the server and client. At present it contains
-only two `free-text` examples; it is an initial fixture set, not a complete grader specification.
+JSON cases that define how answers are graded (LP-111). The C# graders in `Logic.Content/Grading` are authoritative;
+a later client-side grader (TypeScript, offline mode – ADR 001) must pass the same files. `Logic.Content.Tests`
+(`GradingCaseTests`) runs every file in CI.
 
-## Current files
+## Layout
 
-```text
-shared/grading-cases/
-└─ free-text/
-   ├─ case-insensitive-match.json
-   └─ one-typo-is-almost-right.json
+One folder per question type, named like the type discriminator (`QuestionTypes`): `choice/`, `text/`, `cloze/`,
+`match/`, `flashcard/`. File names are kebab-case and say what the case shows.
+
+## Shape
+
+```json
+{
+  "description": "Two swapped letters within tolerance count as wrong but return the almost-right hint",
+  "question": {
+    "payload": { "type": "text", "prompt": "Übersetze: Katze", "inputKind": "text" },
+    "solution": { "type": "text", "acceptedAnswers": ["cat"], "caseSensitive": false, "allowTypo": true }
+  },
+  "response": { "type": "text", "text": "cta" },
+  "expected": { "isCorrect": false, "points": 0, "maxPoints": 1, "hint": "almostRight", "parts": [false] }
+}
 ```
 
-## Fixture shape
+`question` is exactly what an exercise stores (ADR 005, `ExerciseJson.Options`), `response` what the child answered.
 
-The examples describe a question type, payload, solution, response, and expected grading result. Use the existing cases
-as the source of truth for the exact current JSON shape. As additional question types and graders are implemented,
-their fixtures should be added in a matching kebab-case directory.
+## Rules
+
+- **Points:** gaps (cloze) and pairs (match) count one point each, `parts` says which were right; every other type is
+  worth one point. `isCorrect` only when every part is right. Multiple choice is all or nothing.
+- **Text:** trimmed, inner spaces joined, Unicode composed, `.`/`!`/`?` at the end ignored, case ignored unless
+  `caseSensitive`. With `allowTypo`, one typo (missing, extra, replaced or swapped letter) is wrong with the hint
+  `almostRight`.
+- **Numbers** (`inputKind: number`): dot or comma as decimal separator, equal within `numberTolerance` (none = exact).
+- **Cloze:** same text rules per gap, no typo tolerance.
+- **Flashcard:** self-assessment, `knew: true` is right.
+- A response of another question type is wrong (all parts false).
 
 ## Adding cases
 
-- Give each fixture a descriptive filename and explain the behavior it covers.
-- Add cases for ordinary behavior, empty and boundary inputs, and invalid or partial answers as appropriate to the
-  grader.
-- Do not edit an existing expected result only to make a failing test pass. Confirm the intended grading behavior and
-  add or update a case deliberately.
-- A fixture does not by itself mean a grader or automated test runner exists. Add or update the corresponding tests
-  when implementing a grader.
+- Cover ordinary behavior, empty and boundary inputs, and invalid or partial answers.
+- Do not change an expected result only to make a failing test pass – confirm the intended rule first.
+- At least 10 cases per type (flashcards: 3, there are only two outcomes).

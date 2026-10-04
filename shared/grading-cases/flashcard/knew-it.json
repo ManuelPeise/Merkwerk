@@ -1,0 +1,27 @@
+{
+  "description": "\"Knew it\" counts as right",
+  "question": {
+    "payload": {
+      "type": "flashcard",
+      "prompt": "Weißt du es?",
+      "front": "house"
+    },
+    "solution": {
+      "type": "flashcard",
+      "back": "Haus"
+    }
+  },
+  "response": {
+    "type": "flashcard",
+    "knew": true
+  },
+  "expected": {
+    "isCorrect": true,
+    "points": 1,
+    "maxPoints": 1,
+    "hint": "none",
+    "parts": [
+      true
+    ]
+  }
+}

@@ -1,0 +1,32 @@
+{
+  "description": "A number within numberTolerance is right",
+  "question": {
+    "payload": {
+      "type": "text",
+      "prompt": "Pi auf zwei Stellen",
+      "inputKind": "number"
+    },
+    "solution": {
+      "type": "text",
+      "acceptedAnswers": [
+        "3.1416"
+      ],
+      "caseSensitive": false,
+      "allowTypo": false,
+      "numberTolerance": 0.01
+    }
+  },
+  "response": {
+    "type": "text",
+    "text": "3.14"
+  },
+  "expected": {
+    "isCorrect": true,
+    "points": 1,
+    "maxPoints": 1,
+    "hint": "none",
+    "parts": [
+      true
+    ]
+  }
+}

@@ -1,0 +1,39 @@
+{
+  "description": "Several answers: the order of the selection does not matter",
+  "question": {
+    "payload": {
+      "type": "choice",
+      "prompt": "Welche Zahlen sind gerade?",
+      "options": [
+        "2",
+        "3",
+        "4",
+        "7"
+      ],
+      "multipleAnswers": true
+    },
+    "solution": {
+      "type": "choice",
+      "correctIndexes": [
+        0,
+        2
+      ]
+    }
+  },
+  "response": {
+    "type": "choice",
+    "selectedIndexes": [
+      2,
+      0
+    ]
+  },
+  "expected": {
+    "isCorrect": true,
+    "points": 1,
+    "maxPoints": 1,
+    "hint": "none",
+    "parts": [
+      true
+    ]
+  }
+}

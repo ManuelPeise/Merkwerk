@@ -1,0 +1,31 @@
+{
+  "description": "Two typos are wrong without a hint",
+  "question": {
+    "payload": {
+      "type": "text",
+      "prompt": "Übersetze: Haus",
+      "inputKind": "text"
+    },
+    "solution": {
+      "type": "text",
+      "acceptedAnswers": [
+        "house"
+      ],
+      "caseSensitive": false,
+      "allowTypo": true
+    }
+  },
+  "response": {
+    "type": "text",
+    "text": "hoos"
+  },
+  "expected": {
+    "isCorrect": false,
+    "points": 0,
+    "maxPoints": 1,
+    "hint": "none",
+    "parts": [
+      false
+    ]
+  }
+}

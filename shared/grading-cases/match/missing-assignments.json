@@ -1,0 +1,44 @@
+{
+  "description": "Left entries without a partner are wrong",
+  "question": {
+    "payload": {
+      "type": "match",
+      "prompt": "Ordne zu.",
+      "left": [
+        "dog",
+        "cat",
+        "mouse"
+      ],
+      "right": [
+        "Maus",
+        "Hund",
+        "Katze"
+      ]
+    },
+    "solution": {
+      "type": "match",
+      "rightIndexForLeft": [
+        1,
+        2,
+        0
+      ]
+    }
+  },
+  "response": {
+    "type": "match",
+    "rightIndexForLeft": [
+      1
+    ]
+  },
+  "expected": {
+    "isCorrect": false,
+    "points": 1,
+    "maxPoints": 3,
+    "hint": "none",
+    "parts": [
+      true,
+      false,
+      false
+    ]
+  }
+}

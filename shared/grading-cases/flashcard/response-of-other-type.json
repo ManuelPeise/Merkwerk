@@ -1,0 +1,27 @@
+{
+  "description": "A typed answer is not a flashcard response and is wrong",
+  "question": {
+    "payload": {
+      "type": "flashcard",
+      "prompt": "Weißt du es?",
+      "front": "house"
+    },
+    "solution": {
+      "type": "flashcard",
+      "back": "Haus"
+    }
+  },
+  "response": {
+    "type": "text",
+    "text": "Haus"
+  },
+  "expected": {
+    "isCorrect": false,
+    "points": 0,
+    "maxPoints": 1,
+    "hint": "none",
+    "parts": [
+      false
+    ]
+  }
+}

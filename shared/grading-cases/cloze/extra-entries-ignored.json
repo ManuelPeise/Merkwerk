@@ -1,0 +1,43 @@
+{
+  "description": "Entries beyond the last gap are ignored",
+  "question": {
+    "payload": {
+      "type": "cloze",
+      "prompt": "Setze ein.",
+      "parts": [
+        "Der ",
+        " bellt, die ",
+        " miaut."
+      ]
+    },
+    "solution": {
+      "type": "cloze",
+      "gaps": [
+        [
+          "Hund"
+        ],
+        [
+          "Katze"
+        ]
+      ]
+    }
+  },
+  "response": {
+    "type": "cloze",
+    "gaps": [
+      "Hund",
+      "Katze",
+      "Maus"
+    ]
+  },
+  "expected": {
+    "isCorrect": true,
+    "points": 2,
+    "maxPoints": 2,
+    "hint": "none",
+    "parts": [
+      true,
+      true
+    ]
+  }
+}

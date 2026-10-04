@@ -1,0 +1,46 @@
+{
+  "description": "A shifted assignment: no points",
+  "question": {
+    "payload": {
+      "type": "match",
+      "prompt": "Ordne zu.",
+      "left": [
+        "dog",
+        "cat",
+        "mouse"
+      ],
+      "right": [
+        "Maus",
+        "Hund",
+        "Katze"
+      ]
+    },
+    "solution": {
+      "type": "match",
+      "rightIndexForLeft": [
+        1,
+        2,
+        0
+      ]
+    }
+  },
+  "response": {
+    "type": "match",
+    "rightIndexForLeft": [
+      0,
+      1,
+      2
+    ]
+  },
+  "expected": {
+    "isCorrect": false,
+    "points": 0,
+    "maxPoints": 3,
+    "hint": "none",
+    "parts": [
+      false,
+      false,
+      false
+    ]
+  }
+}

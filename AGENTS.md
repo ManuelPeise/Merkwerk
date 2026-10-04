@@ -138,8 +138,11 @@ Per module: `I<Name>Service` in `Logic.Shared.Interfaces` + `internal` implement
 
 ## 6. Graders, generators, learning state
 
-- Every question type has one grader in C# (`Logic.Shared`, **authoritative**) and one in TypeScript in `Web.Client`
-  (instant feedback only). Both must pass the same cases in `shared/grading-cases/<type>/*.json`.
+- Every question type has one grader in C# (`Logic.Content/Grading`, behind `IGradingService`, **authoritative**,
+  LP-111) and later one in TypeScript in `Web.Client` (instant feedback only). Both must pass the same cases in
+  `shared/grading-cases/<type>/*.json`; `Logic.Content.Tests` runs every file.
+- A new question type = payload, solution, response record (`Shared.Models.Exercises`), a grader registered in
+  `AddMerkwerkContent` and its folder of cases.
 - Solutions are never sent to the client – only the grading rules the client grader needs.
 - Generators are **deterministic**: same seed → same exercises. No `Random.Shared`.
 - Learning state: one generic `LearningState` (Leitner boxes 1–5) keyed by item, e.g. `word:{id}:write`, `math:mul:7x8`.

@@ -1,0 +1,31 @@
+{
+  "description": "The accepted answer exactly",
+  "question": {
+    "payload": {
+      "type": "text",
+      "prompt": "Übersetze: Hund",
+      "inputKind": "text"
+    },
+    "solution": {
+      "type": "text",
+      "acceptedAnswers": [
+        "dog"
+      ],
+      "caseSensitive": false,
+      "allowTypo": false
+    }
+  },
+  "response": {
+    "type": "text",
+    "text": "dog"
+  },
+  "expected": {
+    "isCorrect": true,
+    "points": 1,
+    "maxPoints": 1,
+    "hint": "none",
+    "parts": [
+      true
+    ]
+  }
+}

@@ -1,0 +1,46 @@
+{
+  "description": "Two left entries on the same right entry: only the real pair counts",
+  "question": {
+    "payload": {
+      "type": "match",
+      "prompt": "Ordne zu.",
+      "left": [
+        "dog",
+        "cat",
+        "mouse"
+      ],
+      "right": [
+        "Maus",
+        "Hund",
+        "Katze"
+      ]
+    },
+    "solution": {
+      "type": "match",
+      "rightIndexForLeft": [
+        1,
+        2,
+        0
+      ]
+    }
+  },
+  "response": {
+    "type": "match",
+    "rightIndexForLeft": [
+      1,
+      1,
+      0
+    ]
+  },
+  "expected": {
+    "isCorrect": false,
+    "points": 2,
+    "maxPoints": 3,
+    "hint": "none",
+    "parts": [
+      true,
+      false,
+      true
+    ]
+  }
+}

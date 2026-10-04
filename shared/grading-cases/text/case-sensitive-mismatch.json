@@ -1,0 +1,31 @@
+{
+  "description": "With caseSensitive a different case is wrong",
+  "question": {
+    "payload": {
+      "type": "text",
+      "prompt": "Schreibe das Nomen: Haus",
+      "inputKind": "text"
+    },
+    "solution": {
+      "type": "text",
+      "acceptedAnswers": [
+        "Haus"
+      ],
+      "caseSensitive": true,
+      "allowTypo": false
+    }
+  },
+  "response": {
+    "type": "text",
+    "text": "haus"
+  },
+  "expected": {
+    "isCorrect": false,
+    "points": 0,
+    "maxPoints": 1,
+    "hint": "none",
+    "parts": [
+      false
+    ]
+  }
+}

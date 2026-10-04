@@ -1,0 +1,31 @@
+{
+  "description": "A decomposed umlaut (a + combining diaeresis) equals the composed one",
+  "question": {
+    "payload": {
+      "type": "text",
+      "prompt": "Übersetze: bear",
+      "inputKind": "text"
+    },
+    "solution": {
+      "type": "text",
+      "acceptedAnswers": [
+        "Bär"
+      ],
+      "caseSensitive": false,
+      "allowTypo": false
+    }
+  },
+  "response": {
+    "type": "text",
+    "text": "Bär"
+  },
+  "expected": {
+    "isCorrect": true,
+    "points": 1,
+    "maxPoints": 1,
+    "hint": "none",
+    "parts": [
+      true
+    ]
+  }
+}

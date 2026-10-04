@@ -1,0 +1,27 @@
+{
+  "description": "Self-assessment works the same for maths facts",
+  "question": {
+    "payload": {
+      "type": "flashcard",
+      "prompt": "Kleines 1×1",
+      "front": "7 · 8"
+    },
+    "solution": {
+      "type": "flashcard",
+      "back": "56"
+    }
+  },
+  "response": {
+    "type": "flashcard",
+    "knew": true
+  },
+  "expected": {
+    "isCorrect": true,
+    "points": 1,
+    "maxPoints": 1,
+    "hint": "none",
+    "parts": [
+      true
+    ]
+  }
+}

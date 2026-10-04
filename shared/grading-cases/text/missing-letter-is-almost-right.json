@@ -1,0 +1,31 @@
+{
+  "description": "One missing letter is almost right",
+  "question": {
+    "payload": {
+      "type": "text",
+      "prompt": "Übersetze: Haus",
+      "inputKind": "text"
+    },
+    "solution": {
+      "type": "text",
+      "acceptedAnswers": [
+        "house"
+      ],
+      "caseSensitive": false,
+      "allowTypo": true
+    }
+  },
+  "response": {
+    "type": "text",
+    "text": "hous"
+  },
+  "expected": {
+    "isCorrect": false,
+    "points": 0,
+    "maxPoints": 1,
+    "hint": "almostRight",
+    "parts": [
+      false
+    ]
+  }
+}

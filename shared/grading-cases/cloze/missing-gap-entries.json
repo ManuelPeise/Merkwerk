@@ -1,0 +1,41 @@
+{
+  "description": "Gaps without an entry are wrong",
+  "question": {
+    "payload": {
+      "type": "cloze",
+      "prompt": "Setze ein.",
+      "parts": [
+        "Der ",
+        " bellt, die ",
+        " miaut."
+      ]
+    },
+    "solution": {
+      "type": "cloze",
+      "gaps": [
+        [
+          "Hund"
+        ],
+        [
+          "Katze"
+        ]
+      ]
+    }
+  },
+  "response": {
+    "type": "cloze",
+    "gaps": [
+      "Hund"
+    ]
+  },
+  "expected": {
+    "isCorrect": false,
+    "points": 1,
+    "maxPoints": 2,
+    "hint": "none",
+    "parts": [
+      true,
+      false
+    ]
+  }
+}

@@ -1,0 +1,31 @@
+{
+  "description": "A different number is wrong, never almost right",
+  "question": {
+    "payload": {
+      "type": "text",
+      "prompt": "7 + 5 =",
+      "inputKind": "number"
+    },
+    "solution": {
+      "type": "text",
+      "acceptedAnswers": [
+        "12"
+      ],
+      "caseSensitive": false,
+      "allowTypo": true
+    }
+  },
+  "response": {
+    "type": "text",
+    "text": "13"
+  },
+  "expected": {
+    "isCorrect": false,
+    "points": 0,
+    "maxPoints": 1,
+    "hint": "none",
+    "parts": [
+      false
+    ]
+  }
+}

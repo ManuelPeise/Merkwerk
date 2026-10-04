@@ -1,0 +1,37 @@
+{
+  "description": "Any accepted answer of a gap is right",
+  "question": {
+    "payload": {
+      "type": "cloze",
+      "prompt": "Setze ein.",
+      "parts": [
+        "Ich esse einen ",
+        "."
+      ]
+    },
+    "solution": {
+      "type": "cloze",
+      "gaps": [
+        [
+          "Apfel",
+          "Keks"
+        ]
+      ]
+    }
+  },
+  "response": {
+    "type": "cloze",
+    "gaps": [
+      "Keks"
+    ]
+  },
+  "expected": {
+    "isCorrect": true,
+    "points": 1,
+    "maxPoints": 1,
+    "hint": "none",
+    "parts": [
+      true
+    ]
+  }
+}

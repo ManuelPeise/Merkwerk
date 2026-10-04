@@ -1,0 +1,31 @@
+{
+  "description": "Two swapped letters within tolerance count as wrong but return the almost-right hint",
+  "question": {
+    "payload": {
+      "type": "text",
+      "prompt": "Übersetze: Katze",
+      "inputKind": "text"
+    },
+    "solution": {
+      "type": "text",
+      "acceptedAnswers": [
+        "cat"
+      ],
+      "caseSensitive": false,
+      "allowTypo": true
+    }
+  },
+  "response": {
+    "type": "text",
+    "text": "cta"
+  },
+  "expected": {
+    "isCorrect": false,
+    "points": 0,
+    "maxPoints": 1,
+    "hint": "almostRight",
+    "parts": [
+      false
+    ]
+  }
+}

@@ -1,0 +1,31 @@
+{
+  "description": "Without allowTypo a typo is plainly wrong",
+  "question": {
+    "payload": {
+      "type": "text",
+      "prompt": "Übersetze: Haus",
+      "inputKind": "text"
+    },
+    "solution": {
+      "type": "text",
+      "acceptedAnswers": [
+        "house"
+      ],
+      "caseSensitive": false,
+      "allowTypo": false
+    }
+  },
+  "response": {
+    "type": "text",
+    "text": "hous"
+  },
+  "expected": {
+    "isCorrect": false,
+    "points": 0,
+    "maxPoints": 1,
+    "hint": "none",
+    "parts": [
+      false
+    ]
+  }
+}

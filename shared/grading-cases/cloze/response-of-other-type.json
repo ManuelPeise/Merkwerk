@@ -1,0 +1,39 @@
+{
+  "description": "A response of another question type is wrong in every gap",
+  "question": {
+    "payload": {
+      "type": "cloze",
+      "prompt": "Setze ein.",
+      "parts": [
+        "Der ",
+        " bellt, die ",
+        " miaut."
+      ]
+    },
+    "solution": {
+      "type": "cloze",
+      "gaps": [
+        [
+          "Hund"
+        ],
+        [
+          "Katze"
+        ]
+      ]
+    }
+  },
+  "response": {
+    "type": "text",
+    "text": "Hund Katze"
+  },
+  "expected": {
+    "isCorrect": false,
+    "points": 0,
+    "maxPoints": 2,
+    "hint": "none",
+    "parts": [
+      false,
+      false
+    ]
+  }
+}

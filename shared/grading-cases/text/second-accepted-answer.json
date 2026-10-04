@@ -1,0 +1,32 @@
+{
+  "description": "Any of several accepted answers is right",
+  "question": {
+    "payload": {
+      "type": "text",
+      "prompt": "Übersetze: Auto",
+      "inputKind": "text"
+    },
+    "solution": {
+      "type": "text",
+      "acceptedAnswers": [
+        "car",
+        "automobile"
+      ],
+      "caseSensitive": false,
+      "allowTypo": false
+    }
+  },
+  "response": {
+    "type": "text",
+    "text": "automobile"
+  },
+  "expected": {
+    "isCorrect": true,
+    "points": 1,
+    "maxPoints": 1,
+    "hint": "none",
+    "parts": [
+      true
+    ]
+  }
+}

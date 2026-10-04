@@ -1,0 +1,31 @@
+{
+  "description": "A comma as decimal separator equals the dot",
+  "question": {
+    "payload": {
+      "type": "text",
+      "prompt": "Die Hälfte von 1 ist",
+      "inputKind": "number"
+    },
+    "solution": {
+      "type": "text",
+      "acceptedAnswers": [
+        "0.5"
+      ],
+      "caseSensitive": false,
+      "allowTypo": false
+    }
+  },
+  "response": {
+    "type": "text",
+    "text": "0,5"
+  },
+  "expected": {
+    "isCorrect": true,
+    "points": 1,
+    "maxPoints": 1,
+    "hint": "none",
+    "parts": [
+      true
+    ]
+  }
+}

@@ -1,0 +1,27 @@
+{
+  "description": "\"Did not know\" counts as wrong",
+  "question": {
+    "payload": {
+      "type": "flashcard",
+      "prompt": "Weißt du es?",
+      "front": "house"
+    },
+    "solution": {
+      "type": "flashcard",
+      "back": "Haus"
+    }
+  },
+  "response": {
+    "type": "flashcard",
+    "knew": false
+  },
+  "expected": {
+    "isCorrect": false,
+    "points": 0,
+    "maxPoints": 1,
+    "hint": "none",
+    "parts": [
+      false
+    ]
+  }
+}

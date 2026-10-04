@@ -1,0 +1,41 @@
+{
+  "description": "Two pairs, both right",
+  "question": {
+    "payload": {
+      "type": "match",
+      "prompt": "Ordne zu.",
+      "left": [
+        "1 + 1",
+        "2 + 2"
+      ],
+      "right": [
+        "4",
+        "2"
+      ]
+    },
+    "solution": {
+      "type": "match",
+      "rightIndexForLeft": [
+        1,
+        0
+      ]
+    }
+  },
+  "response": {
+    "type": "match",
+    "rightIndexForLeft": [
+      1,
+      0
+    ]
+  },
+  "expected": {
+    "isCorrect": true,
+    "points": 2,
+    "maxPoints": 2,
+    "hint": "none",
+    "parts": [
+      true,
+      true
+    ]
+  }
+}

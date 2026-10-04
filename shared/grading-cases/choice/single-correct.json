@@ -1,0 +1,35 @@
+{
+  "description": "The one correct option selected",
+  "question": {
+    "payload": {
+      "type": "choice",
+      "prompt": "Was heißt dog?",
+      "options": [
+        "Hund",
+        "Katze",
+        "Maus"
+      ]
+    },
+    "solution": {
+      "type": "choice",
+      "correctIndexes": [
+        0
+      ]
+    }
+  },
+  "response": {
+    "type": "choice",
+    "selectedIndexes": [
+      0
+    ]
+  },
+  "expected": {
+    "isCorrect": true,
+    "points": 1,
+    "maxPoints": 1,
+    "hint": "none",
+    "parts": [
+      true
+    ]
+  }
+}

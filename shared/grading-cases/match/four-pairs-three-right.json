@@ -1,0 +1,51 @@
+{
+  "description": "Four pairs with one wrong partner: three points",
+  "question": {
+    "payload": {
+      "type": "match",
+      "prompt": "Ordne zu.",
+      "left": [
+        "rot",
+        "blau",
+        "grün",
+        "gelb"
+      ],
+      "right": [
+        "red",
+        "blue",
+        "green",
+        "yellow"
+      ]
+    },
+    "solution": {
+      "type": "match",
+      "rightIndexForLeft": [
+        0,
+        1,
+        2,
+        3
+      ]
+    }
+  },
+  "response": {
+    "type": "match",
+    "rightIndexForLeft": [
+      0,
+      1,
+      2,
+      2
+    ]
+  },
+  "expected": {
+    "isCorrect": false,
+    "points": 3,
+    "maxPoints": 4,
+    "hint": "none",
+    "parts": [
+      true,
+      true,
+      true,
+      false
+    ]
+  }
+}

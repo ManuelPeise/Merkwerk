@@ -1,0 +1,35 @@
+{
+  "description": "A wrong option selected",
+  "question": {
+    "payload": {
+      "type": "choice",
+      "prompt": "Was heißt dog?",
+      "options": [
+        "Hund",
+        "Katze",
+        "Maus"
+      ]
+    },
+    "solution": {
+      "type": "choice",
+      "correctIndexes": [
+        0
+      ]
+    }
+  },
+  "response": {
+    "type": "choice",
+    "selectedIndexes": [
+      2
+    ]
+  },
+  "expected": {
+    "isCorrect": false,
+    "points": 0,
+    "maxPoints": 1,
+    "hint": "none",
+    "parts": [
+      false
+    ]
+  }
+}

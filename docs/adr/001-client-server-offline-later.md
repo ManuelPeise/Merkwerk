@@ -19,6 +19,8 @@ Merkwerk is a client/server application. The server owns all data and grades aut
 
 ## Consequences
 
-- Grading rules are data-driven and live in `Logic.Shared` so they can later run in the browser.
+- Grading rules are data-driven so they can later run in the browser. Since the switch to React (ADR 015) the C#
+  graders live in `Logic.Content/Grading` (LP-111); the JSON cases in `shared/grading-cases` are the contract a
+  TypeScript grader must pass.
 - `Attempt` and `Answer` carry a client-generated `Guid ClientId` from the start (see ADR 008).
 - Submitting an answer is an idempotent `PUT`.

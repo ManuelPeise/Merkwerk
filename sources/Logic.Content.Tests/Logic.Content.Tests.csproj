@@ -29,6 +29,11 @@
     <FrameworkReference Include="Microsoft.AspNetCore.App" />
   </ItemGroup>
 
+  <!-- Grading cases shared with a later client-side grader (LP-111). -->
+  <ItemGroup>
+    <None Include="..\..\shared\grading-cases\**\*.json" LinkBase="GradingCases" CopyToOutputDirectory="PreserveNewest" />
+  </ItemGroup>
+
   <ItemGroup>
     <Using Include="Xunit" />
   </ItemGroup>

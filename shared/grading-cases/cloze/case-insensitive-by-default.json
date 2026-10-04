@@ -1,0 +1,42 @@
+{
+  "description": "Case is ignored unless caseSensitive",
+  "question": {
+    "payload": {
+      "type": "cloze",
+      "prompt": "Setze ein.",
+      "parts": [
+        "Der ",
+        " bellt, die ",
+        " miaut."
+      ]
+    },
+    "solution": {
+      "type": "cloze",
+      "gaps": [
+        [
+          "Hund"
+        ],
+        [
+          "Katze"
+        ]
+      ]
+    }
+  },
+  "response": {
+    "type": "cloze",
+    "gaps": [
+      "hund",
+      "KATZE"
+    ]
+  },
+  "expected": {
+    "isCorrect": true,
+    "points": 2,
+    "maxPoints": 2,
+    "hint": "none",
+    "parts": [
+      true,
+      true
+    ]
+  }
+}

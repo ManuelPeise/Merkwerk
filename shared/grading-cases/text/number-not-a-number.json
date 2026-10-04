@@ -1,0 +1,31 @@
+{
+  "description": "Words in a number question are wrong",
+  "question": {
+    "payload": {
+      "type": "text",
+      "prompt": "7 + 5 =",
+      "inputKind": "number"
+    },
+    "solution": {
+      "type": "text",
+      "acceptedAnswers": [
+        "12"
+      ],
+      "caseSensitive": false,
+      "allowTypo": false
+    }
+  },
+  "response": {
+    "type": "text",
+    "text": "zwölf"
+  },
+  "expected": {
+    "isCorrect": false,
+    "points": 0,
+    "maxPoints": 1,
+    "hint": "none",
+    "parts": [
+      false
+    ]
+  }
+}

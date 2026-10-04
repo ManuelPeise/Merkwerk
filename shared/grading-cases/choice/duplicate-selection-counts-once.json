@@ -1,0 +1,36 @@
+{
+  "description": "Selecting the same option twice counts once",
+  "question": {
+    "payload": {
+      "type": "choice",
+      "prompt": "Was heißt dog?",
+      "options": [
+        "Hund",
+        "Katze",
+        "Maus"
+      ]
+    },
+    "solution": {
+      "type": "choice",
+      "correctIndexes": [
+        1
+      ]
+    }
+  },
+  "response": {
+    "type": "choice",
+    "selectedIndexes": [
+      1,
+      1
+    ]
+  },
+  "expected": {
+    "isCorrect": true,
+    "points": 1,
+    "maxPoints": 1,
+    "hint": "none",
+    "parts": [
+      true
+    ]
+  }
+}

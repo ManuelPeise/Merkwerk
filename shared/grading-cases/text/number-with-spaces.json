@@ -1,0 +1,31 @@
+{
+  "description": "Spaces around a number are ignored",
+  "question": {
+    "payload": {
+      "type": "text",
+      "prompt": "7 + 5 =",
+      "inputKind": "number"
+    },
+    "solution": {
+      "type": "text",
+      "acceptedAnswers": [
+        "12"
+      ],
+      "caseSensitive": false,
+      "allowTypo": false
+    }
+  },
+  "response": {
+    "type": "text",
+    "text": " 12 "
+  },
+  "expected": {
+    "isCorrect": true,
+    "points": 1,
+    "maxPoints": 1,
+    "hint": "none",
+    "parts": [
+      true
+    ]
+  }
+}

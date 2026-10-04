@@ -1,0 +1,36 @@
+{
+  "description": "The correct option plus a wrong one is wrong",
+  "question": {
+    "payload": {
+      "type": "choice",
+      "prompt": "Was heißt dog?",
+      "options": [
+        "Hund",
+        "Katze",
+        "Maus"
+      ]
+    },
+    "solution": {
+      "type": "choice",
+      "correctIndexes": [
+        0
+      ]
+    }
+  },
+  "response": {
+    "type": "choice",
+    "selectedIndexes": [
+      0,
+      1
+    ]
+  },
+  "expected": {
+    "isCorrect": false,
+    "points": 0,
+    "maxPoints": 1,
+    "hint": "none",
+    "parts": [
+      false
+    ]
+  }
+}

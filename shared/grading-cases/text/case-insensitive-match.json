@@ -1,0 +1,31 @@
+{
+  "description": "Upper/lower case is ignored when caseSensitive is false",
+  "question": {
+    "payload": {
+      "type": "text",
+      "prompt": "Übersetze: Hund",
+      "inputKind": "text"
+    },
+    "solution": {
+      "type": "text",
+      "acceptedAnswers": [
+        "dog"
+      ],
+      "caseSensitive": false,
+      "allowTypo": true
+    }
+  },
+  "response": {
+    "type": "text",
+    "text": "Dog"
+  },
+  "expected": {
+    "isCorrect": true,
+    "points": 1,
+    "maxPoints": 1,
+    "hint": "none",
+    "parts": [
+      true
+    ]
+  }
+}

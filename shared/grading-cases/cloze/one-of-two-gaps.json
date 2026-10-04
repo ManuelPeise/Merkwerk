@@ -1,0 +1,42 @@
+{
+  "description": "One right gap gives one point; not correct as a whole",
+  "question": {
+    "payload": {
+      "type": "cloze",
+      "prompt": "Setze ein.",
+      "parts": [
+        "Der ",
+        " bellt, die ",
+        " miaut."
+      ]
+    },
+    "solution": {
+      "type": "cloze",
+      "gaps": [
+        [
+          "Hund"
+        ],
+        [
+          "Katze"
+        ]
+      ]
+    }
+  },
+  "response": {
+    "type": "cloze",
+    "gaps": [
+      "Hund",
+      "Maus"
+    ]
+  },
+  "expected": {
+    "isCorrect": false,
+    "points": 1,
+    "maxPoints": 2,
+    "hint": "none",
+    "parts": [
+      true,
+      false
+    ]
+  }
+}

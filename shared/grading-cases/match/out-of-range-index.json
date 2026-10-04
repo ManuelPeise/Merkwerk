@@ -1,0 +1,46 @@
+{
+  "description": "A partner index outside the right side is wrong",
+  "question": {
+    "payload": {
+      "type": "match",
+      "prompt": "Ordne zu.",
+      "left": [
+        "dog",
+        "cat",
+        "mouse"
+      ],
+      "right": [
+        "Maus",
+        "Hund",
+        "Katze"
+      ]
+    },
+    "solution": {
+      "type": "match",
+      "rightIndexForLeft": [
+        1,
+        2,
+        0
+      ]
+    }
+  },
+  "response": {
+    "type": "match",
+    "rightIndexForLeft": [
+      1,
+      2,
+      9
+    ]
+  },
+  "expected": {
+    "isCorrect": false,
+    "points": 2,
+    "maxPoints": 3,
+    "hint": "none",
+    "parts": [
+      true,
+      true,
+      false
+    ]
+  }
+}

@@ -1,0 +1,33 @@
+{
+  "description": "A response of another question type is wrong",
+  "question": {
+    "payload": {
+      "type": "choice",
+      "prompt": "Was heißt dog?",
+      "options": [
+        "Hund",
+        "Katze",
+        "Maus"
+      ]
+    },
+    "solution": {
+      "type": "choice",
+      "correctIndexes": [
+        0
+      ]
+    }
+  },
+  "response": {
+    "type": "text",
+    "text": "Hund"
+  },
+  "expected": {
+    "isCorrect": false,
+    "points": 0,
+    "maxPoints": 1,
+    "hint": "none",
+    "parts": [
+      false
+    ]
+  }
+}

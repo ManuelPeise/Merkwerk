@@ -1,4 +1,5 @@
 using Logic.Content.Exercises;
+using Logic.Content.Generators;
 using Logic.Content.Grading;
 using Logic.Content.Subjects;
 using Logic.Shared.Interfaces;
@@ -10,7 +11,7 @@ namespace Logic.Content.DI;
 public static class ServiceCollectionExtensions
 {
     /// <summary>
-    /// Subjects (LP-109), exercises (LP-110) and grading (LP-111). Needs Data.Accessor and an <see cref="IMemberService"/> (Logic.Organizations).
+    /// Subjects (LP-109), exercises (LP-110), grading (LP-111) and generators (LP-131). Needs Data.Accessor and an <see cref="IMemberService"/> (Logic.Organizations).
     /// </summary>
     public static IServiceCollection AddMerkwerkContent(this IServiceCollection services)
     {
@@ -25,6 +26,10 @@ public static class ServiceCollectionExtensions
         services.AddSingleton<IQuestionGrader, MatchGrader>();
         services.AddSingleton<IQuestionGrader, FlashcardGrader>();
         services.AddSingleton<IGradingService, GradingService>();
+
+        // Generators are stateless too; one per settings type, picked by GeneratorService.
+        services.AddSingleton<IExerciseGenerator, ArithmeticGenerator>();
+        services.AddSingleton<IGeneratorService, GeneratorService>();
 
         return services;
     }

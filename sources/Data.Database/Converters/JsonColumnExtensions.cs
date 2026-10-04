@@ -28,6 +28,23 @@ internal static class JsonColumnExtensions
         return property;
     }
 
+    /// <summary>Like <see cref="HasJsonColumn{T}"/>, but the column may be NULL (e.g. generator settings, LP-131).</summary>
+    public static PropertyBuilder<T?> HasOptionalJsonColumn<T>(this PropertyBuilder<T?> property)
+        where T : class
+    {
+        var comparer = new ValueComparer<T?>(
+            (left, right) => Serialize(left) == Serialize(right),
+            value => value == null ? 0 : Serialize(value).GetHashCode(StringComparison.Ordinal),
+            value => value == null ? null : Deserialize<T>(Serialize(value)));
+
+        property
+            .HasConversion(value => Serialize(value), json => Deserialize<T>(json), comparer)
+            .HasColumnType("json")
+            .IsRequired(false);
+
+        return property;
+    }
+
     private static string Serialize<T>(T? value) => JsonSerializer.Serialize(value, ExerciseJson.Options);
 
     private static T Deserialize<T>(string json) =>

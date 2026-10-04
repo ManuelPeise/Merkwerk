@@ -1,5 +1,6 @@
 using Shared.Enums;
 using Shared.Models.Exercises;
+using Shared.Models.Exercises.Generators;
 
 namespace Web.Core.Services.ApiControllers.Exercises.Dtos;
 
@@ -11,7 +12,8 @@ public sealed record ExerciseVersionDto(
     long SubjectId,
     int Grade,
     ExerciseContentSource ContentSource,
-    IReadOnlyList<QuestionDto> Questions)
+    IReadOnlyList<QuestionDto> Questions,
+    GeneratorSettings? Generator)
 {
     public static ExerciseVersionDto From(long exerciseId, int number, ExerciseSnapshot snapshot) => new(
         exerciseId,
@@ -20,5 +22,6 @@ public sealed record ExerciseVersionDto(
         snapshot.SubjectId,
         snapshot.Grade,
         snapshot.ContentSource,
-        snapshot.Questions.Select(QuestionDto.From).ToList());
+        snapshot.Questions.Select(QuestionDto.From).ToList(),
+        snapshot.Generator);
 }

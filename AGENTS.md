@@ -144,7 +144,11 @@ Per module: `I<Name>Service` in `Logic.Shared.Interfaces` + `internal` implement
 - A new question type = payload, solution, response record (`Shared.Models.Exercises`), a grader registered in
   `AddMerkwerkContent` and its folder of cases.
 - Solutions are never sent to the client – only the grading rules the client grader needs.
-- Generators are **deterministic**: same seed → same exercises. No `Random.Shared`.
+- Generators are **deterministic**: same seed → same exercises. No `Random.Shared`, no `System.Random` – use
+  `SeededRandom` (`Logic.Content/Generators`, LP-131), whose sequence is fixed and portable to TypeScript.
+- Generator exercises (`contentSource: generator`) store only their settings (`GeneratorSettings`, JSON column);
+  each attempt generates its tasks from its own seed (LP-115). A new generator = settings record, an
+  `IExerciseGenerator` registered in `AddMerkwerkContent`, rule tests over many seeds.
 - Learning state: one generic `LearningState` (Leitner boxes 1–5) keyed by item, e.g. `word:{id}:write`, `math:mul:7x8`.
 
 ## 7. UI

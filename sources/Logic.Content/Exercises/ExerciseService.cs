@@ -11,17 +11,24 @@ namespace Logic.Content.Exercises;
 /// <summary>
 /// Exercises of a family (LP-110): every adult creates, edits, publishes and archives them. Publishing freezes the
 /// draft as a numbered version (ADR 005); the draft stays editable and later publishing creates the next version.
+/// Generator exercises (LP-131) store settings instead of questions.
 /// </summary>
 internal sealed class ExerciseService : IExerciseService
 {
     private readonly IUnitOfWorkFactory _unitOfWorkFactory;
     private readonly IMemberService _members;
+    private readonly IGeneratorService _generators;
     private readonly TimeProvider _timeProvider;
 
-    public ExerciseService(IUnitOfWorkFactory unitOfWorkFactory, IMemberService members, TimeProvider timeProvider)
+    public ExerciseService(
+        IUnitOfWorkFactory unitOfWorkFactory,
+        IMemberService members,
+        IGeneratorService generators,
+        TimeProvider timeProvider)
     {
         _unitOfWorkFactory = unitOfWorkFactory;
         _members = members;
+        _generators = generators;
         _timeProvider = timeProvider;
     }
 
@@ -59,7 +66,7 @@ internal sealed class ExerciseService : IExerciseService
         await using var unitOfWork = _unitOfWorkFactory.Create();
         var exercise = await LoadAsync(unitOfWork.Repository<ExerciseEntity>().Query(), organizationId, exerciseId, cancellationToken);
 
-        return exercise is null ? null : new ExerciseDetail(ToSummary(exercise), ToContent(exercise));
+        return exercise is null ? null : new ExerciseDetail(ToSummary(exercise), ToContent(exercise), exercise.Generator);
     }
 
     public async Task<ExerciseChangeResult> CreateAsync(
@@ -75,7 +82,7 @@ internal sealed class ExerciseService : IExerciseService
 
         await using var unitOfWork = _unitOfWorkFactory.Create();
 
-        var errors = await ValidateAsync(unitOfWork, input, cancellationToken);
+        var errors = await ValidateAsync(unitOfWork, input, _generators, cancellationToken);
         if (errors.Count > 0)
         {
             return new ExerciseChangeResult(ExerciseChangeStatus.Invalid, Errors: errors);
@@ -109,7 +116,7 @@ internal sealed class ExerciseService : IExerciseService
             return new ExerciseChangeResult(ExerciseChangeStatus.NotFound);
         }
 
-        var errors = await ValidateAsync(unitOfWork, input, cancellationToken);
+        var errors = await ValidateAsync(unitOfWork, input, _generators, cancellationToken);
         if (errors.Count > 0)
         {
             return new ExerciseChangeResult(ExerciseChangeStatus.Invalid, Errors: errors);
@@ -141,7 +148,7 @@ internal sealed class ExerciseService : IExerciseService
             return new ExerciseChangeResult(ExerciseChangeStatus.NotFound);
         }
 
-        if (exercise.Questions.Count == 0)
+        if (exercise.ContentSource == ExerciseContentSource.Questions && exercise.Questions.Count == 0)
         {
             return new ExerciseChangeResult(
                 ExerciseChangeStatus.Invalid,
@@ -163,7 +170,7 @@ internal sealed class ExerciseService : IExerciseService
             Number = exercise.LatestVersion,
             PublishedAt = _timeProvider.GetUtcNow().UtcDateTime,
             Content = new ExerciseSnapshot(
-                exercise.Title, exercise.SubjectId, exercise.Grade, exercise.ContentSource, ToContent(exercise)),
+                exercise.Title, exercise.SubjectId, exercise.Grade, exercise.ContentSource, ToContent(exercise), exercise.Generator),
         });
         await unitOfWork.SaveChangesAsync(cancellationToken);
 
@@ -232,6 +239,7 @@ internal sealed class ExerciseService : IExerciseService
         exercise.SubjectId = input.SubjectId;
         exercise.Grade = input.Grade;
         exercise.ContentSource = input.ContentSource;
+        exercise.Generator = input.ContentSource == ExerciseContentSource.Generator ? input.Generator : null;
 
         exercise.Questions.Clear();
         exercise.Questions.AddRange((input.Questions ?? []).Select((question, index) => new QuestionEntity
@@ -255,11 +263,12 @@ internal sealed class ExerciseService : IExerciseService
         exercise.IsArchived ? ExerciseState.Archived : exercise.LatestVersion > 0 ? ExerciseState.Published : ExerciseState.Draft,
         exercise.LatestVersion,
         exercise.HasUnpublishedChanges,
-        exercise.Questions.Count);
+        exercise.Generator?.TaskCount ?? exercise.Questions.Count);
 
     private static async Task<Dictionary<string, string[]>> ValidateAsync(
         IUnitOfWork unitOfWork,
         ExerciseInput input,
+        IGeneratorService generators,
         CancellationToken cancellationToken)
     {
         var errors = new Dictionary<string, string[]>();
@@ -280,13 +289,34 @@ internal sealed class ExerciseService : IExerciseService
             errors["subjectId"] = ["Unknown subject."];
         }
 
-        if (input.ContentSource != ExerciseContentSource.Questions)
-        {
-            // Word lists (LP-140) and generators (LP-131) are not supported yet.
-            errors["contentSource"] = ["Only exercises with questions are supported so far."];
-        }
-
         var questions = input.Questions ?? [];
+
+        switch (input.ContentSource)
+        {
+            case ExerciseContentSource.Questions:
+                if (input.Generator is not null)
+                {
+                    errors["generator"] = ["Only generator exercises have generator settings."];
+                }
+
+                break;
+            case ExerciseContentSource.Generator:
+                foreach (var (field, messages) in generators.Validate(input.Generator))
+                {
+                    errors[field] = messages;
+                }
+
+                if (questions.Count > 0)
+                {
+                    errors["questions"] = ["Generator exercises have no questions of their own."];
+                }
+
+                break;
+            default:
+                // Word lists (LP-140) are not supported yet.
+                errors["contentSource"] = ["Only exercises with questions or a generator are supported so far."];
+                break;
+        }
         if (questions.Count > ExerciseRules.MaxQuestions)
         {
             errors["questions"] = [$"At most {ExerciseRules.MaxQuestions} questions."];

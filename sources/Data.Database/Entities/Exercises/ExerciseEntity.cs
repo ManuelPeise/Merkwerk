@@ -1,5 +1,6 @@
 using Data.Database.Entities.Base;
 using Shared.Enums;
+using Shared.Models.Exercises.Generators;
 
 namespace Data.Database.Entities.Exercises;
 
@@ -27,6 +28,9 @@ public sealed class ExerciseEntity : AOrganizationEntityBase
     public bool HasUnpublishedChanges { get; set; }
 
     public bool IsArchived { get; set; }
+
+    /// <summary>Settings for <see cref="ExerciseContentSource.Generator"/> (JSON column, LP-131); null otherwise.</summary>
+    public GeneratorSettings? Generator { get; set; }
 
     /// <summary>The draft's questions; display order by <see cref="QuestionEntity.Position"/>.</summary>
     public List<QuestionEntity> Questions { get; set; } = [];

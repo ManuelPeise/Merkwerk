@@ -54,6 +54,15 @@ public sealed class EndpointPolicyTests
         ["Subjects.Create"] = AuthorizationPolicies.OrgAdmin,
         ["Subjects.Update"] = AuthorizationPolicies.OrgAdmin,
 
+        // Every adult of the family works on exercises (LP-110).
+        ["Exercises.List"] = AuthorizationPolicies.Member,
+        ["Exercises.Get"] = AuthorizationPolicies.Member,
+        ["Exercises.Version"] = AuthorizationPolicies.Member,
+        ["Exercises.Create"] = AuthorizationPolicies.Member,
+        ["Exercises.Update"] = AuthorizationPolicies.Member,
+        ["Exercises.Publish"] = AuthorizationPolicies.Member,
+        ["Exercises.Archive"] = AuthorizationPolicies.Member,
+
         // Every adult of the family may pair and unpair devices (decision 04.10.2026).
         ["Devices.PairingCode"] = AuthorizationPolicies.Member,
         ["Devices.List"] = AuthorizationPolicies.Member,

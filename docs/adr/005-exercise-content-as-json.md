@@ -1,6 +1,6 @@
 # 005 – Exercise content as JSON columns with polymorphic C# types
 
-- Status: Proposed
+- Status: Accepted (LP-110, 2026-10-04)
 - Date: 2026-10-02
 - Ticket: LP-002
 
@@ -22,3 +22,6 @@ There are many question types (multiple choice, cloze, marking, syllables, …) 
 - A new question type needs no migration.
 - No database queries into the JSON content are planned.
 - Assignments point to a fixed version, so editing never changes running attempts.
+- Implemented in LP-110: the draft keeps questions as rows (`Questions`, JSON `Payload`/`Solution`); publishing copies
+  the whole exercise into one JSON column (`ExerciseVersions.Content`). MySQL reorders JSON keys, so the serializer
+  options (`ExerciseJson.Options`) allow the type discriminator anywhere in an object.

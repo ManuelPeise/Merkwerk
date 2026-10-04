@@ -66,7 +66,8 @@ internal sealed class AuthSessionService : IAuthSessionService
             return new LoginResult(LoginStatus.EmailNotConfirmed);
         }
 
-        return new LoginResult(LoginStatus.Success, await IssueSessionAsync(user, Guid.NewGuid(), cancellationToken));
+        var session = await IssueSessionAsync(user, Guid.NewGuid(), cancellationToken);
+        return session is null ? new LoginResult(LoginStatus.NoMembership) : new LoginResult(LoginStatus.Success, session);
     }
 
     public async Task<AuthSession?> RefreshAsync(string refreshToken, CancellationToken cancellationToken)
@@ -86,7 +87,15 @@ internal sealed class AuthSessionService : IAuthSessionService
             return null;
         }
 
-        return await CreateSessionAsync(user, rotated, cancellationToken);
+        var session = await CreateSessionAsync(user, rotated, cancellationToken);
+
+        if (session is null)
+        {
+            // Removed from the family meanwhile (LP-107): no role any more, the session ends.
+            await _refreshTokens.RevokeChainAsync(rotated.ChainId, cancellationToken);
+        }
+
+        return session;
     }
 
     public async Task<AuthSession?> SignInAsync(long userId, CancellationToken cancellationToken)
@@ -98,20 +107,39 @@ internal sealed class AuthSessionService : IAuthSessionService
     public Task LogoutAsync(string refreshToken, CancellationToken cancellationToken) =>
         _refreshTokens.RevokeChainAsync(refreshToken, cancellationToken);
 
-    /// <summary>New access token plus refresh token in the given chain (new chain = new login).</summary>
-    internal async Task<AuthSession> IssueSessionAsync(UserEntity user, Guid chainId, CancellationToken cancellationToken) =>
-        await CreateSessionAsync(user, await _refreshTokens.IssueAsync(user.Id, chainId, cancellationToken), cancellationToken);
-
-    /// <summary>Role and organization come from the user's (oldest) membership – read on every login and refresh (LP-105).</summary>
-    private async Task<AuthSession> CreateSessionAsync(UserEntity user, IssuedRefreshToken refreshToken, CancellationToken cancellationToken)
+    /// <summary>
+    /// New access token plus refresh token in the given chain (new chain = new login); <c>null</c> without a membership –
+    /// then no refresh token is issued either.
+    /// </summary>
+    internal async Task<AuthSession?> IssueSessionAsync(UserEntity user, Guid chainId, CancellationToken cancellationToken)
     {
-        MembershipEntity? membership;
-        await using (var unitOfWork = _unitOfWorkFactory.Create())
-        {
-            membership = await unitOfWork.Memberships.FindPrimaryForUserAsync(user.Id, cancellationToken);
-        }
+        var membership = await FindMembershipAsync(user.Id, cancellationToken);
 
-        var role = membership?.Role == OrganizationRole.OrgAdmin ? AuthRoles.OrgAdmin : AuthRoles.Member;
+        return membership is null
+            ? null
+            : CreateSession(user, membership, await _refreshTokens.IssueAsync(user.Id, chainId, cancellationToken));
+    }
+
+    /// <summary>Session for a rotated refresh token; <c>null</c> if the user has no membership any more.</summary>
+    private async Task<AuthSession?> CreateSessionAsync(UserEntity user, IssuedRefreshToken refreshToken, CancellationToken cancellationToken)
+    {
+        var membership = await FindMembershipAsync(user.Id, cancellationToken);
+        return membership is null ? null : CreateSession(user, membership, refreshToken);
+    }
+
+    /// <summary>
+    /// Role and organization come from the user's (oldest) membership – read on every login and refresh (LP-105).
+    /// The role hangs on the membership, never on the user (LP-107).
+    /// </summary>
+    private async Task<MembershipEntity?> FindMembershipAsync(long userId, CancellationToken cancellationToken)
+    {
+        await using var unitOfWork = _unitOfWorkFactory.Create();
+        return await unitOfWork.Memberships.FindPrimaryForUserAsync(userId, cancellationToken);
+    }
+
+    private AuthSession CreateSession(UserEntity user, MembershipEntity membership, IssuedRefreshToken refreshToken)
+    {
+        var role = membership.Role == OrganizationRole.OrgAdmin ? AuthRoles.OrgAdmin : AuthRoles.Member;
         var name = string.IsNullOrEmpty(user.DisplayName) ? user.Email ?? string.Empty : user.DisplayName;
 
         var (accessToken, accessExpiresAt) = _tokenService.CreateAccessToken(
@@ -119,7 +147,7 @@ internal sealed class AuthSessionService : IAuthSessionService
             name,
             role,
             user.MustChangePassword,
-            membership?.OrganizationId);
+            membership.OrganizationId);
 
         return new AuthSession(
             name, role, user.MustChangePassword, accessToken, accessExpiresAt, refreshToken.Token, refreshToken.ExpiresAt);

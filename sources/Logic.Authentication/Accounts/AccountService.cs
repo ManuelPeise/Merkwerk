@@ -242,6 +242,9 @@ internal sealed partial class AccountService : IAccountService
         }
     }
 
+    public Task EndSessionsAsync(long userId, CancellationToken cancellationToken) =>
+        _refreshTokens.RevokeAllAsync(userId, cancellationToken);
+
     public async Task<long?> FindUserIdByEmailAsync(string email, CancellationToken cancellationToken) =>
         (await _userManager.FindByEmailAsync(email))?.Id;
 

@@ -2,6 +2,7 @@ using Logic.Authentication;
 using Logic.Organizations.Tests.Infrastructure;
 using Logic.Shared.Interfaces;
 using Shared.Enums;
+using Shared.Models.Authentication;
 using Shared.Models.Organizations;
 
 namespace Logic.Organizations.Tests;
@@ -41,7 +42,7 @@ public sealed class MemberServiceTests(SharedDatabaseFixture database)
     }
 
     [Fact]
-    public async Task RemoveAsync_Member_RemovesMembershipAndRoleFromNextSession()
+    public async Task RemoveAsync_Member_RemovesMembershipAndNoNewSession()
     {
         var family = await UseFamilyAsync();
         var (memberId, _) = await _context.CreateAccountAsync();
@@ -51,7 +52,38 @@ public sealed class MemberServiceTests(SharedDatabaseFixture database)
 
         Assert.Equal(RemoveMemberStatus.Success, status);
         Assert.DoesNotContain(await ListAsync(family), m => m.UserId == memberId);
-        Assert.Equal(AuthRoles.Member, (await _context.SignInAsync(memberId))!.Role);
+        Assert.Null(await _context.SignInAsync(memberId));
+    }
+
+    [Fact]
+    public async Task RemoveAsync_SignedInMember_EndsTheirSessions()
+    {
+        // Arrange: the member is signed in (refresh cookie in the browser).
+        var family = await UseFamilyAsync();
+        var (memberId, _) = await _context.CreateAccountAsync();
+        var membershipId = await _context.AddMemberAsync(family.OrganizationId, memberId, OrganizationRole.Member);
+        var session = (await _context.SignInAsync(memberId))!;
+
+        // Act
+        await RemoveAsync(family, family.OwnerUserId, membershipId);
+        await _context.AddMemberAsync(family.OrganizationId, memberId, OrganizationRole.Member);
+        var refreshed = await _context.RunAsync<IAuthSessionService, AuthSession?>(s =>
+            s.RefreshAsync(session.RefreshToken, default));
+
+        // Assert: even after being invited back, the old refresh token stays dead.
+        Assert.Null(refreshed);
+    }
+
+    [Fact]
+    public async Task SignInAsync_Member_GetsMemberRole()
+    {
+        var family = await UseFamilyAsync();
+        var (memberId, _) = await _context.CreateAccountAsync();
+        await _context.AddMemberAsync(family.OrganizationId, memberId, OrganizationRole.Member);
+
+        var session = await _context.SignInAsync(memberId);
+
+        Assert.Equal(AuthRoles.Member, session!.Role);
     }
 
     [Fact]

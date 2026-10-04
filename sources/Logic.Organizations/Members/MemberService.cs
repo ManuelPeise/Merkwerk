@@ -75,6 +75,10 @@ internal sealed class MemberService : IMemberService
 
         unitOfWork.Memberships.Remove(membership);
         await unitOfWork.SaveChangesAsync(cancellationToken);
+
+        // The removed adult is signed out at the next refresh at the latest (LP-107); the access token still runs out,
+        // but every service checks the membership in the database anyway.
+        await _accounts.EndSessionsAsync(membership.UserId, cancellationToken);
         return RemoveMemberStatus.Success;
     }
 

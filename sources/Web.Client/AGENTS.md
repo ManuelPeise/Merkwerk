@@ -60,7 +60,7 @@ src/
     icons/                 AppIcons – the only place that imports @mui/icons-material
     typography/            Text building blocks (Caption)
   hooks/                   Reusable hooks (useXyz.ts): useAuthentication, useTranslation, useForm, useReducer,
-                           useSetupStatus, useSetupCompletion, useDeviceStatus
+                           useSetupStatus, useSetupCompletion, useDeviceStatus, useIsOrgAdmin
   lib/
     api/                   apiClient, StatelessApi, toApiError, getFieldErrors + one folder per backend module
                            (<module>Api.ts, <module>Types.ts): authentication, setup, invitations, members,
@@ -156,7 +156,8 @@ New top-level folders under `src/` only after asking.
 - `SetupGate` wraps the whole route tree; auth pages (login, setup, invitation, forgot/reset password, confirm e-mail) live in `PublicLayout` and render inside `AuthCard`.
 - Server field errors (`ProblemDetails.errors`) go through `getFieldErrors` to the matching field's `errorText`; alerts always use `notification…` keys.
 - Children's entry: `/practice/pair` (PublicLayout, pairing code) → `/practice/profiles` (KidsLayout, `ProfileTile` + `AvatarImage`, avatars in `src/assets/avatars/`) → `/practice`. `DeviceRoute` guards the last two; the child route uses `<ProtectedRoute signedOutTo={routes.practiceProfiles} />`.
-- Roles only via `src/lib/auth/roles.ts` (`roles`, `adultRoles`) – no role strings in components.
+- Roles only via `src/lib/auth/roles.ts` (`roles`, `adultRoles`) – no role strings in components. Admin-only actions
+  are shown with `useIsOrgAdmin()`; that only tidies the UI, the server decides (permission matrix in `../../AGENTS.md` §9).
 - Navigation entries (`navigationItems.ts`) exist only for the parents' drawer; public pages have no menu.
 - Unknown paths redirect to `routes.start`.
 

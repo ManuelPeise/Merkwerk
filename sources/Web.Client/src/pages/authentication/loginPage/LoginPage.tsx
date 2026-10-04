@@ -9,6 +9,8 @@ import FormTextField from 'src/components/input/FormTextField';
 import { useAuthentication } from 'src/hooks/useAuthentication';
 import { useForm } from 'src/hooks/useForm';
 import type { ILoginRequest } from 'src/lib/api/authentication/authenticationTypes';
+import { problemTitles } from 'src/lib/api/problemTitles';
+import type { ApiError } from 'src/lib/api/types/apiError';
 import type { NotificationKey } from 'src/lib/translations/translationKeys';
 import { getEmailError } from 'src/lib/auth/authValidation';
 import { routes } from 'src/navigation/routes';
@@ -16,6 +18,23 @@ import { utils } from 'src/lib/utils';
 
 const isLoginValid = (model: ILoginRequest): boolean =>
     utils.validation.validateEmail(model.email.trim()) && model.password !== '';
+
+/** 401 here means wrong credentials, not an expired session; 403 says why the correct password was not enough. */
+const getLoginErrorKey = (error: ApiError): NotificationKey => {
+    if (error.status === 401) {
+        return 'notificationLoginFailed';
+    }
+
+    if (error.status === 403 && error.problem?.title === problemTitles.noMembership) {
+        return 'notificationNoMembership';
+    }
+
+    if (error.status === 403 && error.problem?.title === problemTitles.emailNotConfirmed) {
+        return 'notificationEmailNotConfirmed';
+    }
+
+    return error.messageKey;
+};
 
 /** After a successful login, PublicRoute sends the user on automatically. */
 const LoginPage: React.FC = () => {
@@ -39,8 +58,7 @@ const LoginPage: React.FC = () => {
         setIsSubmitting(false);
 
         if (error) {
-            // 401 here means wrong credentials, not an expired session.
-            setErrorKey(error.status === 401 ? 'notificationLoginFailed' : error.messageKey);
+            setErrorKey(getLoginErrorKey(error));
         }
     };
 

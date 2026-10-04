@@ -5,19 +5,23 @@ namespace Logic.Shared.Interfaces;
 /// <summary>Login, refresh-token rotation and logout (ADR 013). Transport (cookies) is the caller's job.</summary>
 public interface IAuthSessionService
 {
-    /// <summary>Checks the credentials (with lockout) and starts a session.</summary>
+    /// <summary>
+    /// Checks the credentials (with lockout) and starts a session. Adults without a membership get
+    /// <c>LoginStatus.NoMembership</c> and no session (LP-107).
+    /// </summary>
     Task<LoginResult> LoginAsync(string email, string password, CancellationToken cancellationToken);
 
     /// <summary>
     /// Redeems the refresh token (it can be used only once) and issues new tokens; <c>null</c> if it is unknown, expired
-    /// or revoked. Redeeming an already used token revokes the whole chain – unless it was rotated only seconds ago
-    /// (parallel refresh from several tabs, <c>Auth:Jwt:RefreshTokenReuseSeconds</c>).
+    /// or revoked, or if the user has no membership any more (the chain is revoked then, LP-107). Redeeming an already
+    /// used token revokes the whole chain – unless it was rotated only seconds ago (parallel refresh from several tabs,
+    /// <c>Auth:Jwt:RefreshTokenReuseSeconds</c>).
     /// </summary>
     Task<AuthSession?> RefreshAsync(string refreshToken, CancellationToken cancellationToken);
 
     /// <summary>
     /// Starts a session without a password – only for callers that just authenticated the person another way
-    /// (first-run setup, accepted invitation; LP-105). <c>null</c> if the user does not exist.
+    /// (first-run setup, accepted invitation; LP-105). <c>null</c> if the user does not exist or has no membership.
     /// </summary>
     Task<AuthSession?> SignInAsync(long userId, CancellationToken cancellationToken);
 

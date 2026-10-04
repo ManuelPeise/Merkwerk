@@ -8,6 +8,7 @@ import type {
     ILoginRequest,
     IResetPasswordRequest,
     ISession,
+    IVerifyResetTokenRequest,
 } from 'src/lib/api/authentication/authenticationTypes';
 
 /** Endpoints of AuthenticationController. Paths are lowercase on purpose (refresh cookie path). */
@@ -20,6 +21,9 @@ export const authenticationApi = {
     }),
     resetPassword: statelessApi.create<void, IResetPasswordRequest>({
         serviceUrl: '/authentication/reset-password',
+    }),
+    verifyResetToken: statelessApi.create<void, IVerifyResetTokenRequest>({
+        serviceUrl: '/authentication/verify-reset-token',
     }),
     confirmEmail: statelessApi.create<void, IConfirmEmailRequest>({
         serviceUrl: '/authentication/confirm-email',

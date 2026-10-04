@@ -32,6 +32,12 @@ export interface IResetPasswordRequest {
     newPassword: string;
 }
 
+/** Checked when the reset page opens (LP-166): 204 = link usable, 400 = used, expired or unknown. */
+export interface IVerifyResetTokenRequest {
+    email: string;
+    token: string;
+}
+
 export interface IChangePasswordRequest {
     currentPassword: string;
     newPassword: string;

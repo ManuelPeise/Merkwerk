@@ -1,5 +1,5 @@
 ﻿import React from 'react';
-import { FormControl, OutlinedInput, Stack } from '@mui/material';
+import { Box, FormControl, OutlinedInput } from '@mui/material';
 import { useTranslation } from 'src/hooks/useTranslation';
 import FormFieldContainer from 'src/components/input/FormFieldContainer';
 import type { IFormFieldProps } from 'src/components/input/types/formFieldProps';
@@ -15,6 +15,12 @@ interface IProps extends IFormFieldProps<string> {
 }
 
 const nonDigits = /\D/g;
+
+/** Longer codes (6 digits) read in groups of three: 123 456 (LP-166). */
+const groupSize = 3;
+
+const isGroupStart = (index: number, length: number) =>
+    length > 4 && length % groupSize === 0 && index > 0 && index % groupSize === 0;
 
 /**
  * PIN input with one box per digit: moves on after each digit, Backspace goes back,
@@ -94,16 +100,20 @@ const FormPinField: React.FC<IProps> = (props) => {
             helperText={helperText}
             uiTestId={uiTestId}
         >
-            <Stack
-                direction="row"
-                spacing={1.5}
+            <Box
                 role="group"
                 aria-labelledby={labelId}
                 aria-describedby={hasMessage ? `${labelId}-message` : undefined}
+                sx={{ display: 'flex', gap: { xs: 1, sm: 2 } }}
             >
                 {Array.from({ length }, (_, index) => (
                     // One FormControl per box: MUI allows only one input per FormControl.
-                    <FormControl key={index} error={Boolean(errorText)} disabled={disabled}>
+                    <FormControl
+                        key={index}
+                        error={Boolean(errorText)}
+                        disabled={disabled}
+                        sx={isGroupStart(index, length) ? { ml: { xs: 1.5, sm: 2 } } : undefined}
+                    >
                         <OutlinedInput
                             inputRef={(element: HTMLInputElement | null) => {
                                 inputRefs.current[index] = element;
@@ -114,9 +124,9 @@ const FormPinField: React.FC<IProps> = (props) => {
                             onChange={(event) => handleChange(index, event.target.value)}
                             onKeyDown={(event) => handleKeyDown(index, event)}
                             onFocus={(event) => handleFocus(index, event)}
-                            // Square boxes with the same height as every other field.
+                            // Square boxes with the same height as every other field; narrower on phones.
                             sx={{
-                                width: 64,
+                                width: { xs: 44, sm: 64 },
                                 '& input': { textAlign: 'center', fontSize: '1.75rem', px: 0 },
                             }}
                             inputProps={{
@@ -132,7 +142,7 @@ const FormPinField: React.FC<IProps> = (props) => {
                         />
                     </FormControl>
                 ))}
-            </Stack>
+            </Box>
             {name && <input type="hidden" name={name} value={pin} />}
         </FormFieldContainer>
     );

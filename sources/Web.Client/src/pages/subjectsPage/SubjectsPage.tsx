@@ -68,6 +68,7 @@ const SubjectsPage: React.FC = () => {
             <Box
                 sx={{
                     display: 'flex',
+                    flexWrap: 'wrap',
                     alignItems: 'flex-start',
                     justifyContent: 'space-between',
                     gap: 2,

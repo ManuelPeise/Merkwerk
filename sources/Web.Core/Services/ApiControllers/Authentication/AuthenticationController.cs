@@ -143,6 +143,21 @@ public sealed class AuthenticationController : ApiControllerBase
         return result.Succeeded ? NoContent() : FieldProblem(nameof(request.NewPassword), result);
     }
 
+    /// <summary>
+    /// POST /api/v1/authentication/verify-reset-token – 204 if the reset link can still be used, otherwise 400.
+    /// Unknown addresses answer like used or expired links, so the endpoint reveals no accounts (LP-166).
+    /// </summary>
+    [AllowAnonymous]
+    [HttpPost]
+    [ProducesResponseType(StatusCodes.Status204NoContent)]
+    [ProducesResponseType<ProblemDetails>(StatusCodes.Status400BadRequest)]
+    public async Task<IActionResult> VerifyResetTokenAsync(
+        VerifyResetTokenRequestDto request,
+        CancellationToken cancellationToken) =>
+        await _accountService.IsPasswordResetTokenValidAsync(request.Email, request.Token, cancellationToken)
+            ? NoContent()
+            : Problem(statusCode: StatusCodes.Status400BadRequest, title: "Invalid or expired link");
+
     /// <summary>POST /api/v1/authentication/confirm-email – confirms the address from the link.</summary>
     [AllowAnonymous]
     [HttpPost]

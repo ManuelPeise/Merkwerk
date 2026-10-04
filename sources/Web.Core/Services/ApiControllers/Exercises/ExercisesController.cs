@@ -15,10 +15,12 @@ namespace Web.Core.Services.ApiControllers.Exercises;
 public sealed class ExercisesController : ApiControllerBase
 {
     private readonly IExerciseService _exerciseService;
+    private readonly IGeneratorService _generatorService;
 
-    public ExercisesController(IExerciseService exerciseService)
+    public ExercisesController(IExerciseService exerciseService, IGeneratorService generatorService)
     {
         _exerciseService = exerciseService;
+        _generatorService = generatorService;
     }
 
     /// <summary>GET /api/v1/exercises/list – archived ones included (see state).</summary>
@@ -134,6 +136,27 @@ public sealed class ExercisesController : ApiControllerBase
 
         var result = await _exerciseService.SetArchivedAsync(organizationId, userId, request.Id, request.Archived, cancellationToken);
         return ToResponse(result);
+    }
+
+    /// <summary>
+    /// POST /api/v1/exercises/generate-preview – tasks from generator settings, e.g. for the editor's preview (LP-131).
+    /// The same seed gives the same tasks.
+    /// </summary>
+    [Authorize(Policy = AuthorizationPolicies.Member)]
+    [HttpPost]
+    [ProducesResponseType<GeneratorPreviewDto>(StatusCodes.Status200OK)]
+    [ProducesResponseType<ValidationProblemDetails>(StatusCodes.Status400BadRequest)]
+    public ActionResult<GeneratorPreviewDto> GeneratePreview(GeneratePreviewRequestDto request)
+    {
+        var errors = _generatorService.Validate(request.Generator);
+        if (errors.Count > 0)
+        {
+            return FieldErrors(errors);
+        }
+
+        var seed = request.Seed ?? _generatorService.CreateSeed();
+        var questions = _generatorService.Generate(request.Generator, seed);
+        return new GeneratorPreviewDto(seed, questions.Select(QuestionDto.From).ToList());
     }
 
     private ActionResult<ExerciseSummaryDto> ToResponse(ExerciseChangeResult result) => result.Status switch

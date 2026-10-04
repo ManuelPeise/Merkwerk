@@ -1,4 +1,5 @@
 using Shared.Enums;
+using Shared.Models.Exercises.Generators;
 
 namespace Shared.Models.Exercises;
 
@@ -11,4 +12,5 @@ public sealed record ExerciseSnapshot(
     long SubjectId,
     int Grade,
     ExerciseContentSource ContentSource,
-    IReadOnlyList<QuestionContent> Questions);
+    IReadOnlyList<QuestionContent> Questions,
+    GeneratorSettings? Generator = null);

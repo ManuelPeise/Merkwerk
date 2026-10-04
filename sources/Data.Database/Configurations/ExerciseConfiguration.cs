@@ -1,3 +1,4 @@
+using Data.Database.Converters;
 using Data.Database.Entities.Exercises;
 using Data.Database.Entities.Organizations;
 using Data.Database.Entities.Subjects;
@@ -13,6 +14,7 @@ internal sealed class ExerciseConfiguration : IEntityTypeConfiguration<ExerciseE
         builder.ToTable("Exercises");
         builder.Property(e => e.Title).HasMaxLength(ExerciseEntity.TitleMaxLength).IsRequired();
         builder.Property(e => e.ContentSource).HasConversion<string>().HasMaxLength(20);
+        builder.Property(e => e.Generator).HasOptionalJsonColumn();
         builder.HasMany(e => e.Questions).WithOne().HasForeignKey(q => q.ExerciseId).OnDelete(DeleteBehavior.Cascade);
 
         // Subjects in use cannot disappear under an exercise (deleting subjects comes with archiving rules later).

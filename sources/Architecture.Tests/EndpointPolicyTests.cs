@@ -63,6 +63,7 @@ public sealed class EndpointPolicyTests
         ["Exercises.Update"] = AuthorizationPolicies.Member,
         ["Exercises.Publish"] = AuthorizationPolicies.Member,
         ["Exercises.Archive"] = AuthorizationPolicies.Member,
+        ["Exercises.GeneratePreview"] = AuthorizationPolicies.Member,
 
         // Every adult of the family may pair and unpair devices (decision 04.10.2026).
         ["Devices.PairingCode"] = AuthorizationPolicies.Member,

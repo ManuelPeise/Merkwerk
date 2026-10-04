@@ -2,6 +2,7 @@ using Logic.Content.Tests.Infrastructure;
 using Logic.Shared.Interfaces;
 using Shared.Enums;
 using Shared.Models.Exercises;
+using Shared.Models.Exercises.Generators;
 using Shared.Models.Exercises.Questions;
 using Shared.Models.Subjects;
 
@@ -163,11 +164,86 @@ public sealed class ExerciseServiceTests(ContentDatabaseFixture database)
     }
 
     [Fact]
-    public async Task Create_GeneratorSource_NotSupportedYet()
+    public async Task Generator_CreatePublishGet_KeepsSettingsWithoutQuestions()
+    {
+        // Arrange (LP-131)
+        var family = await _context.CreateFamilyAsync();
+        var settings = new ArithmeticSettings
+        {
+            Operations = [ArithmeticOperation.Add, ArithmeticOperation.Subtract],
+            NumberRange = 100,
+            TenTransition = TenTransition.With,
+            Placeholder = PlaceholderMode.Mixed,
+            TaskCount = 15,
+        };
+        var input = Input(await MathAsync(family)) with { ContentSource = ExerciseContentSource.Generator, Generator = settings };
+
+        // Act
+        var created = await CreateAsync(family, input);
+        var published = await PublishAsync(family, created.Exercise!.Id);
+        var detail = await GetAsync(family, created.Exercise.Id);
+        var version = await GetVersionAsync(family, created.Exercise.Id, 1);
+
+        // Assert
+        Assert.Equal(ExerciseChangeStatus.Success, created.Status);
+        Assert.Equal(15, created.Exercise.QuestionCount);
+        Assert.Equal(1, published.Exercise!.LatestVersion);
+        Assert.Empty(detail!.Questions);
+        Assert.Equal(settings, Assert.IsType<ArithmeticSettings>(detail.Generator) with { Operations = settings.Operations });
+        Assert.Equal(settings.Operations, Assert.IsType<ArithmeticSettings>(version!.Generator).Operations);
+        Assert.Equal(ExerciseContentSource.Generator, version.ContentSource);
+    }
+
+    [Fact]
+    public async Task Generator_SwitchBackToQuestions_DropsSettings()
+    {
+        var family = await _context.CreateFamilyAsync();
+        var subjectId = await MathAsync(family);
+        var exercise = (await CreateAsync(family, Input(subjectId) with
+        {
+            ContentSource = ExerciseContentSource.Generator,
+            Generator = new ArithmeticSettings(),
+        })).Exercise!;
+
+        await _context.RunAsync<IExerciseService, ExerciseChangeResult>(s => s.UpdateAsync(
+            family.OrganizationId, family.MemberUserId, exercise.Id, Input(subjectId, Number), default));
+        var detail = await GetAsync(family, exercise.Id);
+
+        Assert.Null(detail!.Generator);
+        Assert.Single(detail.Questions);
+    }
+
+    [Fact]
+    public async Task Generator_WithoutSettingsOrWithQuestions_IsRejected()
+    {
+        var family = await _context.CreateFamilyAsync();
+        var subjectId = await MathAsync(family);
+
+        var withoutSettings = await CreateAsync(family, Input(subjectId) with { ContentSource = ExerciseContentSource.Generator });
+        var withQuestions = await CreateAsync(family, Input(subjectId, Number) with
+        {
+            ContentSource = ExerciseContentSource.Generator,
+            Generator = new ArithmeticSettings(),
+        });
+        var invalidSettings = await CreateAsync(family, Input(subjectId) with
+        {
+            ContentSource = ExerciseContentSource.Generator,
+            Generator = new ArithmeticSettings { NumberRange = 2 },
+        });
+        var settingsOnQuestions = await CreateAsync(family, Input(subjectId, Number) with { Generator = new ArithmeticSettings() });
+
+        Assert.Contains("generator", withoutSettings.Errors!.Keys);
+        Assert.Contains("questions", withQuestions.Errors!.Keys);
+        Assert.Contains("generator.numberRange", invalidSettings.Errors!.Keys);
+        Assert.Contains("generator", settingsOnQuestions.Errors!.Keys);
+    }
+
+    [Fact]
+    public async Task Create_WordListSource_NotSupportedYet()
     {
         var family = await _context.CreateFamilyAsync();
 
-        var result = await CreateAsync(family, Input(await MathAsync(family)) with { ContentSource = ExerciseContentSource.Generator });
+        var result = await CreateAsync(family, Input(await MathAsync(family)) with { ContentSource = ExerciseContentSource.WordList });
 
         Assert.Contains("contentSource", result.Errors!.Keys);
     }

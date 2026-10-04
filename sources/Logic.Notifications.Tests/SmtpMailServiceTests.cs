@@ -1,3 +1,6 @@
+using Shared.Enums;
+using Shared.Models.Notifications;
+
 namespace Logic.Notifications.Tests;
 
 public sealed class SmtpMailServiceTests

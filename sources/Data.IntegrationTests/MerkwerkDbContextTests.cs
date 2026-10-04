@@ -55,7 +55,7 @@ public sealed class MerkwerkDbContextTests(MySqlFixture database) : IClassFixtur
     {
         var time = new ManualTimeProvider(Start);
         await using var context = CreateContext(new TestCurrentUser("user:7"), time);
-        var organization = new Organization { Name = "Familie Audit" };
+        var organization = new OrganizationEntity { Name = "Familie Audit" };
 
         context.Organizations.Add(organization);
         await context.SaveChangesAsync();
@@ -74,7 +74,7 @@ public sealed class MerkwerkDbContextTests(MySqlFixture database) : IClassFixtur
         long id;
         await using (var creator = CreateContext(new TestCurrentUser("user:1"), time))
         {
-            var organization = new Organization { Name = "Familie Alt" };
+            var organization = new OrganizationEntity { Name = "Familie Alt" };
             creator.Organizations.Add(organization);
             await creator.SaveChangesAsync();
             id = organization.Id;
@@ -141,8 +141,8 @@ public sealed class MerkwerkDbContextTests(MySqlFixture database) : IClassFixtur
     private async Task<(long A, long B)> CreateTwoOrganizationsAsync()
     {
         await using var context = CreateContext(new TestCurrentUser());
-        var familyA = new Organization { Name = "Familie A" };
-        var familyB = new Organization { Name = "Familie B" };
+        var familyA = new OrganizationEntity { Name = "Familie A" };
+        var familyB = new OrganizationEntity { Name = "Familie B" };
         context.Organizations.AddRange(familyA, familyB);
         await context.SaveChangesAsync();
         return (familyA.Id, familyB.Id);

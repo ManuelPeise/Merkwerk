@@ -39,16 +39,16 @@ Ask before adding any NuGet or npm package. NuGet versions are managed centrally
 ```
 sources/Merkwerk.slnx
   01 Web     Web.Client             React/TypeScript UI (Web.Client.esproj, npm) – talks to the backend only over HTTP
-             Web.Core               Startup project, API host: Bundels/ (registration, pipeline),
+             Web.Core               Startup project, API host: Bundles/ (registration, pipeline),
                                     Services/ApiControllers/<Module>/ (controller + Dtos/), Services/Cookies/
   02 Logic   Logic.Authentication   Login, token issuing, refresh-token rotation, sessions (DI/ for registration)
              Logic.Notifications    Mails: IMailService (SMTP via MailKit), templates de/en, IPublicLinkBuilder
              Logic.Organizations    First-run setup, families, memberships, invitations, child profiles (LP-105)
              Logic.Devices          Device pairing, paired devices, children's sessions on them (LP-106)
-             Logic.Shared           Pure logic shared by modules (graders, generators) – no I/O
+             Logic.Shared           Service interfaces (Interfaces/), pure logic shared by modules (graders, generators) – no I/O
   03 Data    Data.Database          Entities, MerkwerkDbContext, configurations, interceptors, migrations
              Data.Accessor          Repositories and unit of work – the only way to reach the database
-  04 Shared  (empty for now)
+  04 Shared  Shared                 Service models (Shared.Models.<Module>) and all enums (Shared.Enums) – no references
   05 Tests   Architecture.Tests     Rules of this section (project references, layers, controllers) via reflection
              Data.IntegrationTests  DbContext, repositories, unit of work, migrations against MySQL 8.4 (Testcontainers, needs Docker)
              Logic.Authentication.Tests  Unit tests of token issuing and session rotation
@@ -59,13 +59,14 @@ sources/Merkwerk.slnx
 
 | Project | May reference |
 | --- | --- |
-| Logic.Shared | – (Microsoft.Extensions abstractions only) |
-| Data.Database | – |
-| Data.Accessor | Data.Database |
-| Logic.Notifications | Logic.Shared |
-| Logic.Authentication | Logic.Shared, Logic.Notifications, Data.Accessor |
-| Logic.* (e.g. Logic.Organizations, Logic.Devices) | Logic.Shared, Logic.Notifications, Logic.Authentication, Data.Accessor |
-| Web.Core | Logic.*, Data.Accessor / Data.Database (the latter two for DI registration only) |
+| Shared | – |
+| Logic.Shared | Shared (plus Microsoft.Extensions abstractions) |
+| Data.Database | Shared |
+| Data.Accessor | Data.Database, Shared |
+| Logic.Notifications | Logic.Shared, Shared |
+| Logic.Authentication | Logic.Shared, Logic.Notifications, Data.Accessor, Shared |
+| Logic.* (e.g. Logic.Organizations, Logic.Devices) | Logic.Shared, Logic.Notifications, Logic.Authentication, Data.Accessor, Shared |
+| Web.Core | Logic.*, Shared, Data.Accessor / Data.Database (the latter two for DI registration only) |
 | Web.Client | no .NET project – only the REST API |
 
 **Hard rules** (checked by `Architecture.Tests` – a rule change means changing the test as well):
@@ -74,7 +75,12 @@ sources/Merkwerk.slnx
 - `Logic.*` projects never reference ASP.NET Core (`HttpContext`, cookies, JwtBearer stay in `Web.Core`) and reach data
   **only** through `Data.Accessor` – never `MerkwerkDbContext`, `DbSet<T>` or `DbContextOptions`. Entity types and EF Core's
   async query extensions (`ToListAsync`, `AnyAsync`, …) are fine.
-- `Logic.Shared` has **no** dependency on EF Core, ASP.NET Core or I/O.
+- `Logic.Shared` has **no** dependency on EF Core, ASP.NET Core or I/O; `Shared` references nothing at all.
+- **Where types live** (LP-164): all enums in `Shared.Enums`; input/output records of services in
+  `Shared.Models.<Module>`; public service interfaces in `Logic.Shared.Interfaces` (their signatures use only `Shared`
+  types). Implementations stay `internal` in their `Logic.*` project. Not affected: repositories and `IUnitOfWork`
+  (`Data.Accessor.Abstractions`), `ICurrentUser` (`Data.Database`), options classes and module-internal helpers.
+- Entities are named `<Name>Entity` (e.g. `LearnerEntity`); base classes stay `AEntityBase` / `AOrganizationEntityBase`.
 - **Entities never leave the server.** Only DTOs (`sealed record` in `Web.Core/Services/ApiControllers/<Module>/Dtos/`) go over the wire;
   the UI mirrors them as TypeScript types in `Web.Client/src/lib/api/<module>/<module>Types.ts`.
 - Controllers talk to **services**, never directly to repositories or the DbContext.
@@ -86,14 +92,15 @@ Business areas: `Organizations` (setup, memberships, invitations, child profiles
 `Progress`, `WordLists`, later `Sharing`, `Administration`. Authentication lives in `Logic.Authentication`
 (`IAuthSessionService`, `TokenService`, options); device pairing and children's sessions live in `Logic.Devices`
 (`IDeviceService`, `ILearnerSessionService`, LP-106) and use `TokenService` for the learner tokens.
-Per module: `I<Name>Service` + implementation, validators, module-internal types, registration in a `DI/` extension.
+Per module: `I<Name>Service` in `Logic.Shared.Interfaces` + `internal` implementation in the module, models in
+`Shared.Models.<Module>`, validators, module-internal types, registration in a `DI/` extension.
 
 ## 5. Data access (ADR 004, 007, 008, 011, 012)
 
 - Every entity derives from `AEntityBase` (`long Id`, `CreatedAt`, `CreatedBy`, `UpdatedAt`, `UpdatedBy`);
   everything owned by a family/school derives from `AOrganizationEntityBase` (`long OrganizationId`).
-- Exception (LP-104): Identity types (`User : IdentityUser<long>`, claims, logins, tokens) have no audit fields, and
-  `Logic.Authentication` may use Identity's `UserManager<User>` (it reaches the DB through Identity's own store).
+- Exception (LP-104): Identity types (`UserEntity : IdentityUser<long>`, claims, logins, tokens) have no audit fields, and
+  `Logic.Authentication` may use Identity's `UserManager<UserEntity>` (it reaches the DB through Identity's own store).
   Refresh tokens still go through `IUnitOfWork`. Everything else follows ADR 012.
 - **Never set audit fields by hand** – the `AuditSaveChangesInterceptor` does that.
 - Time is always **UTC** and always comes from `TimeProvider`; never call `DateTime.Now`/`UtcNow` directly.
@@ -118,8 +125,9 @@ Per module: `I<Name>Service` + implementation, validators, module-internal types
   pinned in `.config/dotnet-tools.json`). Names in English, PascalCase. Never edit a generated migration by hand without review.
   MySQL does not run DDL transactionally → keep migrations small, never mix schema and data changes.
   Only exception: the first migration (`InitializeDatabase`) seeds the standard subjects (`HasData` in `SubjectConfiguration`, fixed values).
-- Production applies migrations with the bundle image (`docker compose run --rm migrate`) before the new app version starts;
-  the app itself never migrates at startup. CI fails if the model has changes without a migration.
+- The app applies pending migrations at startup in every environment (`MigrateDatabaseAsync`, ADR 016); existing data
+  stays. A failed migration stops the start – that is why migrations stay small. CI fails if the model has changes
+  without a migration.
 - Character set `utf8mb4`, collation `utf8mb4_0900_ai_ci`.
 
 ## 6. Graders, generators, learning state
@@ -172,7 +180,9 @@ touch targets ≥ 64×64 px, icons plus text and friendly feedback; no CDNs, no 
 - Prefixes: interfaces `I…`, abstract base classes `A…` (e.g. `AEntityBase`).
 - Async methods end in `Async` and take a `CancellationToken` as the last parameter.
 - `sealed` for classes not designed for inheritance; `record` for DTOs.
-- Primary constructors for DI are fine. No service locator, no static state.
+- Classes with injected dependencies use a constructor that assigns `private readonly` fields with an underscore
+  prefix (`private readonly IMyService _myService;`) – no primary constructors for DI. Records, DTOs and test classes
+  may keep primary constructors. No service locator, no static state.
 - Options classes with `SectionName`, bound with `ValidateOnStart`.
 - No warnings in commits (`TreatWarningsAsErrors` in Release, set in `sources/Directory.Build.props`).
 - PowerShell scripts (`*.ps1`): ASCII only, or save as UTF-8 **with BOM**. Windows PowerShell 5.1 reads UTF-8 without BOM
@@ -202,7 +212,7 @@ dotnet test Merkwerk.slnx
 dotnet run --project Web.Core --launch-profile http          # http://localhost:5138, Swagger at /swagger
 dotnet tool restore                                            # once: dotnet-ef from .config/dotnet-tools.json
 dotnet ef migrations add <Name> -p Data.Database -s Web.Core
-dotnet ef database update -p Data.Database -s Web.Core         # local DB (connection string from user secrets)
+dotnet ef database update -p Data.Database -s Web.Core         # optional – the app migrates at startup (ADR 016)
 docker compose -f ../deploy/docker-compose.yml up -d db
 docker compose -f ../deploy/docker-compose.yml --profile dev up -d mailpit   # mail catcher, UI at http://localhost:8025
 

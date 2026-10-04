@@ -1,5 +1,7 @@
 using Data.Database.Abstractions;
-using Logic.Notifications;
+using Logic.Shared.Interfaces;
+using Shared.Enums;
+using Shared.Models.Notifications;
 
 namespace Logic.Organizations.Tests.Infrastructure;
 

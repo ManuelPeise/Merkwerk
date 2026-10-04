@@ -39,7 +39,7 @@ public sealed class MigrationTests(MigratedMySqlFixture database) : IClassFixtur
         Assert.False(context.Database.HasPendingModelChanges());
     }
 
-    private static void AssertSubject(Subject subject, string name, string languageCode, string color)
+    private static void AssertSubject(SubjectEntity subject, string name, string languageCode, string color)
     {
         Assert.Equal(name, subject.Name);
         Assert.Equal(languageCode, subject.LanguageCode);

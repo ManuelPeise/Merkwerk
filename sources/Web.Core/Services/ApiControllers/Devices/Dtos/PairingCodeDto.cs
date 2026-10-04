@@ -1,4 +1,4 @@
-using Logic.Devices.Pairing;
+using Shared.Models.Devices;
 
 namespace Web.Core.Services.ApiControllers.Devices.Dtos;
 

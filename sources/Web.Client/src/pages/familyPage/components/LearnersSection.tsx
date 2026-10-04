@@ -19,7 +19,7 @@ import { useTranslation } from 'src/hooks/useTranslation';
 import { learnersApi } from 'src/lib/api/learners/learnersApi';
 import type { ILearner } from 'src/lib/api/learners/learnersTypes';
 import type { NotificationKey } from 'src/lib/translations/translationKeys';
-import ConfirmDialog from 'src/pages/familyPage/components/ConfirmDialog';
+import ConfirmDialog from 'src/components/feedback/ConfirmDialog';
 import LearnerDialog from 'src/pages/familyPage/components/LearnerDialog';
 
 interface IProps {

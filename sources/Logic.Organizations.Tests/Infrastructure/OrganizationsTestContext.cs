@@ -3,17 +3,17 @@ using Data.Accessor.DI;
 using Data.Database;
 using Data.Database.Abstractions;
 using Data.Database.Entities.Organizations;
-using Logic.Authentication;
-using Logic.Authentication.Accounts;
 using Logic.Authentication.DI;
-using Logic.Notifications;
 using Logic.Notifications.DI;
 using Logic.Organizations.DI;
+using Logic.Shared.Interfaces;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
-using Web.Core.Bundels;
+using Shared.Enums;
+using Shared.Models.Authentication;
+using Web.Core.Bundles;
 
 namespace Logic.Organizations.Tests.Infrastructure;
 
@@ -99,10 +99,10 @@ public sealed class OrganizationsTestContext
 
         await using var scope = Services.CreateAsyncScope();
         await using var unitOfWork = scope.ServiceProvider.GetRequiredService<IUnitOfWorkFactory>().Create();
-        var organization = new Organization { Name = name };
+        var organization = new OrganizationEntity { Name = name };
         unitOfWork.Organizations.Add(organization);
         await unitOfWork.SaveChangesAsync();
-        unitOfWork.Memberships.Add(new Membership
+        unitOfWork.Memberships.Add(new MembershipEntity
         {
             OrganizationId = organization.Id,
             UserId = ownerId,
@@ -119,7 +119,7 @@ public sealed class OrganizationsTestContext
     {
         await using var scope = Services.CreateAsyncScope();
         await using var unitOfWork = scope.ServiceProvider.GetRequiredService<IUnitOfWorkFactory>().Create();
-        var membership = new Membership { OrganizationId = organizationId, UserId = userId, Role = role };
+        var membership = new MembershipEntity { OrganizationId = organizationId, UserId = userId, Role = role };
         unitOfWork.Memberships.Add(membership);
         await unitOfWork.SaveChangesAsync();
         return membership.Id;

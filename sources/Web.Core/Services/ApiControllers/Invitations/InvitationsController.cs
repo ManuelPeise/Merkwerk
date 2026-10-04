@@ -1,7 +1,8 @@
-using Data.Database.Entities.Organizations;
-using Logic.Organizations.Invitations;
+using Logic.Shared.Interfaces;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Shared.Enums;
+using Shared.Models.Organizations;
 using Web.Core.Services.ApiControllers.Authentication.Dtos;
 using Web.Core.Services.ApiControllers.Invitations.Dtos;
 using Web.Core.Services.Authorization;
@@ -10,9 +11,17 @@ using Web.Core.Services.Cookies;
 namespace Web.Core.Services.ApiControllers.Invitations;
 
 /// <summary>Invitations of adults into the family (LP-105).</summary>
-public sealed class InvitationsController(IInvitationService invitationService, AuthCookieWriter cookieWriter)
-    : ApiControllerBase
+public sealed class InvitationsController : ApiControllerBase
 {
+    private readonly IInvitationService _invitationService;
+    private readonly AuthCookieWriter _cookieWriter;
+
+    public InvitationsController(IInvitationService invitationService, AuthCookieWriter cookieWriter)
+    {
+        _invitationService = invitationService;
+        _cookieWriter = cookieWriter;
+    }
+
     /// <summary>POST /api/v1/invitations/create – mails an invitation link (7 days, single use).</summary>
     [Authorize(Policy = AuthorizationPolicies.OrgAdmin)]
     [HttpPost]
@@ -29,8 +38,8 @@ public sealed class InvitationsController(IInvitationService invitationService, 
             return Forbid();
         }
 
-        var result = await invitationService.CreateAsync(
-            organizationId, userId, request.Email, Enum.Parse<OrganizationRole>(request.Role), MailLanguage, cancellationToken);
+        var result = await _invitationService.CreateAsync(
+            organizationId, userId, request.Email, request.ToRole(), MailLanguage, cancellationToken);
 
         return result.Status switch
         {
@@ -48,7 +57,7 @@ public sealed class InvitationsController(IInvitationService invitationService, 
     public async Task<ActionResult<IReadOnlyList<InvitationDto>>> ListAsync(CancellationToken cancellationToken)
     {
         if (CurrentOrganizationId is not { } organizationId || CurrentUserId is not { } userId
-            || await invitationService.ListAsync(organizationId, userId, cancellationToken) is not { } invitations)
+            || await _invitationService.ListAsync(organizationId, userId, cancellationToken) is not { } invitations)
         {
             return Forbid();
         }
@@ -68,7 +77,7 @@ public sealed class InvitationsController(IInvitationService invitationService, 
             return Forbid();
         }
 
-        return await invitationService.RevokeAsync(organizationId, userId, request.Id, cancellationToken)
+        return await _invitationService.RevokeAsync(organizationId, userId, request.Id, cancellationToken)
             ? NoContent()
             : NotFound();
     }
@@ -83,7 +92,7 @@ public sealed class InvitationsController(IInvitationService invitationService, 
         [FromQuery] string token,
         CancellationToken cancellationToken)
     {
-        var result = await invitationService.GetDetailsAsync(token, cancellationToken);
+        var result = await _invitationService.GetDetailsAsync(token, cancellationToken);
 
         return result.Status switch
         {
@@ -109,7 +118,7 @@ public sealed class InvitationsController(IInvitationService invitationService, 
         AcceptInvitationRequestDto request,
         CancellationToken cancellationToken)
     {
-        var result = await invitationService.AcceptAsync(
+        var result = await _invitationService.AcceptAsync(
             new AcceptInvitationRequest(request.Token, request.DisplayName, request.Password, request.PrivacyAccepted),
             CurrentUserId,
             cancellationToken);
@@ -117,7 +126,7 @@ public sealed class InvitationsController(IInvitationService invitationService, 
         switch (result.Status)
         {
             case AcceptInvitationStatus.Success:
-                cookieWriter.Write(Response, result.Session!);
+                _cookieWriter.Write(Response, result.Session!);
                 return SessionDto.From(result.Session!);
             case AcceptInvitationStatus.Invalid:
                 return FieldErrors(result.Errors!);

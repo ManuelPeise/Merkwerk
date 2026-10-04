@@ -1,6 +1,8 @@
 using Logic.Authentication;
-using Logic.Organizations.Setup;
 using Logic.Organizations.Tests.Infrastructure;
+using Logic.Shared.Interfaces;
+using Shared.Enums;
+using Shared.Models.Organizations;
 
 namespace Logic.Organizations.Tests;
 

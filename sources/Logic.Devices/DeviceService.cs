@@ -1,15 +1,13 @@
 using Data.Accessor.Abstractions;
 using Data.Database.Entities.Devices;
-using Logic.Devices.Pairing;
-using Logic.Notifications.Links;
+using Logic.Shared.Interfaces;
 using Microsoft.EntityFrameworkCore;
+using Shared.Enums;
+using Shared.Models.Devices;
 
 namespace Logic.Devices;
 
-internal sealed class DeviceService(
-    IUnitOfWorkFactory unitOfWorkFactory,
-    IPublicLinkBuilder links,
-    TimeProvider timeProvider) : IDeviceService
+internal sealed class DeviceService : IDeviceService
 {
     /// <summary>Client route that pairs with <c>?code=</c> (QR code, LP-125).</summary>
     public const string PairingPath = "/practice/pair";
@@ -17,6 +15,20 @@ internal sealed class DeviceService(
     public const string DefaultDeviceName = "Tablet";
 
     private const int MaxCodeAttempts = 5;
+
+    private readonly IUnitOfWorkFactory _unitOfWorkFactory;
+    private readonly IPublicLinkBuilder _links;
+    private readonly TimeProvider _timeProvider;
+
+    public DeviceService(
+        IUnitOfWorkFactory unitOfWorkFactory,
+        IPublicLinkBuilder links,
+        TimeProvider timeProvider)
+    {
+        _unitOfWorkFactory = unitOfWorkFactory;
+        _links = links;
+        _timeProvider = timeProvider;
+    }
 
     public async Task<PairingCodeInfo?> CreatePairingCodeAsync(
         long organizationId,
@@ -36,9 +48,9 @@ internal sealed class DeviceService(
 
     public async Task<PairResult> PairAsync(string code, string deviceName, CancellationToken cancellationToken)
     {
-        var now = timeProvider.GetUtcNow();
+        var now = _timeProvider.GetUtcNow();
 
-        await using var unitOfWork = unitOfWorkFactory.Create();
+        await using var unitOfWork = _unitOfWorkFactory.Create();
         var pairingCode = await unitOfWork.PairingCodes.FindUsableByHashAsync(
             DeviceTokens.Hash(code.Trim()), now.UtcDateTime, cancellationToken);
 
@@ -52,7 +64,7 @@ internal sealed class DeviceService(
         var expiresAt = now.Add(DeviceLifetimes.DeviceToken);
 
         pairingCode.UsedAt = now.UtcDateTime;
-        unitOfWork.Devices.Add(new Device
+        unitOfWork.Devices.Add(new DeviceEntity
         {
             OrganizationId = pairingCode.OrganizationId,
             Name = NormalizeName(deviceName),
@@ -76,7 +88,7 @@ internal sealed class DeviceService(
 
     public async Task<DeviceStatus?> GetStatusAsync(string deviceToken, CancellationToken cancellationToken)
     {
-        await using var unitOfWork = unitOfWorkFactory.Create();
+        await using var unitOfWork = _unitOfWorkFactory.Create();
         var device = await FindActiveDeviceAsync(unitOfWork, deviceToken, cancellationToken);
 
         if (device is null)
@@ -90,7 +102,7 @@ internal sealed class DeviceService(
 
     public async Task<IReadOnlyList<DeviceProfile>?> ListProfilesAsync(string deviceToken, CancellationToken cancellationToken)
     {
-        await using var unitOfWork = unitOfWorkFactory.Create();
+        await using var unitOfWork = _unitOfWorkFactory.Create();
         var device = await FindActiveDeviceAsync(unitOfWork, deviceToken, cancellationToken);
 
         if (device is null)
@@ -107,9 +119,9 @@ internal sealed class DeviceService(
         long actingUserId,
         CancellationToken cancellationToken)
     {
-        var now = timeProvider.GetUtcNow().UtcDateTime;
+        var now = _timeProvider.GetUtcNow().UtcDateTime;
 
-        await using var unitOfWork = unitOfWorkFactory.Create();
+        await using var unitOfWork = _unitOfWorkFactory.Create();
         if (await unitOfWork.Memberships.FindAsync(organizationId, actingUserId, cancellationToken) is null)
         {
             return null;
@@ -129,9 +141,9 @@ internal sealed class DeviceService(
         long deviceId,
         CancellationToken cancellationToken)
     {
-        var now = timeProvider.GetUtcNow().UtcDateTime;
+        var now = _timeProvider.GetUtcNow().UtcDateTime;
 
-        await using var unitOfWork = unitOfWorkFactory.Create();
+        await using var unitOfWork = _unitOfWorkFactory.Create();
         if (await unitOfWork.Memberships.FindAsync(organizationId, actingUserId, cancellationToken) is null)
         {
             return false;
@@ -160,7 +172,7 @@ internal sealed class DeviceService(
     }
 
     /// <summary>Device of the token, if it is neither unpaired nor expired (tracked).</summary>
-    internal async Task<Device?> FindActiveDeviceAsync(
+    internal async Task<DeviceEntity?> FindActiveDeviceAsync(
         IUnitOfWork unitOfWork,
         string deviceToken,
         CancellationToken cancellationToken)
@@ -171,7 +183,7 @@ internal sealed class DeviceService(
         }
 
         var device = await unitOfWork.Devices.FindByTokenHashAsync(DeviceTokens.Hash(deviceToken), cancellationToken);
-        var now = timeProvider.GetUtcNow().UtcDateTime;
+        var now = _timeProvider.GetUtcNow().UtcDateTime;
 
         return device is { RevokedAt: null } && device.ExpiresAt > now ? device : null;
     }
@@ -181,9 +193,9 @@ internal sealed class DeviceService(
         long actingUserId,
         CancellationToken cancellationToken)
     {
-        var now = timeProvider.GetUtcNow();
+        var now = _timeProvider.GetUtcNow();
 
-        await using var unitOfWork = unitOfWorkFactory.Create();
+        await using var unitOfWork = _unitOfWorkFactory.Create();
         if (await unitOfWork.Memberships.FindAsync(organizationId, actingUserId, cancellationToken) is null)
         {
             return null;
@@ -201,7 +213,7 @@ internal sealed class DeviceService(
         var code = await CreateUnusedCodeAsync(unitOfWork, now.UtcDateTime, cancellationToken);
         var expiresAt = now.Add(DeviceLifetimes.PairingCode);
 
-        unitOfWork.PairingCodes.Add(new PairingCode
+        unitOfWork.PairingCodes.Add(new PairingCodeEntity
         {
             OrganizationId = organizationId,
             CodeHash = DeviceTokens.Hash(code),
@@ -210,7 +222,7 @@ internal sealed class DeviceService(
         });
         await unitOfWork.SaveChangesAsync(cancellationToken);
 
-        return new PairingCodeInfo(code, expiresAt, links.Build(PairingPath, ("code", code)));
+        return new PairingCodeInfo(code, expiresAt, _links.Build(PairingPath, ("code", code)));
     }
 
     /// <summary>Six digits that no other family's open code uses right now.</summary>
@@ -238,6 +250,6 @@ internal sealed class DeviceService(
             return DefaultDeviceName;
         }
 
-        return trimmed.Length > Device.NameMaxLength ? trimmed[..Device.NameMaxLength] : trimmed;
+        return trimmed.Length > DeviceEntity.NameMaxLength ? trimmed[..DeviceEntity.NameMaxLength] : trimmed;
     }
 }

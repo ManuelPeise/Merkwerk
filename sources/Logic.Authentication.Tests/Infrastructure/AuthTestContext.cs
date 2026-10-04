@@ -2,14 +2,14 @@ using Data.Accessor.DI;
 using Data.Database.Abstractions;
 using Data.Database.Entities.Identity;
 using Logic.Authentication.DI;
-using Logic.Notifications;
 using Logic.Notifications.DI;
+using Logic.Shared.Interfaces;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
-using Web.Core.Bundels;
+using Web.Core.Bundles;
 
 namespace Logic.Authentication.Tests.Infrastructure;
 
@@ -78,12 +78,12 @@ public sealed class AuthTestContext
     });
 
     /// <summary>Creates an adult with a unique e-mail address and returns it.</summary>
-    public async Task<User> CreateUserAsync(string password = "correct-horse-battery", bool emailConfirmed = true)
+    public async Task<UserEntity> CreateUserAsync(string password = "correct-horse-battery", bool emailConfirmed = true)
     {
         var email = $"{Guid.NewGuid():N}@example.org";
-        var user = new User { UserName = email, Email = email, EmailConfirmed = emailConfirmed, DisplayName = "Anna" };
+        var user = new UserEntity { UserName = email, Email = email, EmailConfirmed = emailConfirmed, DisplayName = "Anna" };
 
-        await RunAsync<UserManager<User>, bool>(async userManager =>
+        await RunAsync<UserManager<UserEntity>, bool>(async userManager =>
         {
             var result = await userManager.CreateAsync(user, password);
             Assert.True(result.Succeeded, string.Join(", ", result.Errors.Select(e => e.Description)));
@@ -93,8 +93,8 @@ public sealed class AuthTestContext
         return user;
     }
 
-    public Task<User?> FindUserAsync(long id) =>
-        RunAsync<UserManager<User>, User?>(userManager => userManager.FindByIdAsync(id.ToString()));
+    public Task<UserEntity?> FindUserAsync(long id) =>
+        RunAsync<UserManager<UserEntity>, UserEntity?>(userManager => userManager.FindByIdAsync(id.ToString()));
 
     private async Task<TResult> RunAsync<TService, TResult>(Func<TService, Task<TResult>> action)
         where TService : notnull

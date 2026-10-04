@@ -1,5 +1,6 @@
-using Logic.Authentication.Sessions;
 using Logic.Authentication.Tests.Infrastructure;
+using Shared.Enums;
+using Shared.Models.Authentication;
 
 namespace Logic.Authentication.Tests;
 

@@ -6,6 +6,8 @@ using Logic.Notifications.Rendering;
 using Logic.Notifications.Smtp;
 using Microsoft.Extensions.Logging.Abstractions;
 using Microsoft.Extensions.Options;
+using Shared.Enums;
+using Shared.Models.Notifications;
 
 namespace Logic.Notifications.Tests;
 

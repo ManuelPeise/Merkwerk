@@ -1,22 +1,39 @@
 using Data.Accessor.Abstractions;
 using Data.Database.Entities.Identity;
 using Data.Database.Entities.Organizations;
-using Logic.Authentication;
-using Logic.Authentication.Accounts;
+using Logic.Shared.Interfaces;
 using Microsoft.Extensions.Logging;
+using Shared.Enums;
+using Shared.Models.Authentication;
+using Shared.Models.Organizations;
 
 namespace Logic.Organizations.Setup;
 
-internal sealed partial class SetupService(
-    IUnitOfWorkFactory unitOfWorkFactory,
-    IAccountService accounts,
-    IAuthSessionService sessions,
-    SetupLock setupLock,
-    ILogger<SetupService> logger) : ISetupService
+internal sealed partial class SetupService : ISetupService
 {
+    private readonly IUnitOfWorkFactory _unitOfWorkFactory;
+    private readonly IAccountService _accounts;
+    private readonly IAuthSessionService _sessions;
+    private readonly SetupLock _setupLock;
+    private readonly ILogger<SetupService> _logger;
+
+    public SetupService(
+        IUnitOfWorkFactory unitOfWorkFactory,
+        IAccountService accounts,
+        IAuthSessionService sessions,
+        SetupLock setupLock,
+        ILogger<SetupService> logger)
+    {
+        _unitOfWorkFactory = unitOfWorkFactory;
+        _accounts = accounts;
+        _sessions = sessions;
+        _setupLock = setupLock;
+        _logger = logger;
+    }
+
     public async Task<bool> IsSetupRequiredAsync(CancellationToken cancellationToken)
     {
-        await using var unitOfWork = unitOfWorkFactory.Create();
+        await using var unitOfWork = _unitOfWorkFactory.Create();
         return !await unitOfWork.Organizations.AnyAsync(cancellationToken);
     }
 
@@ -28,7 +45,7 @@ internal sealed partial class SetupService(
             return new SetupResult(SetupStatus.Invalid, errors);
         }
 
-        await setupLock.Semaphore.WaitAsync(cancellationToken);
+        await _setupLock.Semaphore.WaitAsync(cancellationToken);
         try
         {
             if (!await IsSetupRequiredAsync(cancellationToken))
@@ -36,7 +53,7 @@ internal sealed partial class SetupService(
                 return new SetupResult(SetupStatus.AlreadyDone, Empty);
             }
 
-            var account = await accounts.CreateAccountAsync(
+            var account = await _accounts.CreateAccountAsync(
                 new NewAccount(request.Email.Trim(), request.DisplayName.Trim(), request.Password, EmailConfirmed: true,
                     PrivacyPolicy.CurrentVersion),
                 cancellationToken);
@@ -56,16 +73,16 @@ internal sealed partial class SetupService(
             catch
             {
                 // Without a family the account would be orphaned and block a second attempt with the same address.
-                await accounts.DeleteAccountAsync(userId, CancellationToken.None);
+                await _accounts.DeleteAccountAsync(userId, CancellationToken.None);
                 throw;
             }
 
             LogInitialized(userId);
-            return new SetupResult(SetupStatus.Success, Empty, await sessions.SignInAsync(userId, cancellationToken));
+            return new SetupResult(SetupStatus.Success, Empty, await _sessions.SignInAsync(userId, cancellationToken));
         }
         finally
         {
-            setupLock.Semaphore.Release();
+            _setupLock.Semaphore.Release();
         }
     }
 
@@ -74,10 +91,10 @@ internal sealed partial class SetupService(
     private async Task CreateFamilyAsync(string familyName, long ownerUserId, CancellationToken cancellationToken)
     {
         // One save = one transaction: a family saved without its owner would block the setup for good.
-        await using var unitOfWork = unitOfWorkFactory.Create();
-        var organization = new Organization { Name = familyName };
+        await using var unitOfWork = _unitOfWorkFactory.Create();
+        var organization = new OrganizationEntity { Name = familyName };
         unitOfWork.Organizations.Add(organization);
-        unitOfWork.Memberships.Add(new Membership
+        unitOfWork.Memberships.Add(new MembershipEntity
         {
             Organization = organization,
             UserId = ownerUserId,
@@ -91,14 +108,14 @@ internal sealed partial class SetupService(
     {
         var errors = new Dictionary<string, string[]>();
 
-        if (string.IsNullOrWhiteSpace(request.FamilyName) || request.FamilyName.Trim().Length > Organization.NameMaxLength)
+        if (string.IsNullOrWhiteSpace(request.FamilyName) || request.FamilyName.Trim().Length > OrganizationEntity.NameMaxLength)
         {
-            errors["familyName"] = [$"Required, at most {Organization.NameMaxLength} characters."];
+            errors["familyName"] = [$"Required, at most {OrganizationEntity.NameMaxLength} characters."];
         }
 
-        if (string.IsNullOrWhiteSpace(request.DisplayName) || request.DisplayName.Trim().Length > User.DisplayNameMaxLength)
+        if (string.IsNullOrWhiteSpace(request.DisplayName) || request.DisplayName.Trim().Length > UserEntity.DisplayNameMaxLength)
         {
-            errors["displayName"] = [$"Required, at most {User.DisplayNameMaxLength} characters."];
+            errors["displayName"] = [$"Required, at most {UserEntity.DisplayNameMaxLength} characters."];
         }
 
         if (!request.PrivacyAccepted)

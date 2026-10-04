@@ -1,7 +1,8 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
+  <!-- Service interfaces (Logic.Shared.Interfaces, LP-164) speak only Shared models and enums. -->
   <ItemGroup>
-    <Folder Include="Interfaces\" />
+    <ProjectReference Include="..\Shared\Shared.csproj" />
   </ItemGroup>
 
   <ItemGroup>

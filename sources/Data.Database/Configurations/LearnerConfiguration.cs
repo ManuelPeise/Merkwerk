@@ -5,13 +5,13 @@ using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
 namespace Data.Database.Configurations;
 
-internal sealed class LearnerConfiguration : IEntityTypeConfiguration<Learner>
+internal sealed class LearnerConfiguration : IEntityTypeConfiguration<LearnerEntity>
 {
-    public void Configure(EntityTypeBuilder<Learner> builder)
+    public void Configure(EntityTypeBuilder<LearnerEntity> builder)
     {
         builder.ToTable("Learners");
-        builder.Property(l => l.DisplayName).HasMaxLength(Learner.DisplayNameMaxLength).IsRequired();
-        builder.Property(l => l.AvatarId).HasMaxLength(Learner.AvatarIdMaxLength).IsRequired();
-        builder.HasOne<Organization>().WithMany().HasForeignKey(l => l.OrganizationId).OnDelete(DeleteBehavior.Cascade);
+        builder.Property(l => l.DisplayName).HasMaxLength(LearnerEntity.DisplayNameMaxLength).IsRequired();
+        builder.Property(l => l.AvatarId).HasMaxLength(LearnerEntity.AvatarIdMaxLength).IsRequired();
+        builder.HasOne<OrganizationEntity>().WithMany().HasForeignKey(l => l.OrganizationId).OnDelete(DeleteBehavior.Cascade);
     }
 }

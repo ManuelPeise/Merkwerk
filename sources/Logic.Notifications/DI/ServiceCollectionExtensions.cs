@@ -2,6 +2,7 @@ using Logic.Notifications.Formatting;
 using Logic.Notifications.Links;
 using Logic.Notifications.Rendering;
 using Logic.Notifications.Smtp;
+using Logic.Shared.Interfaces;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 

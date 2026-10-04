@@ -5,10 +5,14 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Data.Accessor.Repositories;
 
-internal sealed class PairingCodeRepository(MerkwerkDbContext context)
-    : EntityRepository<PairingCode>(context), IPairingCodeRepository
+internal sealed class PairingCodeRepository : EntityRepository<PairingCodeEntity>, IPairingCodeRepository
 {
-    public Task<PairingCode?> FindUsableByHashAsync(string codeHash, DateTime now, CancellationToken cancellationToken = default) =>
+    public PairingCodeRepository(MerkwerkDbContext context)
+        : base(context)
+    {
+    }
+
+    public Task<PairingCodeEntity?> FindUsableByHashAsync(string codeHash, DateTime now, CancellationToken cancellationToken = default) =>
         // IgnoreQueryFilters: the device is not part of a family yet (AGENTS.md §5, documented exception).
         Set.IgnoreQueryFilters()
             .Where(c => c.CodeHash == codeHash && c.UsedAt == null && c.RevokedAt == null && c.ExpiresAt > now)

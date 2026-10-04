@@ -2,6 +2,7 @@ using Logic.Organizations.Invitations;
 using Logic.Organizations.Learners;
 using Logic.Organizations.Members;
 using Logic.Organizations.Setup;
+using Logic.Shared.Interfaces;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 

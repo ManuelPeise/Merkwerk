@@ -1,6 +1,8 @@
-using Data.Database.Entities.Organizations;
 using Logic.Organizations.Learners;
 using Logic.Organizations.Tests.Infrastructure;
+using Logic.Shared.Interfaces;
+using Shared.Enums;
+using Shared.Models.Organizations;
 
 namespace Logic.Organizations.Tests;
 

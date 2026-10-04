@@ -17,7 +17,7 @@ import { useTranslation } from 'src/hooks/useTranslation';
 import { devicesApi } from 'src/lib/api/devices/devicesApi';
 import type { IDevice } from 'src/lib/api/devices/devicesTypes';
 import type { NotificationKey } from 'src/lib/translations/translationKeys';
-import ConfirmDialog from 'src/pages/familyPage/components/ConfirmDialog';
+import ConfirmDialog from 'src/components/feedback/ConfirmDialog';
 
 type Feedback = { severity: 'success' | 'error'; key: NotificationKey };
 

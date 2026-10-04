@@ -1,24 +1,35 @@
 using Data.Accessor.Abstractions;
 using Data.Database.Entities.Learners;
-using Logic.Organizations.Members;
+using Logic.Shared.Interfaces;
 using Microsoft.EntityFrameworkCore;
+using Shared.Enums;
+using Shared.Models.Organizations;
 
 namespace Logic.Organizations.Learners;
 
-internal sealed class LearnerService(IUnitOfWorkFactory unitOfWorkFactory, IMemberService members) : ILearnerService
+internal sealed class LearnerService : ILearnerService
 {
+    private readonly IUnitOfWorkFactory _unitOfWorkFactory;
+    private readonly IMemberService _members;
+
+    public LearnerService(IUnitOfWorkFactory unitOfWorkFactory, IMemberService members)
+    {
+        _unitOfWorkFactory = unitOfWorkFactory;
+        _members = members;
+    }
+
     public async Task<IReadOnlyList<LearnerInfo>?> ListAsync(
         long organizationId,
         long actingUserId,
         CancellationToken cancellationToken)
     {
-        if (!await members.IsMemberAsync(organizationId, actingUserId, cancellationToken))
+        if (!await _members.IsMemberAsync(organizationId, actingUserId, cancellationToken))
         {
             return null;
         }
 
-        await using var unitOfWork = unitOfWorkFactory.Create();
-        return await unitOfWork.Repository<Learner>().Query()
+        await using var unitOfWork = _unitOfWorkFactory.Create();
+        return await unitOfWork.Repository<LearnerEntity>().Query()
             .Where(l => l.OrganizationId == organizationId)
             .OrderBy(l => l.DisplayName)
             .Select(l => new LearnerInfo(l.Id, l.DisplayName, l.Grade, l.AvatarId))
@@ -31,7 +42,7 @@ internal sealed class LearnerService(IUnitOfWorkFactory unitOfWorkFactory, IMemb
         LearnerInput input,
         CancellationToken cancellationToken)
     {
-        if (!await members.IsAdminAsync(organizationId, actingUserId, cancellationToken))
+        if (!await _members.IsAdminAsync(organizationId, actingUserId, cancellationToken))
         {
             return new LearnerChangeResult(LearnerChangeStatus.NotFound);
         }
@@ -42,8 +53,8 @@ internal sealed class LearnerService(IUnitOfWorkFactory unitOfWorkFactory, IMemb
             return new LearnerChangeResult(LearnerChangeStatus.Invalid, Errors: errors);
         }
 
-        await using var unitOfWork = unitOfWorkFactory.Create();
-        var learners = unitOfWork.Repository<Learner>();
+        await using var unitOfWork = _unitOfWorkFactory.Create();
+        var learners = unitOfWork.Repository<LearnerEntity>();
         var count = await learners.Query().CountAsync(l => l.OrganizationId == organizationId, cancellationToken);
 
         if (count >= LearnerRules.MaxPerOrganization)
@@ -51,7 +62,7 @@ internal sealed class LearnerService(IUnitOfWorkFactory unitOfWorkFactory, IMemb
             return new LearnerChangeResult(LearnerChangeStatus.LimitReached);
         }
 
-        var learner = new Learner { OrganizationId = organizationId };
+        var learner = new LearnerEntity { OrganizationId = organizationId };
         Apply(learner, input);
         learners.Add(learner);
         await unitOfWork.SaveChangesAsync(cancellationToken);
@@ -66,7 +77,7 @@ internal sealed class LearnerService(IUnitOfWorkFactory unitOfWorkFactory, IMemb
         LearnerInput input,
         CancellationToken cancellationToken)
     {
-        if (!await members.IsAdminAsync(organizationId, actingUserId, cancellationToken))
+        if (!await _members.IsAdminAsync(organizationId, actingUserId, cancellationToken))
         {
             return new LearnerChangeResult(LearnerChangeStatus.NotFound);
         }
@@ -77,8 +88,8 @@ internal sealed class LearnerService(IUnitOfWorkFactory unitOfWorkFactory, IMemb
             return new LearnerChangeResult(LearnerChangeStatus.Invalid, Errors: errors);
         }
 
-        await using var unitOfWork = unitOfWorkFactory.Create();
-        var learner = await unitOfWork.Repository<Learner>().GetByIdAsync(learnerId, cancellationToken);
+        await using var unitOfWork = _unitOfWorkFactory.Create();
+        var learner = await unitOfWork.Repository<LearnerEntity>().GetByIdAsync(learnerId, cancellationToken);
 
         // Explicit tenant check in addition to the query filter (ADR 007).
         if (learner is null || learner.OrganizationId != organizationId)
@@ -97,13 +108,13 @@ internal sealed class LearnerService(IUnitOfWorkFactory unitOfWorkFactory, IMemb
         long learnerId,
         CancellationToken cancellationToken)
     {
-        if (!await members.IsAdminAsync(organizationId, actingUserId, cancellationToken))
+        if (!await _members.IsAdminAsync(organizationId, actingUserId, cancellationToken))
         {
             return LearnerChangeStatus.NotFound;
         }
 
-        await using var unitOfWork = unitOfWorkFactory.Create();
-        var learners = unitOfWork.Repository<Learner>();
+        await using var unitOfWork = _unitOfWorkFactory.Create();
+        var learners = unitOfWork.Repository<LearnerEntity>();
         var learner = await learners.GetByIdAsync(learnerId, cancellationToken);
 
         if (learner is null || learner.OrganizationId != organizationId)
@@ -116,14 +127,14 @@ internal sealed class LearnerService(IUnitOfWorkFactory unitOfWorkFactory, IMemb
         return LearnerChangeStatus.Success;
     }
 
-    private static void Apply(Learner learner, LearnerInput input)
+    private static void Apply(LearnerEntity learner, LearnerInput input)
     {
         learner.DisplayName = input.DisplayName.Trim();
         learner.Grade = input.Grade;
         learner.AvatarId = input.AvatarId;
     }
 
-    private static LearnerInfo ToInfo(Learner learner) =>
+    private static LearnerInfo ToInfo(LearnerEntity learner) =>
         new(learner.Id, learner.DisplayName, learner.Grade, learner.AvatarId);
 
     private static Dictionary<string, string[]> Validate(LearnerInput input)
@@ -131,9 +142,9 @@ internal sealed class LearnerService(IUnitOfWorkFactory unitOfWorkFactory, IMemb
         var errors = new Dictionary<string, string[]>();
         var name = input.DisplayName?.Trim() ?? string.Empty;
 
-        if (name.Length == 0 || name.Length > Learner.DisplayNameMaxLength)
+        if (name.Length == 0 || name.Length > LearnerEntity.DisplayNameMaxLength)
         {
-            errors["displayName"] = [$"Required, at most {Learner.DisplayNameMaxLength} characters."];
+            errors["displayName"] = [$"Required, at most {LearnerEntity.DisplayNameMaxLength} characters."];
         }
 
         if (input.Grade is < LearnerRules.MinGrade or > LearnerRules.MaxGrade)

@@ -1,5 +1,5 @@
 using System.Text.Json.Serialization;
-using Logic.Authentication;
+using Shared.Models.Authentication;
 
 namespace Web.Core.Services.ApiControllers.Authentication.Dtos;
 

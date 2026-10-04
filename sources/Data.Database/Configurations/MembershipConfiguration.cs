@@ -5,15 +5,15 @@ using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
 namespace Data.Database.Configurations;
 
-internal sealed class MembershipConfiguration : IEntityTypeConfiguration<Membership>
+internal sealed class MembershipConfiguration : IEntityTypeConfiguration<MembershipEntity>
 {
-    public void Configure(EntityTypeBuilder<Membership> builder)
+    public void Configure(EntityTypeBuilder<MembershipEntity> builder)
     {
         builder.ToTable("Memberships");
         builder.Property(m => m.Role).HasConversion<string>().HasMaxLength(20);
         builder.HasIndex(m => new { m.OrganizationId, m.UserId }).IsUnique();
         builder.HasIndex(m => m.UserId);
         builder.HasOne(m => m.Organization).WithMany().HasForeignKey(m => m.OrganizationId).OnDelete(DeleteBehavior.Cascade);
-        builder.HasOne<User>().WithMany().HasForeignKey(m => m.UserId).OnDelete(DeleteBehavior.Cascade);
+        builder.HasOne<UserEntity>().WithMany().HasForeignKey(m => m.UserId).OnDelete(DeleteBehavior.Cascade);
     }
 }

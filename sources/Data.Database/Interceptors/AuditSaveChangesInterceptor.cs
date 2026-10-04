@@ -6,8 +6,17 @@ using Microsoft.EntityFrameworkCore.Diagnostics;
 namespace Data.Database.Interceptors;
 
 /// <summary>Fills the audit fields of every <see cref="AEntityBase"/> on save (ADR 011).</summary>
-public sealed class AuditSaveChangesInterceptor(ICurrentUser currentUser, TimeProvider timeProvider) : SaveChangesInterceptor
+public sealed class AuditSaveChangesInterceptor : SaveChangesInterceptor
 {
+    private readonly ICurrentUser _currentUser;
+    private readonly TimeProvider _timeProvider;
+
+    public AuditSaveChangesInterceptor(ICurrentUser currentUser, TimeProvider timeProvider)
+    {
+        _currentUser = currentUser;
+        _timeProvider = timeProvider;
+    }
+
     public override InterceptionResult<int> SavingChanges(DbContextEventData eventData, InterceptionResult<int> result)
     {
         ApplyAudit(eventData.Context);
@@ -30,8 +39,8 @@ public sealed class AuditSaveChangesInterceptor(ICurrentUser currentUser, TimePr
             return;
         }
 
-        var now = timeProvider.GetUtcNow().UtcDateTime;
-        var actor = currentUser.Actor;
+        var now = _timeProvider.GetUtcNow().UtcDateTime;
+        var actor = _currentUser.Actor;
 
         foreach (var entry in context.ChangeTracker.Entries<AEntityBase>())
         {

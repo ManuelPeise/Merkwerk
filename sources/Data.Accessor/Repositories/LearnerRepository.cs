@@ -5,10 +5,14 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Data.Accessor.Repositories;
 
-internal sealed class LearnerRepository(MerkwerkDbContext context)
-    : EntityRepository<Learner>(context), ILearnerRepository
+internal sealed class LearnerRepository : EntityRepository<LearnerEntity>, ILearnerRepository
 {
-    public async Task<IReadOnlyList<Learner>> ListForDeviceAsync(long organizationId, CancellationToken cancellationToken = default) =>
+    public LearnerRepository(MerkwerkDbContext context)
+        : base(context)
+    {
+    }
+
+    public async Task<IReadOnlyList<LearnerEntity>> ListForDeviceAsync(long organizationId, CancellationToken cancellationToken = default) =>
         // IgnoreQueryFilters: the device request carries no organization claim; the family is filtered explicitly
         // (AGENTS.md §5, documented exception).
         await Set.IgnoreQueryFilters()
@@ -17,7 +21,7 @@ internal sealed class LearnerRepository(MerkwerkDbContext context)
             .OrderBy(l => l.DisplayName)
             .ToListAsync(cancellationToken);
 
-    public Task<Learner?> FindForDeviceAsync(long organizationId, long learnerId, CancellationToken cancellationToken = default) =>
+    public Task<LearnerEntity?> FindForDeviceAsync(long organizationId, long learnerId, CancellationToken cancellationToken = default) =>
         Set.IgnoreQueryFilters()
             .AsNoTracking()
             .FirstOrDefaultAsync(l => l.Id == learnerId && l.OrganizationId == organizationId, cancellationToken);

@@ -1,14 +1,23 @@
-using Logic.Organizations.Learners;
+using Logic.Shared.Interfaces;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Shared.Enums;
+using Shared.Models.Organizations;
 using Web.Core.Services.ApiControllers.Learners.Dtos;
 using Web.Core.Services.Authorization;
 
 namespace Web.Core.Services.ApiControllers.Learners;
 
 /// <summary>Child profiles of the family (LP-105): everyone reads, admins change. Max. 10 per family.</summary>
-public sealed class LearnersController(ILearnerService learnerService) : ApiControllerBase
+public sealed class LearnersController : ApiControllerBase
 {
+    private readonly ILearnerService _learnerService;
+
+    public LearnersController(ILearnerService learnerService)
+    {
+        _learnerService = learnerService;
+    }
+
     /// <summary>GET /api/v1/learners/list</summary>
     [Authorize(Policy = AuthorizationPolicies.Member)]
     [HttpGet]
@@ -17,7 +26,7 @@ public sealed class LearnersController(ILearnerService learnerService) : ApiCont
     public async Task<ActionResult<IReadOnlyList<LearnerDto>>> ListAsync(CancellationToken cancellationToken)
     {
         if (CurrentOrganizationId is not { } organizationId || CurrentUserId is not { } userId
-            || await learnerService.ListAsync(organizationId, userId, cancellationToken) is not { } learners)
+            || await _learnerService.ListAsync(organizationId, userId, cancellationToken) is not { } learners)
         {
             return Forbid();
         }
@@ -38,7 +47,7 @@ public sealed class LearnersController(ILearnerService learnerService) : ApiCont
             return Forbid();
         }
 
-        var result = await learnerService.CreateAsync(
+        var result = await _learnerService.CreateAsync(
             organizationId, userId, new LearnerInput(request.DisplayName, request.Grade, request.AvatarId), cancellationToken);
 
         return ToResponse(result);
@@ -57,7 +66,7 @@ public sealed class LearnersController(ILearnerService learnerService) : ApiCont
             return Forbid();
         }
 
-        var result = await learnerService.UpdateAsync(
+        var result = await _learnerService.UpdateAsync(
             organizationId,
             userId,
             request.Id,
@@ -79,7 +88,7 @@ public sealed class LearnersController(ILearnerService learnerService) : ApiCont
             return Forbid();
         }
 
-        var status = await learnerService.DeleteAsync(organizationId, userId, request.Id, cancellationToken);
+        var status = await _learnerService.DeleteAsync(organizationId, userId, request.Id, cancellationToken);
         return status == LearnerChangeStatus.Success ? NoContent() : NotFound();
     }
 

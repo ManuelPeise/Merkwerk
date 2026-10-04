@@ -1,5 +1,5 @@
 using System.ComponentModel.DataAnnotations;
-using Logic.Organizations.Learners;
+using Shared.Models.Organizations;
 
 namespace Web.Core.Services.ApiControllers.Learners.Dtos;
 

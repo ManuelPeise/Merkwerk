@@ -11,8 +11,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Data.Database.Migrations
 {
     [DbContext(typeof(MerkwerkDbContext))]
-    [Migration("20261003202537_AddOrganizationsMembershipsLearners")]
-    partial class AddOrganizationsMembershipsLearners
+    [Migration("20261004064854_InitializeDatabase")]
+    partial class InitializeDatabase
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -22,7 +22,176 @@ namespace Data.Database.Migrations
                 .HasAnnotation("ProductVersion", "10.0.12")
                 .HasAnnotation("Relational:MaxIdentifierLength", 64);
 
-            modelBuilder.Entity("Data.Database.Entities.Identity.RefreshToken", b =>
+            modelBuilder.Entity("Data.Database.Entities.Devices.DeviceEntity", b =>
+                {
+                    b.Property<long>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bigint");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime(6)");
+
+                    b.Property<string>("CreatedBy")
+                        .IsRequired()
+                        .HasMaxLength(64)
+                        .HasColumnType("varchar(64)");
+
+                    b.Property<DateTime>("ExpiresAt")
+                        .HasColumnType("datetime(6)");
+
+                    b.Property<DateTime?>("LastSeenAt")
+                        .HasColumnType("datetime(6)");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("varchar(50)");
+
+                    b.Property<long>("OrganizationId")
+                        .HasColumnType("bigint");
+
+                    b.Property<long>("PairedByUserId")
+                        .HasColumnType("bigint");
+
+                    b.Property<DateTime?>("RevokedAt")
+                        .HasColumnType("datetime(6)");
+
+                    b.Property<string>("TokenHash")
+                        .IsRequired()
+                        .HasMaxLength(64)
+                        .HasColumnType("char(64)")
+                        .IsFixedLength();
+
+                    b.Property<DateTime>("UpdatedAt")
+                        .HasColumnType("datetime(6)");
+
+                    b.Property<string>("UpdatedBy")
+                        .IsRequired()
+                        .HasMaxLength(64)
+                        .HasColumnType("varchar(64)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("OrganizationId");
+
+                    b.HasIndex("TokenHash")
+                        .IsUnique();
+
+                    b.ToTable("Devices", (string)null);
+                });
+
+            modelBuilder.Entity("Data.Database.Entities.Devices.LearnerSessionEntity", b =>
+                {
+                    b.Property<long>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bigint");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime(6)");
+
+                    b.Property<string>("CreatedBy")
+                        .IsRequired()
+                        .HasMaxLength(64)
+                        .HasColumnType("varchar(64)");
+
+                    b.Property<long>("DeviceId")
+                        .HasColumnType("bigint");
+
+                    b.Property<DateTime>("ExpiresAt")
+                        .HasColumnType("datetime(6)");
+
+                    b.Property<long>("LearnerId")
+                        .HasColumnType("bigint");
+
+                    b.Property<long>("OrganizationId")
+                        .HasColumnType("bigint");
+
+                    b.Property<DateTime?>("RevokedAt")
+                        .HasColumnType("datetime(6)");
+
+                    b.Property<string>("TokenHash")
+                        .IsRequired()
+                        .HasMaxLength(64)
+                        .HasColumnType("char(64)")
+                        .IsFixedLength();
+
+                    b.Property<DateTime>("UpdatedAt")
+                        .HasColumnType("datetime(6)");
+
+                    b.Property<string>("UpdatedBy")
+                        .IsRequired()
+                        .HasMaxLength(64)
+                        .HasColumnType("varchar(64)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("DeviceId");
+
+                    b.HasIndex("LearnerId");
+
+                    b.HasIndex("OrganizationId");
+
+                    b.HasIndex("TokenHash")
+                        .IsUnique();
+
+                    b.ToTable("LearnerSessions", (string)null);
+                });
+
+            modelBuilder.Entity("Data.Database.Entities.Devices.PairingCodeEntity", b =>
+                {
+                    b.Property<long>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bigint");
+
+                    b.Property<string>("CodeHash")
+                        .IsRequired()
+                        .HasMaxLength(64)
+                        .HasColumnType("char(64)")
+                        .IsFixedLength();
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime(6)");
+
+                    b.Property<string>("CreatedBy")
+                        .IsRequired()
+                        .HasMaxLength(64)
+                        .HasColumnType("varchar(64)");
+
+                    b.Property<long>("CreatedByUserId")
+                        .HasColumnType("bigint");
+
+                    b.Property<DateTime>("ExpiresAt")
+                        .HasColumnType("datetime(6)");
+
+                    b.Property<long>("OrganizationId")
+                        .HasColumnType("bigint");
+
+                    b.Property<DateTime?>("RevokedAt")
+                        .IsConcurrencyToken()
+                        .HasColumnType("datetime(6)");
+
+                    b.Property<DateTime>("UpdatedAt")
+                        .HasColumnType("datetime(6)");
+
+                    b.Property<string>("UpdatedBy")
+                        .IsRequired()
+                        .HasMaxLength(64)
+                        .HasColumnType("varchar(64)");
+
+                    b.Property<DateTime?>("UsedAt")
+                        .IsConcurrencyToken()
+                        .HasColumnType("datetime(6)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("CodeHash");
+
+                    b.HasIndex("OrganizationId");
+
+                    b.ToTable("PairingCodes", (string)null);
+                });
+
+            modelBuilder.Entity("Data.Database.Entities.Identity.RefreshTokenEntity", b =>
                 {
                     b.Property<long>("Id")
                         .ValueGeneratedOnAdd()
@@ -75,7 +244,7 @@ namespace Data.Database.Migrations
                     b.ToTable("RefreshTokens", (string)null);
                 });
 
-            modelBuilder.Entity("Data.Database.Entities.Identity.User", b =>
+            modelBuilder.Entity("Data.Database.Entities.Identity.UserEntity", b =>
                 {
                     b.Property<long>("Id")
                         .ValueGeneratedOnAdd()
@@ -158,7 +327,7 @@ namespace Data.Database.Migrations
                     b.ToTable("Users", (string)null);
                 });
 
-            modelBuilder.Entity("Data.Database.Entities.Learners.Learner", b =>
+            modelBuilder.Entity("Data.Database.Entities.Learners.LearnerEntity", b =>
                 {
                     b.Property<long>("Id")
                         .ValueGeneratedOnAdd()
@@ -203,7 +372,7 @@ namespace Data.Database.Migrations
                     b.ToTable("Learners", (string)null);
                 });
 
-            modelBuilder.Entity("Data.Database.Entities.Organizations.Invitation", b =>
+            modelBuilder.Entity("Data.Database.Entities.Organizations.InvitationEntity", b =>
                 {
                     b.Property<long>("Id")
                         .ValueGeneratedOnAdd()
@@ -273,7 +442,7 @@ namespace Data.Database.Migrations
                     b.ToTable("Invitations", (string)null);
                 });
 
-            modelBuilder.Entity("Data.Database.Entities.Organizations.Membership", b =>
+            modelBuilder.Entity("Data.Database.Entities.Organizations.MembershipEntity", b =>
                 {
                     b.Property<long>("Id")
                         .ValueGeneratedOnAdd()
@@ -321,7 +490,7 @@ namespace Data.Database.Migrations
                     b.ToTable("Memberships", (string)null);
                 });
 
-            modelBuilder.Entity("Data.Database.Entities.Organizations.Organization", b =>
+            modelBuilder.Entity("Data.Database.Entities.Organizations.OrganizationEntity", b =>
                 {
                     b.Property<long>("Id")
                         .ValueGeneratedOnAdd()
@@ -353,7 +522,7 @@ namespace Data.Database.Migrations
                     b.ToTable("Organizations", (string)null);
                 });
 
-            modelBuilder.Entity("Data.Database.Entities.Subjects.Subject", b =>
+            modelBuilder.Entity("Data.Database.Entities.Subjects.SubjectEntity", b =>
                 {
                     b.Property<long>("Id")
                         .ValueGeneratedOnAdd()
@@ -507,42 +676,85 @@ namespace Data.Database.Migrations
                     b.ToTable("UserTokens", (string)null);
                 });
 
-            modelBuilder.Entity("Data.Database.Entities.Identity.RefreshToken", b =>
+            modelBuilder.Entity("Data.Database.Entities.Devices.DeviceEntity", b =>
                 {
-                    b.HasOne("Data.Database.Entities.Identity.User", null)
+                    b.HasOne("Data.Database.Entities.Organizations.OrganizationEntity", null)
+                        .WithMany()
+                        .HasForeignKey("OrganizationId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                });
+
+            modelBuilder.Entity("Data.Database.Entities.Devices.LearnerSessionEntity", b =>
+                {
+                    b.HasOne("Data.Database.Entities.Devices.DeviceEntity", "Device")
+                        .WithMany()
+                        .HasForeignKey("DeviceId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("Data.Database.Entities.Learners.LearnerEntity", "Learner")
+                        .WithMany()
+                        .HasForeignKey("LearnerId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("Data.Database.Entities.Organizations.OrganizationEntity", null)
+                        .WithMany()
+                        .HasForeignKey("OrganizationId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Device");
+
+                    b.Navigation("Learner");
+                });
+
+            modelBuilder.Entity("Data.Database.Entities.Devices.PairingCodeEntity", b =>
+                {
+                    b.HasOne("Data.Database.Entities.Organizations.OrganizationEntity", null)
+                        .WithMany()
+                        .HasForeignKey("OrganizationId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                });
+
+            modelBuilder.Entity("Data.Database.Entities.Identity.RefreshTokenEntity", b =>
+                {
+                    b.HasOne("Data.Database.Entities.Identity.UserEntity", null)
                         .WithMany()
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
                 });
 
-            modelBuilder.Entity("Data.Database.Entities.Learners.Learner", b =>
+            modelBuilder.Entity("Data.Database.Entities.Learners.LearnerEntity", b =>
                 {
-                    b.HasOne("Data.Database.Entities.Organizations.Organization", null)
+                    b.HasOne("Data.Database.Entities.Organizations.OrganizationEntity", null)
                         .WithMany()
                         .HasForeignKey("OrganizationId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
                 });
 
-            modelBuilder.Entity("Data.Database.Entities.Organizations.Invitation", b =>
+            modelBuilder.Entity("Data.Database.Entities.Organizations.InvitationEntity", b =>
                 {
-                    b.HasOne("Data.Database.Entities.Organizations.Organization", null)
+                    b.HasOne("Data.Database.Entities.Organizations.OrganizationEntity", null)
                         .WithMany()
                         .HasForeignKey("OrganizationId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
                 });
 
-            modelBuilder.Entity("Data.Database.Entities.Organizations.Membership", b =>
+            modelBuilder.Entity("Data.Database.Entities.Organizations.MembershipEntity", b =>
                 {
-                    b.HasOne("Data.Database.Entities.Organizations.Organization", "Organization")
+                    b.HasOne("Data.Database.Entities.Organizations.OrganizationEntity", "Organization")
                         .WithMany()
                         .HasForeignKey("OrganizationId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("Data.Database.Entities.Identity.User", null)
+                    b.HasOne("Data.Database.Entities.Identity.UserEntity", null)
                         .WithMany()
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -553,7 +765,7 @@ namespace Data.Database.Migrations
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserClaim<long>", b =>
                 {
-                    b.HasOne("Data.Database.Entities.Identity.User", null)
+                    b.HasOne("Data.Database.Entities.Identity.UserEntity", null)
                         .WithMany()
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -562,7 +774,7 @@ namespace Data.Database.Migrations
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserLogin<long>", b =>
                 {
-                    b.HasOne("Data.Database.Entities.Identity.User", null)
+                    b.HasOne("Data.Database.Entities.Identity.UserEntity", null)
                         .WithMany()
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -571,7 +783,7 @@ namespace Data.Database.Migrations
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserToken<long>", b =>
                 {
-                    b.HasOne("Data.Database.Entities.Identity.User", null)
+                    b.HasOne("Data.Database.Entities.Identity.UserEntity", null)
                         .WithMany()
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)

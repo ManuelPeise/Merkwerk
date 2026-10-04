@@ -10,7 +10,7 @@ Setup, commands and short how-tos for humans: [`README.md`](README.md).
 Single-page app for both audiences of Merkwerk:
 
 - `/admin` – adults (parents, teachers) create exercises and assign them.
-- `/ueben` – children (grades 1–4, Android tablets/phones) practise; becomes a PWA later.
+- `/practice` – children (grades 1–4, Android tablets/phones) practise; becomes a PWA later.
 
 It talks **only** to the backend `Web.Core` over `/api/v1`. No server-side rendering, no business rules that the server
 does not also enforce – the server is always authoritative (grading, permissions, tenant isolation).
@@ -54,15 +54,17 @@ src/
     input/                 Form fields (FormFieldContainer, FormTextField, FormPinField, FormCheckbox, …), buttons, ChoiceTile
     layout/                PublicLayout, AdminLayout, KidsLayout, AuthCard, HeaderBar, NavigationDrawer
       components/          Parts used only by layouts (LanguageSwitch)
-    kids/                  Children's UI: AvatarImage, ProfileTile, NumberKeypad
-    feedback/              LoadingIndicator, …
+    kids/                  Children's UI: AvatarImage, ProfileTile, NumberKeypad, DotArray, TimesTableMatrix
+    feedback/              LoadingIndicator, ConfirmDialog (shared by admin pages), …
     providers/             Context providers and their contexts (authentication, setup) – context in its own .ts file
     icons/                 AppIcons – the only place that imports @mui/icons-material
+    typography/            Text building blocks (Caption)
   hooks/                   Reusable hooks (useXyz.ts): useAuthentication, useTranslation, useForm, useReducer,
                            useSetupStatus, useSetupCompletion, useDeviceStatus
   lib/
     api/                   apiClient, StatelessApi, toApiError, getFieldErrors + one folder per backend module
-                           (<module>Api.ts, <module>Types.ts): authentication, setup, invitations, devices
+                           (<module>Api.ts, <module>Types.ts): authentication, setup, invitations, members,
+                           learners, devices
     auth/                  roles.ts (role constants), authValidation.ts (field checks for auth forms)
     theme/                 MUI theme (design direction A, LP-008)
     translations/          i18n.ts, i18next.d.ts, translationKeys.ts, resources/<lang>/<namespace>.<lang>.json
@@ -109,7 +111,7 @@ New top-level folders under `src/` only after asking.
 - MUI 9 has **no system props** on components (`<Stack alignItems=…>`, `<Box mt={2}>` fail to compile):
   layout values always go into `sx` (`<Stack spacing={2} sx={{ alignItems: 'center' }}>`).
 - Fonts are self-hosted (Andika); **no font or script CDNs**.
-- Children's area (`/ueben`):
+- Children's area (`/practice`):
     - touch targets ≥ 64×64 px;
     - little text, icons plus read-aloud;
     - feedback never by colour alone (always an icon as well);
@@ -153,7 +155,7 @@ New top-level folders under `src/` only after asking.
 - Every route belongs to exactly one layout: `PublicLayout` (no menu, language switch), `AdminLayout` (header, drawer, `adultRoles`), `KidsLayout` (large header, `roles.learner`).
 - `SetupGate` wraps the whole route tree; auth pages (login, setup, invitation, forgot/reset password, confirm e-mail) live in `PublicLayout` and render inside `AuthCard`.
 - Server field errors (`ProblemDetails.errors`) go through `getFieldErrors` to the matching field's `errorText`; alerts always use `notification…` keys.
-- Children's entry: `/practice/pair` (PublicLayout, pairing code) ? `/practice/profiles` (KidsLayout, `ProfileTile` + `AvatarImage`, avatars in `src/assets/avatars/`) ? `/practice`. `DeviceRoute` guards the last two; the child route uses `<ProtectedRoute signedOutTo={routes.practiceProfiles} />`.
+- Children's entry: `/practice/pair` (PublicLayout, pairing code) → `/practice/profiles` (KidsLayout, `ProfileTile` + `AvatarImage`, avatars in `src/assets/avatars/`) → `/practice`. `DeviceRoute` guards the last two; the child route uses `<ProtectedRoute signedOutTo={routes.practiceProfiles} />`.
 - Roles only via `src/lib/auth/roles.ts` (`roles`, `adultRoles`) – no role strings in components.
 - Navigation entries (`navigationItems.ts`) exist only for the parents' drawer; public pages have no menu.
 - Unknown paths redirect to `routes.start`.

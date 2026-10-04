@@ -13,7 +13,7 @@ interface IProps {
     onCancel: () => void;
 }
 
-/** Asks before something that cannot be undone (delete a child, remove an adult). */
+/** Asks before something that cannot be undone (delete a child, remove an adult, unpair a device). */
 const ConfirmDialog: React.FC<IProps> = (props) => {
     const { open, title, text, confirmLabel, disabled, onConfirm, onCancel } = props;
     const { getResource } = useTranslation();

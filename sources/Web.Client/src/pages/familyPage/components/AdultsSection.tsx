@@ -26,7 +26,7 @@ import { membersApi } from 'src/lib/api/members/membersApi';
 import type { IMember, OrganizationRole } from 'src/lib/api/members/membersTypes';
 import type { LabelKey, NotificationKey } from 'src/lib/translations/translationKeys';
 import { utils } from 'src/lib/utils';
-import ConfirmDialog from 'src/pages/familyPage/components/ConfirmDialog';
+import ConfirmDialog from 'src/components/feedback/ConfirmDialog';
 
 interface IProps {
     isAdmin: boolean;

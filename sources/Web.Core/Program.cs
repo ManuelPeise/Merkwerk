@@ -8,6 +8,8 @@ services.ConfigureServices(builder.Configuration);
 
 var app = builder.AddAppConfiguration();
 
+await services.EnsureDatabaseCreated();
+
 app.Run();
 
 /// <summary>Entry point, public for WebApplicationFactory in integration tests.</summary>

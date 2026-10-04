@@ -1,8 +1,0 @@
-{
-  "description": "Upper/lower case is ignored when caseSensitive is false",
-  "questionType": "free-text",
-  "payload": { "prompt": "Translate: Hund" },
-  "solution": { "accepted": ["dog"], "caseSensitive": false, "typoTolerance": 1 },
-  "response": { "text": "Dog" },
-  "expected": { "isCorrect": true, "points": 1, "maxPoints": 1, "hint": null }
-}

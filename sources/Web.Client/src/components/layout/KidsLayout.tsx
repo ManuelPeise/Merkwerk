@@ -1,4 +1,4 @@
-import React from 'react';
+﻿import React from 'react';
 import { AppBar, Box, Button, Container, Toolbar, Typography } from '@mui/material';
 import { Outlet, useNavigate } from 'react-router-dom';
 import AvatarImage from 'src/components/kids/AvatarImage';
@@ -6,6 +6,7 @@ import { SwitchAccountIcon } from 'src/components/icons/AppIcons';
 import { kidsHeaderHeight } from 'src/components/layout/layoutConstants';
 import { useAuthentication } from 'src/hooks/useAuthentication';
 import { roles } from 'src/lib/auth/roles';
+import { uiTestId } from 'src/lib/testing/uiTestId';
 import { useTranslation } from 'src/hooks/useTranslation';
 import { routes } from 'src/navigation/routes';
 
@@ -26,7 +27,10 @@ const KidsLayout: React.FC = () => {
     };
 
     return (
-        <Box sx={{ minHeight: '100dvh', display: 'flex', flexDirection: 'column' }}>
+        <Box
+            sx={{ minHeight: '100dvh', display: 'flex', flexDirection: 'column' }}
+            data-testid={uiTestId('layout-kids')}
+        >
             <AppBar
                 position="static"
                 color="inherit"
@@ -37,7 +41,12 @@ const KidsLayout: React.FC = () => {
                     {/* Without a child (profile selection) the header stays empty. */}
                     {learner && (
                         <>
-                            <AvatarImage avatarId={learner.avatarId} name={name} size={56} />
+                            <AvatarImage
+                                avatarId={learner.avatarId}
+                                name={name}
+                                size={56}
+                                uiTestId={uiTestId('kids-layout-avatar')}
+                            />
                             <Typography
                                 variant="h6"
                                 component="span"

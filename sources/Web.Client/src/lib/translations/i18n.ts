@@ -1,4 +1,4 @@
-import i18n from 'i18next';
+﻿import i18n from 'i18next';
 import { initReactI18next } from 'react-i18next';
 import commonDe from 'src/lib/translations/resources/de/common.de.json';
 import commonEn from 'src/lib/translations/resources/en/common.en.json';
@@ -14,7 +14,7 @@ export const resources = {
     en: { common: commonEn },
 } as const;
 
-/** UI preference only – no personal data (AGENTS.md §10). */
+/** UI preference only - no personal data (AGENTS.md Â§10). */
 const languageStorageKey = 'merkwerk.language';
 
 export const isSupportedLanguage = (value: string | null | undefined): value is SupportedLanguage =>
@@ -38,7 +38,7 @@ export const changeLanguage = async (language: SupportedLanguage): Promise<void>
     try {
         localStorage.setItem(languageStorageKey, language);
     } catch {
-        // Not remembered – still switch for this session.
+        // Not remembered - still switch for this session.
     }
 
     document.documentElement.lang = language;

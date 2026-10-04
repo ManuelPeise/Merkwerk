@@ -7,6 +7,7 @@ import ChoiceTile from 'src/components/input/ChoiceTile';
 import { useAuthentication } from 'src/hooks/useAuthentication';
 import { useTranslation } from 'src/hooks/useTranslation';
 import { adultRoles, roles } from 'src/lib/auth/roles';
+import { uiTestId } from 'src/lib/testing/uiTestId';
 import { routes } from 'src/navigation/routes';
 
 /** Shared entry for children and adults: signed-in users are sent on, everyone else chooses. */
@@ -15,7 +16,7 @@ const LandingPage: React.FC = () => {
     const { status, user } = useAuthentication();
 
     if (status === 'loading') {
-        return <LoadingIndicator />;
+        return <LoadingIndicator uiTestId={uiTestId('loading-landing-page')} />;
     }
 
     if (user && adultRoles.includes(user.role)) {
@@ -55,6 +56,7 @@ const LandingPage: React.FC = () => {
                     label={getResource('labelPracticeEntry')}
                     description={getResource('labelPracticeEntryDescription')}
                     to={routes.practice}
+                    uiTestId={uiTestId('landing-choice-practice')}
                 />
                 <ChoiceTile
                     icon={<AdultIcon />}
@@ -62,6 +64,7 @@ const LandingPage: React.FC = () => {
                     description={getResource('labelAdultEntryDescription')}
                     to={routes.login}
                     color="secondary"
+                    uiTestId={uiTestId('landing-choice-adult')}
                 />
             </Box>
         </Stack>

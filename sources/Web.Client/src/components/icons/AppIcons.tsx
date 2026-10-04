@@ -1,4 +1,4 @@
-// The only place that imports @mui/icons-material (AGENTS.md §3). Add icons here, use them by their app name.
+﻿// The only place that imports @mui/icons-material (AGENTS.md Â§3). Add icons here, use them by their app name.
 import AbcIconMui from '@mui/icons-material/Abc';
 import AddIconMui from '@mui/icons-material/Add';
 import AutoStoriesIconMui from '@mui/icons-material/AutoStories';
@@ -57,7 +57,7 @@ export const ResetPasswordIcon = LockResetIconMui;
 // Devices page
 export const UnpairIcon = LinkOffIconMui;
 
-// Subjects (LP-109) – keys mapped in src/lib/subjects/subjectStyles.ts
+// Subjects (LP-109) - keys mapped in src/lib/subjects/subjectStyles.ts
 export const SubjectGermanIcon = AbcIconMui;
 export const SubjectEnglishIcon = TranslateIconMui;
 export const SubjectMathIcon = CalculateIconMui;

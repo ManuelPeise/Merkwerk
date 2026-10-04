@@ -185,7 +185,19 @@ New top-level folders under `src/` only after asking.
 - Don't put personal data in `localStorage`, URLs or logs. Only UI preferences may go to `localStorage`.
 - No secrets in the client – everything in the bundle is public.
 
-## 11. Commands
+## 11. UI tests (Playwright)
+
+- Locator order: **role first** (`getByRole`), then **label** (`getByLabel`), and `data-testid` only where there is no
+  unique/stable accessible name (lists, dialogs, repeated tiles, grouped sections).
+- Test IDs are assigned **at the usage site** as kebab-case literals through `uiTestId(...)` from
+  `src/lib/testing/uiTestId.ts` (no central registry object).
+- Every reusable component used in test flows takes a **required** `uiTestId` prop (`IUiTestIdProps`) and forwards it
+  to a meaningful DOM root (`data-testid`); composite components derive sub-ids with `uiTestIdOf(base, part)`.
+- `npm run lint` also runs `scripts/check-test-ids.mjs` (kebab-case + uniqueness checks for `uiTestId(...)` literals).
+- E2E tests live under `e2e/` and use shared helpers/fixtures from `e2e/support/`.
+- Run UI smoke tests with `npm run test:e2e` (or interactive mode via `npm run test:e2e:ui`).
+
+## 12. Commands
 
 ```powershell
 cd sources\Web.Client
@@ -198,7 +210,7 @@ npm run format         # Prettier write; format:check for CI
 npm run i18n:check
 ```
 
-## 12. Definition of Done (frontend)
+## 13. Definition of Done (frontend)
 
 1. Acceptance criteria of the ticket are met.
 2. `npm run build` without errors, `npm run lint` without errors or warnings, `npm run format:check` clean.

@@ -1,7 +1,7 @@
-import type { ApiError } from 'src/lib/api/types/apiError';
+﻿import type { ApiError } from 'src/lib/api/types/apiError';
 import type { StatelessApiOptions } from 'src/lib/api/types/statelessApiOptions';
 
-/** Either data or error – requests never throw. */
+/** Either data or error - requests never throw. */
 export type StatelessApiResponse<TResponse> =
     { data: TResponse; error?: never } | { data?: never; error: ApiError };
 

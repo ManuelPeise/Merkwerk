@@ -1,4 +1,4 @@
-import React from 'react';
+﻿import React from 'react';
 import { Alert, Stack } from '@mui/material';
 import { useLocation, useNavigate, useSearchParams } from 'react-router-dom';
 import FormButton from 'src/components/input/FormButton';
@@ -7,13 +7,15 @@ import FormTextField from 'src/components/input/FormTextField';
 import AuthCard from 'src/components/layout/AuthCard';
 import { useTranslation } from 'src/hooks/useTranslation';
 import { devicesApi } from 'src/lib/api/devices/devicesApi';
+import { uiTestId, uiTestIdOf } from 'src/lib/testing/uiTestId';
 import type { NotificationKey } from 'src/lib/translations/translationKeys';
 import { routes, type IPairState } from 'src/navigation/routes';
 
 const codeLength = 6;
 const codePattern = /^\d{6}$/;
+const pairDeviceCardUiTestId = uiTestId('practice-pair-device-card');
 
-/** /practice/pair – an adult enters the pairing code. With ?code= (QR code) it pairs without typing. */
+/** /practice/pair - an adult enters the pairing code. With ?code= (QR code) it pairs without typing. */
 const PairDevicePage: React.FC = () => {
     const { getResource } = useTranslation();
     const navigate = useNavigate();
@@ -75,6 +77,7 @@ const PairDevicePage: React.FC = () => {
         <AuthCard
             title={getResource('captionPairDevice')}
             subtitle={getResource('captionPairDeviceDescription')}
+            uiTestId={pairDeviceCardUiTestId}
         >
             <form onSubmit={handleSubmit} noValidate>
                 <Stack spacing={2}>
@@ -89,6 +92,7 @@ const PairDevicePage: React.FC = () => {
                         required
                         disabled={isSubmitting}
                         value={code}
+                        uiTestId={uiTestIdOf(pairDeviceCardUiTestId, 'pairing-code')}
                         onChange={(value) => {
                             setErrorKey(null);
                             setCode(value);
@@ -99,12 +103,14 @@ const PairDevicePage: React.FC = () => {
                         name="deviceName"
                         disabled={isSubmitting}
                         value={deviceName}
+                        uiTestId={uiTestIdOf(pairDeviceCardUiTestId, 'device-name')}
                         onChange={setDeviceName}
                     />
                     <FormButton
                         label={getResource('labelPairDevice')}
                         type="submit"
                         disabled={!codePattern.test(code) || isSubmitting}
+                        uiTestId={uiTestIdOf(pairDeviceCardUiTestId, 'submit')}
                     />
                 </Stack>
             </form>

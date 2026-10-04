@@ -1,8 +1,8 @@
-/** Mirrors the C# DTOs of SubjectsController (Web.Core). */
+﻿/** Mirrors the C# DTOs of SubjectsController (Web.Core). */
 export interface ISubject {
     id: number;
     name: string;
-    /** BCP 47, e.g. "de" – the language used for reading aloud. */
+    /** BCP 47, e.g. "de" - the language used for reading aloud. */
     languageCode: string;
     /** Design-token key, e.g. "subject.math" (see src/lib/subjects/subjectStyles.ts). */
     color: string;

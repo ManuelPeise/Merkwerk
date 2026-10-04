@@ -1,4 +1,4 @@
-import React from 'react';
+﻿import React from 'react';
 import {
     Alert,
     Box,
@@ -18,6 +18,7 @@ import FormButton from 'src/components/input/FormButton';
 import { useTranslation } from 'src/hooks/useTranslation';
 import { learnersApi } from 'src/lib/api/learners/learnersApi';
 import type { ILearner } from 'src/lib/api/learners/learnersTypes';
+import { uiTestId, uiTestIdOf } from 'src/lib/testing/uiTestId';
 import type { NotificationKey } from 'src/lib/translations/translationKeys';
 import ConfirmDialog from 'src/components/feedback/ConfirmDialog';
 import LearnerDialog from 'src/pages/familyPage/components/LearnerDialog';
@@ -84,7 +85,12 @@ const LearnersSection: React.FC<IProps> = (props) => {
     const errorKey = actionErrorKey ?? loadErrorKey;
 
     return (
-        <Stack spacing={2} component="section" aria-labelledby="children-heading">
+        <Stack
+            spacing={2}
+            component="section"
+            aria-labelledby="children-heading"
+            data-testid={uiTestId('family-learners-section')}
+        >
             <Box
                 sx={{
                     display: 'flex',
@@ -99,6 +105,7 @@ const LearnersSection: React.FC<IProps> = (props) => {
                 {isAdmin && (
                     <FormButton
                         label={getResource('labelAddChild')}
+                        uiTestId={uiTestId('family-add-child-button')}
                         onClick={() => setDialog({ kind: 'edit' })}
                     />
                 )}
@@ -107,7 +114,7 @@ const LearnersSection: React.FC<IProps> = (props) => {
             {errorKey && <Alert severity="error">{getResource(errorKey)}</Alert>}
 
             {learners === null ? (
-                <LoadingIndicator />
+                <LoadingIndicator uiTestId={uiTestId('loading-family-learners-section')} />
             ) : learners.length === 0 ? (
                 <Typography color="text.secondary">{getResource('captionNoChildren')}</Typography>
             ) : (
@@ -116,6 +123,10 @@ const LearnersSection: React.FC<IProps> = (props) => {
                         {learners.map((learner) => (
                             <ListItem
                                 key={learner.id}
+                                data-testid={uiTestIdOf(
+                                    uiTestId('family-learner-item'),
+                                    String(learner.id),
+                                )}
                                 secondaryAction={
                                     isAdmin && (
                                         <Box sx={{ display: 'flex', gap: 1 }}>
@@ -146,6 +157,10 @@ const LearnersSection: React.FC<IProps> = (props) => {
                                         avatarId={learner.avatarId}
                                         name={learner.displayName}
                                         size={48}
+                                        uiTestId={uiTestIdOf(
+                                            uiTestId('family-learner-avatar'),
+                                            String(learner.id),
+                                        )}
                                     />
                                 </ListItemAvatar>
                                 <ListItemText
@@ -166,6 +181,7 @@ const LearnersSection: React.FC<IProps> = (props) => {
                     learner={dialog.learner}
                     onClose={() => setDialog({ kind: 'closed' })}
                     onSaved={handleSaved}
+                    uiTestId={uiTestId('family-learner-edit-dialog')}
                 />
             )}
             {dialog.kind === 'delete' && (
@@ -177,6 +193,7 @@ const LearnersSection: React.FC<IProps> = (props) => {
                     })}
                     confirmLabel={getResource('labelDelete')}
                     disabled={isDeleting}
+                    uiTestId={uiTestId('family-learner-delete-dialog')}
                     onConfirm={() => void handleDelete(dialog.learner)}
                     onCancel={() => setDialog({ kind: 'closed' })}
                 />

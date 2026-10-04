@@ -1,4 +1,4 @@
-import React from 'react';
+﻿import React from 'react';
 import { Button } from '@mui/material';
 
 interface IProps {
@@ -8,11 +8,12 @@ interface IProps {
     /** 'submit' inside a <form>, so Enter submits it. */
     type?: 'button' | 'submit';
     disabled?: boolean;
+    uiTestId: string;
     onClick?: () => void;
 }
 
 const FormButton: React.FC<IProps> = (props) => {
-    const { label, intent = 'save', type = 'button', disabled, onClick } = props;
+    const { label, intent = 'save', type = 'button', disabled, uiTestId, onClick } = props;
 
     return (
         <Button
@@ -20,6 +21,7 @@ const FormButton: React.FC<IProps> = (props) => {
             variant={intent === 'save' ? 'contained' : 'outlined'}
             color="primary"
             disabled={disabled}
+            data-testid={uiTestId}
             onClick={onClick}
         >
             {label}

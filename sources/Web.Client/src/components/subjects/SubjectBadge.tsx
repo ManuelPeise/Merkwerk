@@ -1,4 +1,4 @@
-import React from 'react';
+﻿import React from 'react';
 import { Box, Typography } from '@mui/material';
 import type { ISubject } from 'src/lib/api/subjects/subjectsTypes';
 import { getSubjectColor, renderSubjectIcon } from 'src/lib/subjects/subjectStyles';
@@ -7,18 +7,20 @@ interface IProps {
     subject: Pick<ISubject, 'name' | 'color' | 'icon'>;
     /** `small` for lists (icon beside the name), `large` for tiles (64 px icon above the name). */
     size?: 'small' | 'large';
+    uiTestId: string;
 }
 
 /**
- * The one way a subject is shown – adults' and children's area alike (LP-109). Icon in the subject color plus the
+ * The one way a subject is shown - adults' and children's area alike (LP-109). Icon in the subject color plus the
  * name: the color is never the only hint.
  */
 const SubjectBadge: React.FC<IProps> = (props) => {
-    const { subject, size = 'small' } = props;
+    const { subject, size = 'small', uiTestId } = props;
     const chipSize = size === 'large' ? 64 : 40;
 
     return (
         <Box
+            data-testid={uiTestId}
             sx={{
                 display: 'inline-flex',
                 flexDirection: size === 'large' ? 'column' : 'row',

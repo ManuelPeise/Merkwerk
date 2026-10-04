@@ -1,22 +1,25 @@
-import React from 'react';
+﻿import React from 'react';
 import { Card, CardActionArea, Typography } from '@mui/material';
 import AvatarImage from 'src/components/kids/AvatarImage';
+import { uiTestIdOf } from 'src/lib/testing/uiTestId';
 
 interface IProps {
     name: string;
     avatarId?: string;
     disabled?: boolean;
+    uiTestId: string;
     onSelect: () => void;
 }
 
 /** Profile choice tile: same look as ChoiceTile, but a button that signs the child in. */
 const ProfileTile: React.FC<IProps> = (props) => {
-    const { name, avatarId, disabled, onSelect } = props;
+    const { name, avatarId, disabled, uiTestId, onSelect } = props;
 
     return (
         <Card sx={{ height: '100%' }}>
             <CardActionArea
                 disabled={disabled}
+                data-testid={uiTestId}
                 onClick={onSelect}
                 sx={{
                     height: '100%',
@@ -35,7 +38,12 @@ const ProfileTile: React.FC<IProps> = (props) => {
                     },
                 }}
             >
-                <AvatarImage avatarId={avatarId} name={name} size={96} />
+                <AvatarImage
+                    avatarId={avatarId}
+                    name={name}
+                    size={96}
+                    uiTestId={uiTestIdOf(uiTestId, 'avatar')}
+                />
                 <Typography variant="h6" component="span" sx={{ fontWeight: 700 }}>
                     {name}
                 </Typography>

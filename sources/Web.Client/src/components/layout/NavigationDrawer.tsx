@@ -1,4 +1,4 @@
-import React from 'react';
+﻿import React from 'react';
 import {
     Box,
     Drawer,
@@ -11,6 +11,7 @@ import {
 import { Link, matchPath, useLocation } from 'react-router-dom';
 import { useTranslation } from 'src/hooks/useTranslation';
 import { drawerWidth, headerHeight } from 'src/components/layout/layoutConstants';
+import { uiTestIdOf } from 'src/lib/testing/uiTestId';
 import { navigationItems } from 'src/navigation/navigationItems';
 import { routes } from 'src/navigation/routes';
 
@@ -19,10 +20,11 @@ interface IProps {
     variant: 'permanent' | 'temporary';
     open: boolean;
     onClose: () => void;
+    uiTestId: string;
 }
 
 const NavigationDrawer: React.FC<IProps> = (props) => {
-    const { variant, open, onClose } = props;
+    const { variant, open, onClose, uiTestId } = props;
 
     const { getResource } = useTranslation();
     const { pathname } = useLocation();
@@ -35,6 +37,7 @@ const NavigationDrawer: React.FC<IProps> = (props) => {
             variant={variant}
             open={variant === 'permanent' || open}
             onClose={onClose}
+            data-testid={uiTestId}
             sx={{
                 width: drawerWidth,
                 flexShrink: 0,
@@ -52,6 +55,10 @@ const NavigationDrawer: React.FC<IProps> = (props) => {
                             to={path}
                             selected={isActive(path)}
                             onClick={onClose}
+                            data-testid={uiTestIdOf(
+                                uiTestId,
+                                `item-${path.split('/').filter(Boolean).at(-1) ?? 'start'}`,
+                            )}
                             sx={{ minHeight: 64, mx: 1, borderRadius: 2 }}
                         >
                             <ListItemIcon>

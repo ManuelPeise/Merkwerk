@@ -1,12 +1,13 @@
-import React from 'react';
+﻿import React from 'react';
 import { Stack, Typography } from '@mui/material';
 import { useIsOrgAdmin } from 'src/hooks/useIsOrgAdmin';
 import { useTranslation } from 'src/hooks/useTranslation';
+import { uiTestId } from 'src/lib/testing/uiTestId';
 import AdultsSection from 'src/pages/familyPage/components/AdultsSection';
 import GroupsSection from 'src/pages/familyPage/components/GroupsSection';
 import LearnersSection from 'src/pages/familyPage/components/LearnersSection';
 
-/** /admin/family – children, groups and adults of the family (LP-105, LP-108). Everyone sees it, only admins change it. */
+/** /admin/family - children, groups and adults of the family (LP-105, LP-108). Everyone sees it, only admins change it. */
 const FamilyPage: React.FC = () => {
     const { getResource } = useTranslation();
     const isAdmin = useIsOrgAdmin();
@@ -14,7 +15,7 @@ const FamilyPage: React.FC = () => {
     const [learnersVersion, setLearnersVersion] = React.useState(0);
 
     return (
-        <Stack spacing={5}>
+        <Stack spacing={5} data-testid={uiTestId('family-page')}>
             <Typography variant="h1">{getResource('captionFamily')}</Typography>
             <LearnersSection
                 isAdmin={isAdmin}

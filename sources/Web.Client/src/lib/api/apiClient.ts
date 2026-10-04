@@ -1,4 +1,4 @@
-import axios, { type AxiosError, type InternalAxiosRequestConfig } from 'axios';
+﻿import axios, { type AxiosError, type InternalAxiosRequestConfig } from 'axios';
 
 /**
  * Single axios instance for Web.Core. Auth lives in HttpOnly cookies (mw_access / mw_refresh),
@@ -13,7 +13,7 @@ export const apiClient = axios.create({
 /** AuthenticationController. Lowercase on purpose: the refresh cookie's path is case-sensitive. */
 const refreshPath = '/authentication/refresh';
 
-/** A 401 from these means wrong credentials or no session – refreshing won't help. */
+/** A 401 from these means wrong credentials or no session - refreshing won't help. */
 const noRefreshPaths = ['/authentication/login', refreshPath, '/authentication/logout'];
 
 type RetriableRequest = InternalAxiosRequestConfig & { retried?: boolean };

@@ -1,15 +1,19 @@
-import React from 'react';
+﻿import React from 'react';
 import { OutlinedInput } from '@mui/material';
 import FormFieldContainer from 'src/components/input/FormFieldContainer';
 import type { IFormFieldProps } from 'src/components/input/types/formFieldProps';
+import { uiTestIdOf } from 'src/lib/testing/uiTestId';
 
-type IProps = IFormFieldProps<number | null>;
+interface IProps extends IFormFieldProps<number | null> {
+    uiTestId: string;
+}
 
-/** Whole numbers ≥ 0. Empty field = null. */
+/** Whole numbers >= 0. Empty field = null. */
 const digitsOnly = /^\d*$/;
 
 const FormNumberField: React.FC<IProps> = (props) => {
-    const { label, value, name, disabled, required, errorText, helperText, onChange } = props;
+    const { label, value, name, disabled, required, errorText, helperText, uiTestId, onChange } =
+        props;
 
     const inputId = React.useId();
     const hasMessage = Boolean(errorText ?? helperText);
@@ -33,6 +37,7 @@ const FormNumberField: React.FC<IProps> = (props) => {
             required={required}
             errorText={errorText}
             helperText={helperText}
+            uiTestId={uiTestId}
         >
             <OutlinedInput
                 id={inputId}
@@ -43,12 +48,11 @@ const FormNumberField: React.FC<IProps> = (props) => {
                 fullWidth
                 onChange={handleChange}
                 sx={{ '& input': { textAlign: 'right' } }}
-                slotProps={{
-                    input: {
-                        inputMode: 'numeric',
-                        pattern: '[0-9]*',
-                        'aria-describedby': hasMessage ? `${inputId}-message` : undefined,
-                    },
+                inputProps={{
+                    inputMode: 'numeric',
+                    pattern: '[0-9]*',
+                    'aria-describedby': hasMessage ? `${inputId}-message` : undefined,
+                    'data-testid': uiTestIdOf(uiTestId, 'input'),
                 }}
             />
         </FormFieldContainer>

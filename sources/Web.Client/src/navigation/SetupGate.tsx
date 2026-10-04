@@ -3,6 +3,7 @@ import { Navigate, Outlet, useLocation } from 'react-router-dom';
 import LoadingIndicator from 'src/components/feedback/LoadingIndicator';
 import { SetupContext, type ISetupContext } from 'src/components/providers/setupContext';
 import { useSetupStatus } from 'src/hooks/useSetupStatus';
+import { uiTestId } from 'src/lib/testing/uiTestId';
 import { routes } from 'src/navigation/routes';
 
 /**
@@ -16,7 +17,7 @@ const SetupGate: React.FC = () => {
     const context = React.useMemo<ISetupContext>(() => ({ markSetupDone }), [markSetupDone]);
 
     if (status === 'loading') {
-        return <LoadingIndicator />;
+        return <LoadingIndicator uiTestId={uiTestId('loading-setup-gate')} />;
     }
 
     if (isSetupRequired && pathname !== routes.setup) {

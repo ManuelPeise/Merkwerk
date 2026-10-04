@@ -1,4 +1,4 @@
-import React, { useState, type PropsWithChildren } from 'react';
+﻿import React, { useState, type PropsWithChildren } from 'react';
 import {
     AuthenticationContext,
     type AuthenticationStatus,
@@ -18,7 +18,7 @@ interface IAuthenticationState {
 
 const anonymous: IAuthenticationState = { status: 'anonymous', user: null };
 
-/** Holds who is signed in. The tokens stay in HttpOnly cookies – the client only knows name and role. */
+/** Holds who is signed in. The tokens stay in HttpOnly cookies - the client only knows name and role. */
 const AuthenticationProvider: React.FC<IAuthenticationProviderProps> = (props) => {
     const { children } = props;
 

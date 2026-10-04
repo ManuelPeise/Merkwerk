@@ -1,4 +1,4 @@
-import React from 'react';
+﻿import React from 'react';
 import { Box, Card, CardActionArea, Typography } from '@mui/material';
 import { Link } from 'react-router-dom';
 
@@ -12,17 +12,19 @@ interface IProps {
     /** Route the whole tile links to. */
     to: string;
     color?: 'primary' | 'secondary';
+    uiTestId: string;
 }
 
 /** Large, fully clickable tile (one focus stop). Icon plus text, never colour alone. */
 const ChoiceTile: React.FC<IProps> = (props) => {
-    const { icon, label, description, to, color = 'primary' } = props;
+    const { icon, label, description, to, color = 'primary', uiTestId } = props;
 
     return (
         <Card sx={{ height: '100%' }}>
             <CardActionArea
                 component={Link}
                 to={to}
+                data-testid={uiTestId}
                 sx={{
                     height: '100%',
                     minWidth: 160,

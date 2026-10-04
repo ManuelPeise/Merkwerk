@@ -1,4 +1,4 @@
-import { createElement, type ComponentType, type ReactElement } from 'react';
+﻿import { createElement, type ComponentType, type ReactElement } from 'react';
 import type { SvgIconProps } from '@mui/material';
 import {
     SubjectArtIcon,
@@ -17,7 +17,7 @@ import {
 import type { LabelKey } from 'src/lib/translations/translationKeys';
 
 /**
- * The fixed choice for subjects (LP-109) – mirrors Logic.Content/Subjects/SubjectRules.cs. Color keys are palette
+ * The fixed choice for subjects (LP-109) - mirrors Logic.Content/Subjects/SubjectRules.cs. Color keys are palette
  * paths of the theme (`theme.palette.subject.*`), so `sx={{ bgcolor: subject.color }}` works directly.
  */
 export const subjectColors: readonly { key: string; labelKey: LabelKey }[] = [

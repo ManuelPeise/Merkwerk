@@ -1,4 +1,4 @@
-import React from 'react';
+﻿import React from 'react';
 import { Alert, Box, Stack, Typography } from '@mui/material';
 import { useNavigate } from 'react-router-dom';
 import LoadingIndicator from 'src/components/feedback/LoadingIndicator';
@@ -6,11 +6,12 @@ import ProfileTile from 'src/components/kids/ProfileTile';
 import { useAuthentication } from 'src/hooks/useAuthentication';
 import { useTranslation } from 'src/hooks/useTranslation';
 import { devicesApi } from 'src/lib/api/devices/devicesApi';
+import { uiTestId, uiTestIdOf } from 'src/lib/testing/uiTestId';
 import type { IDeviceProfile } from 'src/lib/api/devices/devicesTypes';
 import type { NotificationKey } from 'src/lib/translations/translationKeys';
 import { routes, type IPairState } from 'src/navigation/routes';
 
-/** /practice/profiles – the child taps their picture; no typing needed. */
+/** /practice/profiles - the child taps their picture; no typing needed. */
 const ProfilesPage: React.FC = () => {
     const { getResource } = useTranslation();
     const { signInLearner } = useAuthentication();
@@ -63,11 +64,11 @@ const ProfilesPage: React.FC = () => {
     };
 
     if (profiles === null) {
-        return <LoadingIndicator />;
+        return <LoadingIndicator uiTestId={uiTestId('loading-practice-profiles-page')} />;
     }
 
     return (
-        <Stack spacing={3}>
+        <Stack spacing={3} data-testid={uiTestId('practice-profiles-page')}>
             <Typography variant="h1">{getResource('captionWhoIsPracticing')}</Typography>
             {errorKey && <Alert severity="error">{getResource(errorKey)}</Alert>}
             {profiles.length === 0 && !errorKey && (
@@ -78,7 +79,7 @@ const ProfilesPage: React.FC = () => {
                     display: 'grid',
                     gap: 2,
                     gridTemplateColumns: {
-                        // minmax(0, …): columns may shrink below the tile's content width on 360 px phones.
+                        // minmax(0, ...): columns may shrink below the tile's content width on 360 px phones.
                         xs: 'repeat(2, minmax(0, 1fr))',
                         sm: 'repeat(3, minmax(0, 1fr))',
                         md: 'repeat(4, minmax(0, 1fr))',
@@ -91,6 +92,10 @@ const ProfilesPage: React.FC = () => {
                         name={profile.firstName}
                         avatarId={profile.avatarId}
                         disabled={isSigningIn}
+                        uiTestId={uiTestIdOf(
+                            uiTestId('practice-profile-tile'),
+                            String(profile.learnerId),
+                        )}
                         onSelect={() => void handleSelect(profile.learnerId)}
                     />
                 ))}

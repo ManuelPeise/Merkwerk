@@ -1,4 +1,4 @@
-import React from 'react';
+﻿import React from 'react';
 
 /** Either a partial state or a function that computes it from the current state (like setState). */
 export type StateUpdate<TState> = Partial<TState> | ((state: TState) => Partial<TState>);
@@ -36,7 +36,7 @@ const reducerFunction = <TState extends object>(
 ): TState => (action.type === 'replace' ? action.state : mergeState(state, action.update));
 
 export type UseReducerResult<TModel> = {
-    /** Model from the last setModel call (or the initial model) – the baseline for change tracking. */
+    /** Model from the last setModel call (or the initial model) - the baseline for change tracking. */
     originalState: TModel;
     state: TModel;
     /** Merges a partial update into the state. Stable reference. */

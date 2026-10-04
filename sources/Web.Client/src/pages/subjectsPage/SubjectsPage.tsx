@@ -19,6 +19,7 @@ import { useTranslation } from 'src/hooks/useTranslation';
 import { subjectsApi } from 'src/lib/api/subjects/subjectsApi';
 import type { ISubject } from 'src/lib/api/subjects/subjectsTypes';
 import { getSubjectLanguageLabel } from 'src/lib/subjects/subjectStyles';
+import { testIds } from 'src/lib/testing/testIds';
 import type { NotificationKey } from 'src/lib/translations/translationKeys';
 import SubjectDialog from 'src/pages/subjectsPage/components/SubjectDialog';
 
@@ -63,7 +64,7 @@ const SubjectsPage: React.FC = () => {
     };
 
     return (
-        <Stack spacing={4}>
+        <Stack spacing={4} data-testid={testIds.subjects.page}>
             <Box
                 sx={{
                     display: 'flex',
@@ -94,10 +95,11 @@ const SubjectsPage: React.FC = () => {
                 <Typography color="text.secondary">{getResource('captionNoSubjects')}</Typography>
             ) : (
                 <Card>
-                    <List>
+                    <List data-testid={testIds.subjects.list}>
                         {subjects.map((subject) => (
                             <ListItem
                                 key={subject.id}
+                                data-testid={testIds.subjects.item(subject.id)}
                                 secondaryAction={
                                     isAdmin && (
                                         <IconButton
@@ -132,6 +134,7 @@ const SubjectsPage: React.FC = () => {
                     subject={dialog.subject}
                     onClose={() => setDialog({ kind: 'closed' })}
                     onSaved={handleSaved}
+                    testId={testIds.subjects.dialog}
                 />
             )}
         </Stack>

@@ -10,6 +10,8 @@ import type {
 export const learnersApi = {
     list: statelessApi.create<ILearner[]>({ serviceUrl: '/learners/list' }),
     create: statelessApi.create<ILearner, ILearnerInput>({ serviceUrl: '/learners/create' }),
-    update: statelessApi.create<ILearner, IUpdateLearnerRequest>({ serviceUrl: '/learners/update' }),
+    update: statelessApi.create<ILearner, IUpdateLearnerRequest>({
+        serviceUrl: '/learners/update',
+    }),
     delete: statelessApi.create<void, IDeleteLearnerRequest>({ serviceUrl: '/learners/delete' }),
 };

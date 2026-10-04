@@ -4,15 +4,19 @@ import { Card, Stack, Typography } from '@mui/material';
 interface IProps {
     title: string;
     subtitle?: string;
+    testId?: string;
     children: React.ReactNode;
 }
 
 /** Card for every auth page: title (h1), optional subtitle, content. Centred, max. 440 px wide. */
 const AuthCard: React.FC<IProps> = (props) => {
-    const { title, subtitle, children } = props;
+    const { title, subtitle, testId, children } = props;
 
     return (
-        <Card sx={{ width: '100%', maxWidth: 440, mx: 'auto', my: 'auto', p: { xs: 3, sm: 4 } }}>
+        <Card
+            sx={{ width: '100%', maxWidth: 440, mx: 'auto', my: 'auto', p: { xs: 3, sm: 4 } }}
+            data-testid={testId}
+        >
             <Stack spacing={3}>
                 <Stack spacing={1}>
                     <Typography variant="h1">{title}</Typography>

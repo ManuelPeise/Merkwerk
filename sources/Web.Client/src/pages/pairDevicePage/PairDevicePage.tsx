@@ -7,6 +7,7 @@ import FormTextField from 'src/components/input/FormTextField';
 import AuthCard from 'src/components/layout/AuthCard';
 import { useTranslation } from 'src/hooks/useTranslation';
 import { devicesApi } from 'src/lib/api/devices/devicesApi';
+import { testIds } from 'src/lib/testing/testIds';
 import type { NotificationKey } from 'src/lib/translations/translationKeys';
 import { routes, type IPairState } from 'src/navigation/routes';
 
@@ -75,6 +76,7 @@ const PairDevicePage: React.FC = () => {
         <AuthCard
             title={getResource('captionPairDevice')}
             subtitle={getResource('captionPairDeviceDescription')}
+            testId={testIds.practice.pairDevice}
         >
             <form onSubmit={handleSubmit} noValidate>
                 <Stack spacing={2}>

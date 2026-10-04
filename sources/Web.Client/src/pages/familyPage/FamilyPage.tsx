@@ -2,6 +2,7 @@ import React from 'react';
 import { Stack, Typography } from '@mui/material';
 import { useIsOrgAdmin } from 'src/hooks/useIsOrgAdmin';
 import { useTranslation } from 'src/hooks/useTranslation';
+import { testIds } from 'src/lib/testing/testIds';
 import AdultsSection from 'src/pages/familyPage/components/AdultsSection';
 import GroupsSection from 'src/pages/familyPage/components/GroupsSection';
 import LearnersSection from 'src/pages/familyPage/components/LearnersSection';
@@ -14,7 +15,7 @@ const FamilyPage: React.FC = () => {
     const [learnersVersion, setLearnersVersion] = React.useState(0);
 
     return (
-        <Stack spacing={5}>
+        <Stack spacing={5} data-testid={testIds.family.page}>
             <Typography variant="h1">{getResource('captionFamily')}</Typography>
             <LearnersSection
                 isAdmin={isAdmin}

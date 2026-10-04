@@ -3,6 +3,7 @@ import { FormControl, OutlinedInput, Stack } from '@mui/material';
 import { useTranslation } from 'src/hooks/useTranslation';
 import FormFieldContainer from 'src/components/input/FormFieldContainer';
 import type { IFormFieldProps } from 'src/components/input/types/formFieldProps';
+import { testIdOf } from 'src/lib/testing/testIds';
 
 interface IProps extends IFormFieldProps<string> {
     /** Number of digits. Default 4. */
@@ -10,6 +11,7 @@ interface IProps extends IFormFieldProps<string> {
     /** Show dots instead of digits. Default true. */
     masked?: boolean;
     autoFocus?: boolean;
+    testId?: string;
 }
 
 const nonDigits = /\D/g;
@@ -30,6 +32,7 @@ const FormPinField: React.FC<IProps> = (props) => {
         length = 4,
         masked = true,
         autoFocus,
+        testId,
         onChange,
     } = props;
 
@@ -89,6 +92,7 @@ const FormPinField: React.FC<IProps> = (props) => {
             required={required}
             errorText={errorText}
             helperText={helperText}
+            testId={testId}
         >
             <Stack
                 direction="row"
@@ -115,16 +119,15 @@ const FormPinField: React.FC<IProps> = (props) => {
                                 width: 64,
                                 '& input': { textAlign: 'center', fontSize: '1.75rem', px: 0 },
                             }}
-                            slotProps={{
-                                input: {
-                                    inputMode: 'numeric',
-                                    pattern: '[0-9]*',
-                                    autoComplete: index === 0 ? 'one-time-code' : 'off',
-                                    'aria-label': getResource('labelPinDigit', {
-                                        position: index + 1,
-                                        length,
-                                    }),
-                                },
+                            inputProps={{
+                                inputMode: 'numeric',
+                                pattern: '[0-9]*',
+                                autoComplete: index === 0 ? 'one-time-code' : 'off',
+                                'data-testid': testIdOf(testId, 'input'),
+                                'aria-label': getResource('labelPinDigit', {
+                                    position: index + 1,
+                                    length,
+                                }),
                             }}
                         />
                     </FormControl>

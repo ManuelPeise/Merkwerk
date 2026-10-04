@@ -4,10 +4,12 @@ import { useTranslation } from 'src/hooks/useTranslation';
 import { VisibilityIcon, VisibilityOffIcon } from 'src/components/icons/AppIcons';
 import FormFieldContainer from 'src/components/input/FormFieldContainer';
 import type { IFormFieldProps } from 'src/components/input/types/formFieldProps';
+import { testIdOf } from 'src/lib/testing/testIds';
 
 interface IProps extends IFormFieldProps<string> {
     /** 'current-password' for logins, 'new-password' when setting a password. */
     autoComplete?: 'current-password' | 'new-password';
+    testId?: string;
 }
 
 const FormPasswordField: React.FC<IProps> = (props) => {
@@ -20,6 +22,7 @@ const FormPasswordField: React.FC<IProps> = (props) => {
         errorText,
         helperText,
         autoComplete = 'current-password',
+        testId,
         onChange,
     } = props;
 
@@ -36,6 +39,7 @@ const FormPasswordField: React.FC<IProps> = (props) => {
             required={required}
             errorText={errorText}
             helperText={helperText}
+            testId={testId}
         >
             <OutlinedInput
                 id={inputId}
@@ -45,8 +49,9 @@ const FormPasswordField: React.FC<IProps> = (props) => {
                 autoComplete={autoComplete}
                 fullWidth
                 onChange={(event) => onChange(event.target.value)}
-                slotProps={{
-                    input: { 'aria-describedby': hasMessage ? `${inputId}-message` : undefined },
+                inputProps={{
+                    'aria-describedby': hasMessage ? `${inputId}-message` : undefined,
+                    'data-testid': testIdOf(testId, 'input'),
                 }}
                 endAdornment={
                     <InputAdornment position="end">

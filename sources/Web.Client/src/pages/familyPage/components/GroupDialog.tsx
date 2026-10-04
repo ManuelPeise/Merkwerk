@@ -8,6 +8,7 @@ import {
     DialogTitle,
     Stack,
     Typography,
+    type DialogProps,
 } from '@mui/material';
 import FormButton from 'src/components/input/FormButton';
 import FormCheckbox from 'src/components/input/FormCheckbox';
@@ -18,6 +19,7 @@ import { getFieldErrors } from 'src/lib/api/getFieldErrors';
 import { groupsApi } from 'src/lib/api/groups/groupsApi';
 import type { IGroup } from 'src/lib/api/groups/groupsTypes';
 import type { ILearner } from 'src/lib/api/learners/learnersTypes';
+import { testIdOf } from 'src/lib/testing/testIds';
 import type { NotificationKey } from 'src/lib/translations/translationKeys';
 
 /** Mount it only while open (the form starts from the props). */
@@ -27,6 +29,7 @@ interface IProps {
     group?: IGroup;
     /** All children of the family to choose from. */
     learners: ILearner[];
+    testId?: string;
     onClose: () => void;
     onSaved: () => void;
 }
@@ -35,7 +38,7 @@ const maxNameLength = 50;
 
 /** Create or edit a group: name and which children belong to it (LP-108). */
 const GroupDialog: React.FC<IProps> = (props) => {
-    const { open, group, learners, onClose, onSaved } = props;
+    const { open, group, learners, testId, onClose, onSaved } = props;
     const { getResource } = useTranslation();
 
     const [name, setName] = React.useState(group?.name ?? '');
@@ -84,7 +87,17 @@ const GroupDialog: React.FC<IProps> = (props) => {
     };
 
     return (
-        <Dialog open={open} onClose={onClose} maxWidth="sm" fullWidth>
+        <Dialog
+            open={open}
+            onClose={onClose}
+            maxWidth="sm"
+            fullWidth
+            slotProps={{
+                paper: {
+                    'data-testid': testId,
+                } as NonNullable<DialogProps['slotProps']>['paper'],
+            }}
+        >
             <form onSubmit={handleSubmit} noValidate>
                 <DialogTitle>
                     {getResource(group ? 'captionEditGroup' : 'captionAddGroup')}
@@ -99,6 +112,7 @@ const GroupDialog: React.FC<IProps> = (props) => {
                             value={name}
                             errorText={fieldErrors.name}
                             helperText={getResource('captionGroupNameHint')}
+                            testId={testIdOf(testId, 'name')}
                             onChange={setName}
                         />
                         <Box>
@@ -115,6 +129,7 @@ const GroupDialog: React.FC<IProps> = (props) => {
                                         <FormCheckbox
                                             key={learner.id}
                                             name={`learner-${learner.id}`}
+                                            testId={testIdOf(testId, `learner-${learner.id}`)}
                                             checked={learnerIds.includes(learner.id)}
                                             onChange={(checked) =>
                                                 toggleLearner(learner.id, checked)
@@ -147,12 +162,14 @@ const GroupDialog: React.FC<IProps> = (props) => {
                     <FormButton
                         label={getResource('labelCancel')}
                         intent="cancel"
+                        testId={testIdOf(testId, 'cancel')}
                         onClick={onClose}
                     />
                     <FormButton
                         label={getResource('labelSave')}
                         type="submit"
                         disabled={!isValid || isSaving}
+                        testId={testIdOf(testId, 'save')}
                     />
                 </DialogActions>
             </form>

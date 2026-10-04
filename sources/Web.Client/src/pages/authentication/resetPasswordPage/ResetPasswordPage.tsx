@@ -9,6 +9,7 @@ import { useTranslation } from 'src/hooks/useTranslation';
 import { authenticationApi } from 'src/lib/api/authentication/authenticationApi';
 import { getFieldErrors } from 'src/lib/api/getFieldErrors';
 import { getPasswordError, getPasswordRepeatError } from 'src/lib/auth/authValidation';
+import { testIds } from 'src/lib/testing/testIds';
 import type { NotificationKey } from 'src/lib/translations/translationKeys';
 import { utils } from 'src/lib/utils';
 import { routes } from 'src/navigation/routes';
@@ -86,7 +87,10 @@ const ResetPasswordPage: React.FC = () => {
 
     if (email === null || token === null) {
         return (
-            <AuthCard title={getResource('captionResetPassword')}>
+            <AuthCard
+                title={getResource('captionResetPassword')}
+                testId={testIds.auth.resetPassword}
+            >
                 <Stack spacing={2}>
                     <Alert severity="error">{getResource('notificationLinkExpired')}</Alert>
                     {toLoginButton}
@@ -96,7 +100,7 @@ const ResetPasswordPage: React.FC = () => {
     }
 
     return (
-        <AuthCard title={getResource('captionResetPassword')}>
+        <AuthCard title={getResource('captionResetPassword')} testId={testIds.auth.resetPassword}>
             {isDone ? (
                 <Stack spacing={2}>
                     <Alert severity="success">{getResource('notificationPasswordChanged')}</Alert>

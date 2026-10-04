@@ -15,6 +15,7 @@ import { invitationsApi } from 'src/lib/api/invitations/invitationsApi';
 import type { IInvitationDetails } from 'src/lib/api/invitations/invitationsTypes';
 import { getPasswordError, getPasswordRepeatError } from 'src/lib/auth/authValidation';
 import { adultRoles } from 'src/lib/auth/roles';
+import { testIds } from 'src/lib/testing/testIds';
 import type { NotificationKey } from 'src/lib/translations/translationKeys';
 import { utils } from 'src/lib/utils';
 import { routes, type IRedirectState } from 'src/navigation/routes';
@@ -164,7 +165,7 @@ const InvitationPage: React.FC = () => {
 
     if (loadErrorKey || !invitation) {
         return (
-            <AuthCard title={getResource('captionInvitation')}>
+            <AuthCard title={getResource('captionInvitation')} testId={testIds.auth.invitation}>
                 <Alert severity="error">
                     {getResource(loadErrorKey ?? 'notificationInvitationInvalid')}
                 </Alert>
@@ -176,7 +177,11 @@ const InvitationPage: React.FC = () => {
 
     if (isSignedInAdult) {
         return (
-            <AuthCard title={getResource('captionInvitation')} subtitle={subtitle}>
+            <AuthCard
+                title={getResource('captionInvitation')}
+                subtitle={subtitle}
+                testId={testIds.auth.invitation}
+            >
                 <Stack spacing={2}>
                     {errorKey && <Alert severity="error">{getResource(errorKey)}</Alert>}
                     <Typography>
@@ -194,12 +199,21 @@ const InvitationPage: React.FC = () => {
 
     if (isAccountExisting) {
         return (
-            <AuthCard title={getResource('captionInvitation')} subtitle={subtitle}>
+            <AuthCard
+                title={getResource('captionInvitation')}
+                subtitle={subtitle}
+                testId={testIds.auth.invitation}
+            >
                 <Stack spacing={2}>
                     <Alert severity="info">
                         {getResource('notificationInvitationAccountExists')}
                     </Alert>
-                    <Button component={Link} to={routes.login} state={loginState} variant="contained">
+                    <Button
+                        component={Link}
+                        to={routes.login}
+                        state={loginState}
+                        variant="contained"
+                    >
                         {getResource('labelLoginToAccept')}
                     </Button>
                 </Stack>
@@ -208,7 +222,11 @@ const InvitationPage: React.FC = () => {
     }
 
     return (
-        <AuthCard title={getResource('captionInvitation')} subtitle={subtitle}>
+        <AuthCard
+            title={getResource('captionInvitation')}
+            subtitle={subtitle}
+            testId={testIds.auth.invitation}
+        >
             <form onSubmit={handleSubmit} noValidate>
                 <Stack spacing={2}>
                     {errorKey && <Alert severity="error">{getResource(errorKey)}</Alert>}

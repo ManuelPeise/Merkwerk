@@ -9,6 +9,7 @@ import { useTranslation } from 'src/hooks/useTranslation';
 import { authenticationApi } from 'src/lib/api/authentication/authenticationApi';
 import type { IForgotPasswordRequest } from 'src/lib/api/authentication/authenticationTypes';
 import { getEmailError } from 'src/lib/auth/authValidation';
+import { testIds } from 'src/lib/testing/testIds';
 import type { NotificationKey } from 'src/lib/translations/translationKeys';
 import { utils } from 'src/lib/utils';
 import { routes } from 'src/navigation/routes';
@@ -54,7 +55,7 @@ const ForgotPasswordPage: React.FC = () => {
     const emailErrorKey = getEmailError(state.email);
 
     return (
-        <AuthCard title={getResource('captionForgotPassword')}>
+        <AuthCard title={getResource('captionForgotPassword')} testId={testIds.auth.forgotPassword}>
             {isSent ? (
                 <Stack spacing={2}>
                     <Alert severity="success">{getResource('notificationResetLinkSent')}</Alert>

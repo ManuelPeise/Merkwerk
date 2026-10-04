@@ -18,6 +18,7 @@ import FormButton from 'src/components/input/FormButton';
 import { useTranslation } from 'src/hooks/useTranslation';
 import { learnersApi } from 'src/lib/api/learners/learnersApi';
 import type { ILearner } from 'src/lib/api/learners/learnersTypes';
+import { testIds } from 'src/lib/testing/testIds';
 import type { NotificationKey } from 'src/lib/translations/translationKeys';
 import ConfirmDialog from 'src/components/feedback/ConfirmDialog';
 import LearnerDialog from 'src/pages/familyPage/components/LearnerDialog';
@@ -84,7 +85,12 @@ const LearnersSection: React.FC<IProps> = (props) => {
     const errorKey = actionErrorKey ?? loadErrorKey;
 
     return (
-        <Stack spacing={2} component="section" aria-labelledby="children-heading">
+        <Stack
+            spacing={2}
+            component="section"
+            aria-labelledby="children-heading"
+            data-testid={testIds.family.learners}
+        >
             <Box
                 sx={{
                     display: 'flex',
@@ -116,6 +122,7 @@ const LearnersSection: React.FC<IProps> = (props) => {
                         {learners.map((learner) => (
                             <ListItem
                                 key={learner.id}
+                                data-testid={testIds.family.learnerItem(learner.id)}
                                 secondaryAction={
                                     isAdmin && (
                                         <Box sx={{ display: 'flex', gap: 1 }}>
@@ -166,6 +173,7 @@ const LearnersSection: React.FC<IProps> = (props) => {
                     learner={dialog.learner}
                     onClose={() => setDialog({ kind: 'closed' })}
                     onSaved={handleSaved}
+                    testId={testIds.family.learnerDialog}
                 />
             )}
             {dialog.kind === 'delete' && (
@@ -177,6 +185,7 @@ const LearnersSection: React.FC<IProps> = (props) => {
                     })}
                     confirmLabel={getResource('labelDelete')}
                     disabled={isDeleting}
+                    testId={testIds.family.learnerDialog}
                     onConfirm={() => void handleDelete(dialog.learner)}
                     onCancel={() => setDialog({ kind: 'closed' })}
                 />

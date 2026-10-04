@@ -11,6 +11,7 @@ import {
     ToggleButton,
     ToggleButtonGroup,
     Typography,
+    type DialogProps,
 } from '@mui/material';
 import { CheckIcon } from 'src/components/icons/AppIcons';
 import FormButton from 'src/components/input/FormButton';
@@ -26,6 +27,7 @@ import {
     subjectIcons,
     subjectLanguages,
 } from 'src/lib/subjects/subjectStyles';
+import { testIdOf } from 'src/lib/testing/testIds';
 import type { NotificationKey } from 'src/lib/translations/translationKeys';
 
 /** Mount it only while open (the form starts from the props). */
@@ -33,6 +35,7 @@ interface IProps {
     open: boolean;
     /** Edit this subject; without it a new one is created. */
     subject?: ISubject;
+    testId?: string;
     onClose: () => void;
     onSaved: () => void;
 }
@@ -48,7 +51,7 @@ const toForm = (subject?: ISubject): ISubjectInput => ({
 
 /** Create or edit a subject: name, language for reading aloud, color and icon from the fixed choice (LP-109). */
 const SubjectDialog: React.FC<IProps> = (props) => {
-    const { open, subject, onClose, onSaved } = props;
+    const { open, subject, testId, onClose, onSaved } = props;
     const { getResource } = useTranslation();
 
     const [form, setForm] = React.useState<ISubjectInput>(() => toForm(subject));
@@ -86,7 +89,17 @@ const SubjectDialog: React.FC<IProps> = (props) => {
     };
 
     return (
-        <Dialog open={open} onClose={onClose} maxWidth="sm" fullWidth>
+        <Dialog
+            open={open}
+            onClose={onClose}
+            maxWidth="sm"
+            fullWidth
+            slotProps={{
+                paper: {
+                    'data-testid': testId,
+                } as NonNullable<DialogProps['slotProps']>['paper'],
+            }}
+        >
             <form onSubmit={handleSubmit} noValidate>
                 <DialogTitle>
                     {getResource(subject ? 'captionEditSubject' : 'captionAddSubject')}
@@ -105,6 +118,7 @@ const SubjectDialog: React.FC<IProps> = (props) => {
                             required
                             value={form.name}
                             errorText={fieldErrors.name}
+                            testId={testIdOf(testId, 'name')}
                             onChange={(value) => setForm({ ...form, name: value })}
                         />
 
@@ -221,12 +235,14 @@ const SubjectDialog: React.FC<IProps> = (props) => {
                     <FormButton
                         label={getResource('labelCancel')}
                         intent="cancel"
+                        testId={testIdOf(testId, 'cancel')}
                         onClick={onClose}
                     />
                     <FormButton
                         label={getResource('labelSave')}
                         type="submit"
                         disabled={!isValid || isSaving}
+                        testId={testIdOf(testId, 'save')}
                     />
                 </DialogActions>
             </form>

@@ -2,11 +2,13 @@ import React from 'react';
 import { OutlinedInput } from '@mui/material';
 import FormFieldContainer from 'src/components/input/FormFieldContainer';
 import type { IFormFieldProps } from 'src/components/input/types/formFieldProps';
+import { testIdOf } from 'src/lib/testing/testIds';
 
 interface IProps extends IFormFieldProps<string> {
     type?: 'text' | 'email';
     /** e.g. 'email', 'username', 'given-name'. Defaults to 'email' for type email. */
     autoComplete?: string;
+    testId?: string;
 }
 
 const FormTextField: React.FC<IProps> = (props) => {
@@ -20,6 +22,7 @@ const FormTextField: React.FC<IProps> = (props) => {
         helperText,
         type = 'text',
         autoComplete,
+        testId,
         onChange,
     } = props;
 
@@ -34,6 +37,7 @@ const FormTextField: React.FC<IProps> = (props) => {
             required={required}
             errorText={errorText}
             helperText={helperText}
+            testId={testId}
         >
             <OutlinedInput
                 id={inputId}
@@ -43,8 +47,9 @@ const FormTextField: React.FC<IProps> = (props) => {
                 autoComplete={autoComplete ?? (type === 'email' ? 'email' : undefined)}
                 fullWidth
                 onChange={(event) => onChange(event.target.value)}
-                slotProps={{
-                    input: { 'aria-describedby': hasMessage ? `${inputId}-message` : undefined },
+                inputProps={{
+                    'aria-describedby': hasMessage ? `${inputId}-message` : undefined,
+                    'data-testid': testIdOf(testId, 'input'),
                 }}
             />
         </FormFieldContainer>

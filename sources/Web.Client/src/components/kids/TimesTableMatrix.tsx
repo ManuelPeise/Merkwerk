@@ -18,12 +18,13 @@ import { useTranslation } from 'src/hooks/useTranslation';
 interface IProps {
     /** Mark the current attempt as having used a learning aid. Called whenever the matrix is used. */
     onUse: () => void;
+    testId?: string;
 }
 
 const factors = Array.from({ length: 10 }, (_, index) => index + 1);
 
 const TimesTableMatrix: React.FC<IProps> = (props) => {
-    const { onUse } = props;
+    const { onUse, testId } = props;
     const { getResource } = useTranslation();
     const [selectedRow, setSelectedRow] = React.useState<number | null>(null);
     const [selectedColumn, setSelectedColumn] = React.useState<number | null>(null);
@@ -43,7 +44,7 @@ const TimesTableMatrix: React.FC<IProps> = (props) => {
         selectedRow !== null && selectedColumn !== null ? selectedRow * selectedColumn : null;
 
     return (
-        <Stack spacing={2}>
+        <Stack spacing={2} data-testid={testId}>
             <TableContainer component={Paper} variant="outlined" sx={{ maxWidth: '100%' }}>
                 <Table
                     size="small"

@@ -3,6 +3,7 @@ import { AppBar, Box, Container, Link as MuiLink, Toolbar, Typography } from '@m
 import { Link, Outlet } from 'react-router-dom';
 import LanguageSwitch from 'src/components/layout/components/LanguageSwitch';
 import { headerHeight } from 'src/components/layout/layoutConstants';
+import { testIds } from 'src/lib/testing/testIds';
 import { useTranslation } from 'src/hooks/useTranslation';
 import { routes } from 'src/navigation/routes';
 
@@ -10,7 +11,10 @@ const PublicLayout: React.FC = () => {
     const { getResource } = useTranslation();
 
     return (
-        <Box sx={{ minHeight: '100dvh', display: 'flex', flexDirection: 'column' }}>
+        <Box
+            sx={{ minHeight: '100dvh', display: 'flex', flexDirection: 'column' }}
+            data-testid={testIds.layout.public}
+        >
             <AppBar
                 position="static"
                 color="inherit"
@@ -36,7 +40,7 @@ const PublicLayout: React.FC = () => {
                         </Typography>
                     </MuiLink>
                     <Box sx={{ ml: 'auto' }}>
-                        <LanguageSwitch />
+                        <LanguageSwitch testId={testIds.layout.languageSwitch} />
                     </Box>
                 </Toolbar>
             </AppBar>

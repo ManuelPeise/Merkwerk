@@ -1,5 +1,6 @@
 import React from 'react';
 import { FormControl, FormHelperText, FormLabel } from '@mui/material';
+import { testIdOf } from 'src/lib/testing/testIds';
 
 interface IProps {
     label: string;
@@ -11,6 +12,7 @@ interface IProps {
     required?: boolean;
     errorText?: string;
     helperText?: string;
+    testId?: string;
     children: React.ReactNode;
 }
 
@@ -22,18 +24,32 @@ const toMessageId = (id: string) => `${id}-message`;
  * Disabled, required and error state reach the inputs through the FormControl context.
  */
 const FormFieldContainer: React.FC<IProps> = (props) => {
-    const { label, inputId, labelId, disabled, required, errorText, helperText, children } = props;
+    const { label, inputId, labelId, disabled, required, errorText, helperText, testId, children } =
+        props;
 
     const message = errorText ?? helperText;
     const messageId = toMessageId(inputId ?? labelId ?? '');
 
     return (
-        <FormControl fullWidth error={Boolean(errorText)} disabled={disabled} required={required}>
+        <FormControl
+            fullWidth
+            error={Boolean(errorText)}
+            disabled={disabled}
+            required={required}
+            data-testid={testId}
+        >
             <FormLabel htmlFor={inputId} id={labelId} sx={{ mb: 1 }}>
                 {label}
             </FormLabel>
             {children}
-            {message && <FormHelperText id={messageId}>{message}</FormHelperText>}
+            {message && (
+                <FormHelperText
+                    id={messageId}
+                    data-testid={errorText ? testIdOf(testId, 'error') : undefined}
+                >
+                    {message}
+                </FormHelperText>
+            )}
         </FormControl>
     );
 };

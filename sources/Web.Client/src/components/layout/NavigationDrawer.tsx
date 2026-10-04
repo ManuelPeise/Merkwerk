@@ -11,6 +11,7 @@ import {
 import { Link, matchPath, useLocation } from 'react-router-dom';
 import { useTranslation } from 'src/hooks/useTranslation';
 import { drawerWidth, headerHeight } from 'src/components/layout/layoutConstants';
+import { testIdOf } from 'src/lib/testing/testIds';
 import { navigationItems } from 'src/navigation/navigationItems';
 import { routes } from 'src/navigation/routes';
 
@@ -19,10 +20,11 @@ interface IProps {
     variant: 'permanent' | 'temporary';
     open: boolean;
     onClose: () => void;
+    testId?: string;
 }
 
 const NavigationDrawer: React.FC<IProps> = (props) => {
-    const { variant, open, onClose } = props;
+    const { variant, open, onClose, testId } = props;
 
     const { getResource } = useTranslation();
     const { pathname } = useLocation();
@@ -35,6 +37,7 @@ const NavigationDrawer: React.FC<IProps> = (props) => {
             variant={variant}
             open={variant === 'permanent' || open}
             onClose={onClose}
+            data-testid={testId}
             sx={{
                 width: drawerWidth,
                 flexShrink: 0,
@@ -52,6 +55,10 @@ const NavigationDrawer: React.FC<IProps> = (props) => {
                             to={path}
                             selected={isActive(path)}
                             onClick={onClose}
+                            data-testid={testIdOf(
+                                testId,
+                                `item-${path.split('/').filter(Boolean).at(-1) ?? 'start'}`,
+                            )}
                             sx={{ minHeight: 64, mx: 1, borderRadius: 2 }}
                         >
                             <ListItemIcon>

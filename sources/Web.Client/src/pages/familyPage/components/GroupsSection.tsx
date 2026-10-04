@@ -21,6 +21,7 @@ import { groupsApi } from 'src/lib/api/groups/groupsApi';
 import type { IGroup } from 'src/lib/api/groups/groupsTypes';
 import { learnersApi } from 'src/lib/api/learners/learnersApi';
 import type { ILearner } from 'src/lib/api/learners/learnersTypes';
+import { testIds } from 'src/lib/testing/testIds';
 import type { NotificationKey } from 'src/lib/translations/translationKeys';
 import GroupDialog from 'src/pages/familyPage/components/GroupDialog';
 
@@ -31,9 +32,7 @@ interface IProps {
 }
 
 type DialogState =
-    | { kind: 'closed' }
-    | { kind: 'edit'; group?: IGroup }
-    | { kind: 'delete'; group: IGroup };
+    { kind: 'closed' } | { kind: 'edit'; group?: IGroup } | { kind: 'delete'; group: IGroup };
 
 /** Groups of children (LP-108): list with the children's avatars; admins add, edit and delete. */
 const GroupsSection: React.FC<IProps> = (props) => {
@@ -95,7 +94,12 @@ const GroupsSection: React.FC<IProps> = (props) => {
     const errorKey = actionErrorKey ?? loadErrorKey;
 
     return (
-        <Stack spacing={2} component="section" aria-labelledby="groups-heading">
+        <Stack
+            spacing={2}
+            component="section"
+            aria-labelledby="groups-heading"
+            data-testid={testIds.family.groups}
+        >
             <Box
                 sx={{
                     display: 'flex',
@@ -130,6 +134,7 @@ const GroupsSection: React.FC<IProps> = (props) => {
                             return (
                                 <ListItem
                                     key={group.id}
+                                    data-testid={testIds.family.groupItem(group.id)}
                                     secondaryAction={
                                         isAdmin && (
                                             <Box sx={{ display: 'flex', gap: 1 }}>
@@ -193,6 +198,7 @@ const GroupsSection: React.FC<IProps> = (props) => {
                     learners={learners}
                     onClose={() => setDialog({ kind: 'closed' })}
                     onSaved={handleSaved}
+                    testId={testIds.family.groupDialog}
                 />
             )}
             {dialog.kind === 'delete' && (
@@ -202,6 +208,7 @@ const GroupsSection: React.FC<IProps> = (props) => {
                     text={getResource('captionConfirmDeleteGroup', { name: dialog.group.name })}
                     confirmLabel={getResource('labelDelete')}
                     disabled={isDeleting}
+                    testId={testIds.family.groupDialog}
                     onConfirm={() => void handleDelete(dialog.group)}
                     onCancel={() => setDialog({ kind: 'closed' })}
                 />

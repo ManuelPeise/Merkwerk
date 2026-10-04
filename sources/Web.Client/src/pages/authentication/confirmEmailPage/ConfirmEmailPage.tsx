@@ -5,6 +5,7 @@ import LoadingIndicator from 'src/components/feedback/LoadingIndicator';
 import AuthCard from 'src/components/layout/AuthCard';
 import { useTranslation } from 'src/hooks/useTranslation';
 import { authenticationApi } from 'src/lib/api/authentication/authenticationApi';
+import { testIds } from 'src/lib/testing/testIds';
 import { routes } from 'src/navigation/routes';
 
 type ConfirmState = 'loading' | 'success' | 'failed';
@@ -36,7 +37,7 @@ const ConfirmEmailPage: React.FC = () => {
     }, [userId, token]);
 
     return (
-        <AuthCard title={getResource('captionConfirmEmail')}>
+        <AuthCard title={getResource('captionConfirmEmail')} testId={testIds.auth.confirmEmail}>
             {confirmState === 'loading' ? (
                 <LoadingIndicator />
             ) : (

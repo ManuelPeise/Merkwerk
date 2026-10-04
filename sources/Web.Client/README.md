@@ -45,18 +45,42 @@ npm run dev -- --host
 
 Open `http://<your-PC-IP>:65350` from the device. This is a development server, not a production deployment.
 
+## E2E tests (Playwright)
+
+Playwright tests are in `e2e/` and run against the local stack. Start prerequisites first:
+
+1. backend API (`Web.Core`) on `http://localhost:5138`
+2. MySQL
+3. Mailpit on `http://localhost:8025`
+4. UI dev server (Playwright starts this automatically via `webServer` if not running)
+
+Run smoke tests:
+
+```powershell
+cd sources\Web.Client
+npm run test:e2e
+```
+
+Interactive runner:
+
+```powershell
+npm run test:e2e:ui
+```
+
 ## Scripts
 
-| Command | Purpose |
-| --- | --- |
-| `npm run dev` | Vite development server with hot reload |
-| `npm run build` | TypeScript project build and production bundle to `dist/` |
-| `npm run preview` | Serve the built bundle locally |
-| `npm run lint` | ESLint and translation-key parity/prefix checks |
-| `npm run lint:fix` | ESLint with automatic fixes |
-| `npm run format` | Format UI files with Prettier |
-| `npm run format:check` | Check UI formatting without writing |
-| `npm run i18n:check` | Check translation keys in German and English |
+| Command                | Purpose                                                   |
+| ---------------------- | --------------------------------------------------------- |
+| `npm run dev`          | Vite development server with hot reload                   |
+| `npm run build`        | TypeScript project build and production bundle to `dist/` |
+| `npm run preview`      | Serve the built bundle locally                            |
+| `npm run lint`         | ESLint and translation-key parity/prefix checks           |
+| `npm run lint:fix`     | ESLint with automatic fixes                               |
+| `npm run format`       | Format UI files with Prettier                             |
+| `npm run format:check` | Check UI formatting without writing                       |
+| `npm run i18n:check`   | Check translation keys in German and English              |
+| `npm run test:e2e`     | Run Playwright smoke tests (desktop + mobile)             |
+| `npm run test:e2e:ui`  | Run Playwright in UI mode                                 |
 
 ## Structure
 

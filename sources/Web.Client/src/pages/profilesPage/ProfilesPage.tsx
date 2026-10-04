@@ -7,6 +7,7 @@ import { useAuthentication } from 'src/hooks/useAuthentication';
 import { useTranslation } from 'src/hooks/useTranslation';
 import { devicesApi } from 'src/lib/api/devices/devicesApi';
 import type { IDeviceProfile } from 'src/lib/api/devices/devicesTypes';
+import { testIds } from 'src/lib/testing/testIds';
 import type { NotificationKey } from 'src/lib/translations/translationKeys';
 import { routes, type IPairState } from 'src/navigation/routes';
 
@@ -67,7 +68,7 @@ const ProfilesPage: React.FC = () => {
     }
 
     return (
-        <Stack spacing={3}>
+        <Stack spacing={3} data-testid={testIds.practice.profiles}>
             <Typography variant="h1">{getResource('captionWhoIsPracticing')}</Typography>
             {errorKey && <Alert severity="error">{getResource(errorKey)}</Alert>}
             {profiles.length === 0 && !errorKey && (
@@ -91,6 +92,7 @@ const ProfilesPage: React.FC = () => {
                         name={profile.firstName}
                         avatarId={profile.avatarId}
                         disabled={isSigningIn}
+                        testId={testIds.practice.profileTile(profile.learnerId)}
                         onSelect={() => void handleSelect(profile.learnerId)}
                     />
                 ))}

@@ -11,6 +11,7 @@ import { useForm } from 'src/hooks/useForm';
 import type { ILoginRequest } from 'src/lib/api/authentication/authenticationTypes';
 import { problemTitles } from 'src/lib/api/problemTitles';
 import type { ApiError } from 'src/lib/api/types/apiError';
+import { testIds } from 'src/lib/testing/testIds';
 import type { NotificationKey } from 'src/lib/translations/translationKeys';
 import { getEmailError } from 'src/lib/auth/authValidation';
 import { routes } from 'src/navigation/routes';
@@ -65,7 +66,7 @@ const LoginPage: React.FC = () => {
     const emailErrorKey = getEmailError(state.email);
 
     return (
-        <AuthCard title={getResource('captionLogin')}>
+        <AuthCard title={getResource('captionLogin')} testId={testIds.auth.login}>
             <form onSubmit={handleSubmit} noValidate>
                 <Stack spacing={2}>
                     {errorKey && <Alert severity="error">{getResource(errorKey)}</Alert>}

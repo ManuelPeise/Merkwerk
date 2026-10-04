@@ -1,6 +1,7 @@
 import React from 'react';
 import { Stack, Typography } from '@mui/material';
 import { useTranslation } from 'src/hooks/useTranslation';
+import { testIds } from 'src/lib/testing/testIds';
 import DevicesSection from 'src/pages/devicesPage/components/DevicesSection';
 import PairingCodeSection from 'src/pages/devicesPage/components/PairingCodeSection';
 
@@ -9,7 +10,7 @@ const DevicesPage: React.FC = () => {
     const { getResource } = useTranslation();
 
     return (
-        <Stack spacing={5}>
+        <Stack spacing={5} data-testid={testIds.devices.page}>
             <Stack spacing={1}>
                 <Typography variant="h1">{getResource('captionDevices')}</Typography>
                 <Typography color="text.secondary">

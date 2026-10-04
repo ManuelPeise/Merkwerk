@@ -24,6 +24,7 @@ import { invitationsApi } from 'src/lib/api/invitations/invitationsApi';
 import type { IInvitation } from 'src/lib/api/invitations/invitationsTypes';
 import { membersApi } from 'src/lib/api/members/membersApi';
 import type { IMember, OrganizationRole } from 'src/lib/api/members/membersTypes';
+import { testIdOf, testIds } from 'src/lib/testing/testIds';
 import type { LabelKey, NotificationKey } from 'src/lib/translations/translationKeys';
 import { utils } from 'src/lib/utils';
 import ConfirmDialog from 'src/components/feedback/ConfirmDialog';
@@ -32,7 +33,11 @@ interface IProps {
     isAdmin: boolean;
 }
 
-type Feedback = { severity: 'success' | 'error'; key: NotificationKey; values?: Record<string, string> };
+type Feedback = {
+    severity: 'success' | 'error';
+    key: NotificationKey;
+    values?: Record<string, string>;
+};
 
 type ConfirmState =
     | { kind: 'none' }
@@ -119,7 +124,11 @@ const AdultsSection: React.FC<IProps> = (props) => {
         }
 
         setEmail('');
-        setFeedback({ severity: 'success', key: 'notificationInvitationSent', values: { email: address } });
+        setFeedback({
+            severity: 'success',
+            key: 'notificationInvitationSent',
+            values: { email: address },
+        });
         reload();
     };
 
@@ -137,19 +146,29 @@ const AdultsSection: React.FC<IProps> = (props) => {
         setIsBusy(true);
         const result =
             confirm.kind === 'remove'
-                ? await membersApi.remove.post({ body: { membershipId: confirm.member.membershipId } })
-                : await authenticationApi.adminResetPassword.post({ body: { userId: confirm.member.userId } });
+                ? await membersApi.remove.post({
+                      body: { membershipId: confirm.member.membershipId },
+                  })
+                : await authenticationApi.adminResetPassword.post({
+                      body: { userId: confirm.member.userId },
+                  });
         setIsBusy(false);
 
         if (result.error) {
             setFeedback({
                 severity: 'error',
-                key: result.error.status === 409 ? 'notificationMemberCannotBeRemoved' : result.error.messageKey,
+                key:
+                    result.error.status === 409
+                        ? 'notificationMemberCannotBeRemoved'
+                        : result.error.messageKey,
             });
         } else {
             setFeedback({
                 severity: 'success',
-                key: confirm.kind === 'remove' ? 'notificationMemberRemoved' : 'notificationStartPasswordSent',
+                key:
+                    confirm.kind === 'remove'
+                        ? 'notificationMemberRemoved'
+                        : 'notificationStartPasswordSent',
             });
         }
 
@@ -160,7 +179,12 @@ const AdultsSection: React.FC<IProps> = (props) => {
     const isEmailValid = utils.validation.validateEmail(email.trim());
 
     return (
-        <Stack spacing={2} component="section" aria-labelledby="adults-heading">
+        <Stack
+            spacing={2}
+            component="section"
+            aria-labelledby="adults-heading"
+            data-testid={testIds.family.adults}
+        >
             <Typography variant="h2" id="adults-heading">
                 {getResource('captionAdults')}
             </Typography>
@@ -179,6 +203,7 @@ const AdultsSection: React.FC<IProps> = (props) => {
                         {members.map((member) => (
                             <ListItem
                                 key={member.membershipId}
+                                data-testid={testIds.family.memberItem(member.membershipId)}
                                 secondaryAction={
                                     isAdmin && (
                                         <Box sx={{ display: 'flex', gap: 1 }}>
@@ -186,7 +211,9 @@ const AdultsSection: React.FC<IProps> = (props) => {
                                                 aria-label={getResource('labelResetPassword', {
                                                     name: member.displayName,
                                                 })}
-                                                onClick={() => setConfirm({ kind: 'resetPassword', member })}
+                                                onClick={() =>
+                                                    setConfirm({ kind: 'resetPassword', member })
+                                                }
                                             >
                                                 <ResetPasswordIcon />
                                             </IconButton>
@@ -195,7 +222,9 @@ const AdultsSection: React.FC<IProps> = (props) => {
                                                     aria-label={getResource('labelRemoveMember', {
                                                         name: member.displayName,
                                                     })}
-                                                    onClick={() => setConfirm({ kind: 'remove', member })}
+                                                    onClick={() =>
+                                                        setConfirm({ kind: 'remove', member })
+                                                    }
                                                 >
                                                     <DeleteIcon />
                                                 </IconButton>
@@ -206,11 +235,21 @@ const AdultsSection: React.FC<IProps> = (props) => {
                             >
                                 <ListItemText
                                     primary={
-                                        <Box component="span" sx={{ display: 'flex', gap: 1, flexWrap: 'wrap' }}>
+                                        <Box
+                                            component="span"
+                                            sx={{ display: 'flex', gap: 1, flexWrap: 'wrap' }}
+                                        >
                                             <span>{member.displayName}</span>
-                                            <Chip size="small" label={getResource(roleLabel[member.role])} />
+                                            <Chip
+                                                size="small"
+                                                label={getResource(roleLabel[member.role])}
+                                            />
                                             {member.isOwner && (
-                                                <Chip size="small" variant="outlined" label={getResource('labelOwner')} />
+                                                <Chip
+                                                    size="small"
+                                                    variant="outlined"
+                                                    label={getResource('labelOwner')}
+                                                />
                                             )}
                                         </Box>
                                     }
@@ -263,6 +302,7 @@ const AdultsSection: React.FC<IProps> = (props) => {
                                     label={getResource('labelInvite')}
                                     type="submit"
                                     disabled={!isEmailValid || isBusy}
+                                    testId={testIdOf(testIds.family.adults, 'invite')}
                                 />
                             </Box>
                         </Stack>
@@ -272,13 +312,16 @@ const AdultsSection: React.FC<IProps> = (props) => {
                         {getResource('captionInvitations')}
                     </Typography>
                     {invitations.length === 0 ? (
-                        <Typography color="text.secondary">{getResource('captionNoInvitations')}</Typography>
+                        <Typography color="text.secondary">
+                            {getResource('captionNoInvitations')}
+                        </Typography>
                     ) : (
                         <Card>
                             <List>
                                 {invitations.map((invitation) => (
                                     <ListItem
                                         key={invitation.id}
+                                        data-testid={testIds.family.invitationItem(invitation.id)}
                                         secondaryAction={
                                             <IconButton
                                                 aria-label={getResource('labelRevokeInvitation', {
@@ -316,13 +359,16 @@ const AdultsSection: React.FC<IProps> = (props) => {
                         { name: confirm.member.displayName },
                     )}
                     text={getResource(
-                        confirm.kind === 'remove' ? 'captionConfirmRemoveMember' : 'captionConfirmResetPassword',
+                        confirm.kind === 'remove'
+                            ? 'captionConfirmRemoveMember'
+                            : 'captionConfirmResetPassword',
                         { name: confirm.member.displayName },
                     )}
                     confirmLabel={getResource(
                         confirm.kind === 'remove' ? 'labelRemove' : 'labelSendStartPassword',
                     )}
                     disabled={isBusy}
+                    testId={testIdOf(testIds.family.adults, 'confirm-dialog')}
                     onConfirm={() => void handleConfirm()}
                     onCancel={() => setConfirm({ kind: 'none' })}
                 />

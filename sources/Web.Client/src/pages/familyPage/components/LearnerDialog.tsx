@@ -11,6 +11,7 @@ import {
     ToggleButton,
     ToggleButtonGroup,
     Typography,
+    type DialogProps,
 } from '@mui/material';
 import AvatarImage from 'src/components/kids/AvatarImage';
 import FormButton from 'src/components/input/FormButton';
@@ -20,6 +21,7 @@ import { useTranslation } from 'src/hooks/useTranslation';
 import { getFieldErrors } from 'src/lib/api/getFieldErrors';
 import { learnersApi } from 'src/lib/api/learners/learnersApi';
 import type { ILearner } from 'src/lib/api/learners/learnersTypes';
+import { testIdOf } from 'src/lib/testing/testIds';
 import type { NotificationKey } from 'src/lib/translations/translationKeys';
 
 /** Mount it only while open (the form starts from the props). */
@@ -27,6 +29,7 @@ interface IProps {
     open: boolean;
     /** Edit this child; without it a new one is created. */
     learner?: ILearner;
+    testId?: string;
     onClose: () => void;
     onSaved: () => void;
 }
@@ -48,7 +51,7 @@ const toForm = (learner?: ILearner): ILearnerForm => ({
 
 /** Create or edit a child: first name or nickname, grade, built-in picture – nothing else (privacy). */
 const LearnerDialog: React.FC<IProps> = (props) => {
-    const { open, learner, onClose, onSaved } = props;
+    const { open, learner, testId, onClose, onSaved } = props;
     const { getResource } = useTranslation();
 
     const [form, setForm] = React.useState<ILearnerForm>(() => toForm(learner));
@@ -88,7 +91,17 @@ const LearnerDialog: React.FC<IProps> = (props) => {
     };
 
     return (
-        <Dialog open={open} onClose={onClose} maxWidth="sm" fullWidth>
+        <Dialog
+            open={open}
+            onClose={onClose}
+            maxWidth="sm"
+            fullWidth
+            slotProps={{
+                paper: {
+                    'data-testid': testId,
+                } as NonNullable<DialogProps['slotProps']>['paper'],
+            }}
+        >
             <form onSubmit={handleSubmit} noValidate>
                 <DialogTitle>
                     {getResource(learner ? 'captionEditChild' : 'captionAddChild')}
@@ -103,6 +116,7 @@ const LearnerDialog: React.FC<IProps> = (props) => {
                             value={form.displayName}
                             errorText={fieldErrors.displayName}
                             helperText={getResource('captionChildNameHint')}
+                            testId={testIdOf(testId, 'name')}
                             onChange={(displayName) => setForm({ ...form, displayName })}
                         />
                         <Box>
@@ -120,7 +134,11 @@ const LearnerDialog: React.FC<IProps> = (props) => {
                                 }}
                             >
                                 {grades.map((grade) => (
-                                    <ToggleButton key={grade} value={grade} sx={{ minWidth: 64, minHeight: 56 }}>
+                                    <ToggleButton
+                                        key={grade}
+                                        value={grade}
+                                        sx={{ minWidth: 64, minHeight: 56 }}
+                                    >
                                         {getResource('captionGrade', { grade })}
                                     </ToggleButton>
                                 ))}
@@ -150,7 +168,9 @@ const LearnerDialog: React.FC<IProps> = (props) => {
                                             sx={{
                                                 p: 0.5,
                                                 border: '3px solid',
-                                                borderColor: isSelected ? 'primary.main' : 'transparent',
+                                                borderColor: isSelected
+                                                    ? 'primary.main'
+                                                    : 'transparent',
                                             }}
                                         >
                                             <AvatarImage
@@ -166,11 +186,17 @@ const LearnerDialog: React.FC<IProps> = (props) => {
                     </Stack>
                 </DialogContent>
                 <DialogActions sx={{ p: 2, gap: 1 }}>
-                    <FormButton label={getResource('labelCancel')} intent="cancel" onClick={onClose} />
+                    <FormButton
+                        label={getResource('labelCancel')}
+                        intent="cancel"
+                        testId={testIdOf(testId, 'cancel')}
+                        onClick={onClose}
+                    />
                     <FormButton
                         label={getResource('labelSave')}
                         type="submit"
                         disabled={!isValid || isSaving}
+                        testId={testIdOf(testId, 'save')}
                     />
                 </DialogActions>
             </form>

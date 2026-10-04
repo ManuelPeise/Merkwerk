@@ -5,11 +5,12 @@ import { Link } from 'react-router-dom';
 interface IProps {
     label: string;
     to: string;
+    testId?: string;
 }
 
 /** Text link inside forms, e.g. "Forgot password?". */
 const FormLink: React.FC<IProps> = (props) => {
-    const { label, to } = props;
+    const { label, to, testId } = props;
 
     return (
         <MuiLink
@@ -21,6 +22,7 @@ const FormLink: React.FC<IProps> = (props) => {
                 alignItems: 'center',
                 minHeight: 48,
             }}
+            data-testid={testId}
         >
             {label}
         </MuiLink>

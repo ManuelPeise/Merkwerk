@@ -16,6 +16,7 @@ import FormButton from 'src/components/input/FormButton';
 import { useTranslation } from 'src/hooks/useTranslation';
 import { devicesApi } from 'src/lib/api/devices/devicesApi';
 import type { IDevice } from 'src/lib/api/devices/devicesTypes';
+import { testIdOf, testIds } from 'src/lib/testing/testIds';
 import type { NotificationKey } from 'src/lib/translations/translationKeys';
 import ConfirmDialog from 'src/components/feedback/ConfirmDialog';
 
@@ -81,7 +82,12 @@ const DevicesSection: React.FC = () => {
         ].join(' · ');
 
     return (
-        <Stack spacing={2} component="section" aria-labelledby="devices-heading">
+        <Stack
+            spacing={2}
+            component="section"
+            aria-labelledby="devices-heading"
+            data-testid={testIds.devices.pairedList}
+        >
             <Box
                 sx={{
                     display: 'flex',
@@ -113,6 +119,7 @@ const DevicesSection: React.FC = () => {
                         {devices.map((device) => (
                             <ListItem
                                 key={device.id}
+                                data-testid={testIds.devices.deviceItem(device.id)}
                                 secondaryAction={
                                     <IconButton
                                         aria-label={getResource('labelRevokeDevice', {
@@ -138,6 +145,7 @@ const DevicesSection: React.FC = () => {
                     text={getResource('captionConfirmRevokeDevice', { name: toRevoke.name })}
                     confirmLabel={getResource('labelRevoke')}
                     disabled={isRevoking}
+                    testId={testIdOf(testIds.devices.pairedList, 'confirm-dialog')}
                     onConfirm={() => void handleRevoke(toRevoke)}
                     onCancel={() => setToRevoke(null)}
                 />

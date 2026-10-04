@@ -5,6 +5,7 @@ import FormButton from 'src/components/input/FormButton';
 import { useTranslation } from 'src/hooks/useTranslation';
 import { devicesApi } from 'src/lib/api/devices/devicesApi';
 import type { IPairingCode } from 'src/lib/api/devices/devicesTypes';
+import { testIds } from 'src/lib/testing/testIds';
 import type { NotificationKey } from 'src/lib/translations/translationKeys';
 
 const qrCodeSize = 240;
@@ -65,11 +66,18 @@ const PairingCodeSection: React.FC = () => {
     const qrDataUrl = qrCode && qrCode.url === pairingUrl ? qrCode.dataUrl : null;
 
     return (
-        <Stack spacing={2} component="section" aria-labelledby="pairing-heading">
+        <Stack
+            spacing={2}
+            component="section"
+            aria-labelledby="pairing-heading"
+            data-testid={testIds.devices.pairingCode}
+        >
             <Typography variant="h2" id="pairing-heading">
                 {getResource('captionPairNewDevice')}
             </Typography>
-            <Typography color="text.secondary">{getResource('captionPairingInstructions')}</Typography>
+            <Typography color="text.secondary">
+                {getResource('captionPairingInstructions')}
+            </Typography>
 
             {errorKey && <Alert severity="error">{getResource(errorKey)}</Alert>}
 
@@ -89,16 +97,24 @@ const PairingCodeSection: React.FC = () => {
                                     sx={{ width: qrCodeSize, height: qrCodeSize, flexShrink: 0 }}
                                 />
                             ) : (
-                                <Box sx={{ width: qrCodeSize, height: qrCodeSize, flexShrink: 0 }} />
+                                <Box
+                                    sx={{ width: qrCodeSize, height: qrCodeSize, flexShrink: 0 }}
+                                />
                             )}
-                            <Stack spacing={1} sx={{ alignItems: { xs: 'center', sm: 'flex-start' } }}>
+                            <Stack
+                                spacing={1}
+                                sx={{ alignItems: { xs: 'center', sm: 'flex-start' } }}
+                            >
                                 <Typography variant="body2" color="text.secondary">
                                     {getResource('labelPairingCode')}
                                 </Typography>
                                 <Typography
                                     component="p"
                                     variant="h2"
-                                    sx={{ fontVariantNumeric: 'tabular-nums', letterSpacing: '0.2em' }}
+                                    sx={{
+                                        fontVariantNumeric: 'tabular-nums',
+                                        letterSpacing: '0.2em',
+                                    }}
                                 >
                                     {pairingCode.code}
                                 </Typography>
@@ -115,7 +131,9 @@ const PairingCodeSection: React.FC = () => {
 
             <Box>
                 <FormButton
-                    label={getResource(pairingCode ? 'labelCreateNewPairingCode' : 'labelCreatePairingCode')}
+                    label={getResource(
+                        pairingCode ? 'labelCreateNewPairingCode' : 'labelCreatePairingCode',
+                    )}
                     disabled={isBusy}
                     onClick={() => void handleCreate()}
                 />

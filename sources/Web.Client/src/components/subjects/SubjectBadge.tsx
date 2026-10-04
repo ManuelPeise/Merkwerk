@@ -7,6 +7,7 @@ interface IProps {
     subject: Pick<ISubject, 'name' | 'color' | 'icon'>;
     /** `small` for lists (icon beside the name), `large` for tiles (64 px icon above the name). */
     size?: 'small' | 'large';
+    testId?: string;
 }
 
 /**
@@ -14,11 +15,12 @@ interface IProps {
  * name: the color is never the only hint.
  */
 const SubjectBadge: React.FC<IProps> = (props) => {
-    const { subject, size = 'small' } = props;
+    const { subject, size = 'small', testId } = props;
     const chipSize = size === 'large' ? 64 : 40;
 
     return (
         <Box
+            data-testid={testId}
             sx={{
                 display: 'inline-flex',
                 flexDirection: size === 'large' ? 'column' : 'row',

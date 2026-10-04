@@ -6,16 +6,18 @@ interface IProps {
     /** Accessible name (already translated) – the button shows only an icon. */
     label: string;
     color?: 'primary' | 'secondary';
+    testId?: string;
     onClick: () => void;
 }
 
 const FloatingActionButton: React.FC<IProps> = (props) => {
-    const { icon, label, color = 'primary', onClick } = props;
+    const { icon, label, color = 'primary', testId, onClick } = props;
 
     return (
         <Fab
             color={color}
             aria-label={label}
+            data-testid={testId}
             onClick={onClick}
             sx={{ position: 'fixed', bottom: 24, right: 24 }}
         >

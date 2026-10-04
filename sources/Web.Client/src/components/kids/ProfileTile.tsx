@@ -6,17 +6,19 @@ interface IProps {
     name: string;
     avatarId?: string;
     disabled?: boolean;
+    testId?: string;
     onSelect: () => void;
 }
 
 /** Profile choice tile: same look as ChoiceTile, but a button that signs the child in. */
 const ProfileTile: React.FC<IProps> = (props) => {
-    const { name, avatarId, disabled, onSelect } = props;
+    const { name, avatarId, disabled, testId, onSelect } = props;
 
     return (
         <Card sx={{ height: '100%' }}>
             <CardActionArea
                 disabled={disabled}
+                data-testid={testId}
                 onClick={onSelect}
                 sx={{
                     height: '100%',

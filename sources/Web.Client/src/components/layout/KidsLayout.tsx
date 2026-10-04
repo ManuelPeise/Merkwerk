@@ -6,6 +6,7 @@ import { SwitchAccountIcon } from 'src/components/icons/AppIcons';
 import { kidsHeaderHeight } from 'src/components/layout/layoutConstants';
 import { useAuthentication } from 'src/hooks/useAuthentication';
 import { roles } from 'src/lib/auth/roles';
+import { testIds } from 'src/lib/testing/testIds';
 import { useTranslation } from 'src/hooks/useTranslation';
 import { routes } from 'src/navigation/routes';
 
@@ -26,7 +27,10 @@ const KidsLayout: React.FC = () => {
     };
 
     return (
-        <Box sx={{ minHeight: '100dvh', display: 'flex', flexDirection: 'column' }}>
+        <Box
+            sx={{ minHeight: '100dvh', display: 'flex', flexDirection: 'column' }}
+            data-testid={testIds.layout.kids}
+        >
             <AppBar
                 position="static"
                 color="inherit"

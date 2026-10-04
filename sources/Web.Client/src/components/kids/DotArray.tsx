@@ -10,6 +10,7 @@ interface IProps {
     onChange: (firstAddend: number, secondAddend: number) => void;
     /** Mark the current attempt as having used a learning aid. */
     onUse: () => void;
+    testId?: string;
 }
 
 const blockSize = 5;
@@ -19,7 +20,7 @@ type Addend = 'first' | 'second';
 
 /** A twenty-frame grouped into rows of five dots, with the two addends shown separately. */
 const DotArray: React.FC<IProps> = (props) => {
-    const { allowed, firstAddend, secondAddend, onChange, onUse } = props;
+    const { allowed, firstAddend, secondAddend, onChange, onUse, testId } = props;
     const { getResource } = useTranslation();
     const [activeAddend, setActiveAddend] = React.useState<Addend>('first');
 
@@ -58,7 +59,7 @@ const DotArray: React.FC<IProps> = (props) => {
     };
 
     return (
-        <Paper component="section" variant="outlined" sx={{ p: 2 }}>
+        <Paper component="section" variant="outlined" sx={{ p: 2 }} data-testid={testId}>
             <Stack spacing={2}>
                 <Typography component="h2" variant="h6">
                     {getResource('captionDotArray')}

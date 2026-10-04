@@ -17,6 +17,7 @@ import {
     getPasswordError,
     getPasswordRepeatError,
 } from 'src/lib/auth/authValidation';
+import { testIds } from 'src/lib/testing/testIds';
 import type { NotificationKey } from 'src/lib/translations/translationKeys';
 import { utils } from 'src/lib/utils';
 import { routes } from 'src/navigation/routes';
@@ -108,6 +109,7 @@ const SetupPage: React.FC = () => {
         <AuthCard
             title={getResource('captionSetup')}
             subtitle={getResource('captionSetupDescription')}
+            testId={testIds.auth.setup}
         >
             <form onSubmit={handleSubmit} noValidate>
                 <Stack spacing={2}>

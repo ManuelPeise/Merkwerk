@@ -5,15 +5,17 @@ import { LogoutIcon, MenuIcon } from 'src/components/icons/AppIcons';
 import LanguageSwitch from 'src/components/layout/components/LanguageSwitch';
 import { headerHeight } from 'src/components/layout/layoutConstants';
 import { useAuthentication } from 'src/hooks/useAuthentication';
+import { testIdOf } from 'src/lib/testing/testIds';
 
 interface IProps {
     /** Shown on small screens, where the drawer is hidden until opened. */
     showMenuButton: boolean;
     onMenuClick: () => void;
+    testId?: string;
 }
 
 const HeaderBar: React.FC<IProps> = (props) => {
-    const { showMenuButton, onMenuClick } = props;
+    const { showMenuButton, onMenuClick, testId } = props;
 
     const { getResource } = useTranslation();
     const { isAuthenticated, logout } = useAuthentication();
@@ -23,6 +25,7 @@ const HeaderBar: React.FC<IProps> = (props) => {
             position="fixed"
             color="inherit"
             elevation={0}
+            data-testid={testId}
             sx={{
                 borderBottom: 1,
                 borderColor: 'divider',
@@ -46,7 +49,7 @@ const HeaderBar: React.FC<IProps> = (props) => {
                     {getResource('captionAppTitle')}
                 </Typography>
                 <Box sx={{ ml: 'auto', display: 'flex', alignItems: 'center', gap: 1 }}>
-                    <LanguageSwitch />
+                    <LanguageSwitch testId={testIdOf(testId, 'language-switch')} />
                     {isAuthenticated && (
                         <IconButton
                             size="large"

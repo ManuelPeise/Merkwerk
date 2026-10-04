@@ -1,3 +1,5 @@
+using System.Text.Json;
+using System.Text.Json.Serialization;
 using Data.Accessor.DI;
 using Data.Database.Abstractions;
 using Logic.Authentication;
@@ -30,7 +32,14 @@ public static class ServiceRegistrationExtensions
         // The refresh cookie path depends on it (AuthCookies).
         services.AddRouting(options => options.LowercaseUrls = true);
         services.AddControllers(options =>
-            options.Conventions.Add(new RouteTokenTransformerConvention(new SlugifyParameterTransformer())));
+                options.Conventions.Add(new RouteTokenTransformerConvention(new SlugifyParameterTransformer())))
+            .AddJsonOptions(options =>
+            {
+                // Same rules as ExerciseJson (LP-110): enums as camelCase strings; the "type" discriminator of
+                // polymorphic question content may come anywhere in the object.
+                options.JsonSerializerOptions.AllowOutOfOrderMetadataProperties = true;
+                options.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter(JsonNamingPolicy.CamelCase));
+            });
 
         // OpenAPI document at /openapi/v1.json; Swagger UI renders it (see AppConfigurationExtensions).
         services.AddOpenApi(options => options.AddDocumentTransformer((document, _, _) =>

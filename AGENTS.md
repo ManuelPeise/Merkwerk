@@ -122,8 +122,11 @@ Per module: `I<Name>Service` in `Logic.Shared.Interfaces` + `internal` implement
   Exception (LP-106): anonymous device requests – `IDeviceRepository.FindByTokenHashAsync`,
   `IPairingCodeRepository.FindUsableByHashAsync`, `ILearnerSessionRepository.FindByTokenHashAsync` and
   `ILearnerRepository.ListForDeviceAsync`/`FindForDeviceAsync` (filtered explicitly by the device's organization).
-- Exercise content (`Question.Payload`, `Question.Solution`, generator parameters) is stored in JSON columns with polymorphic types
-  (`System.Text.Json`, type discriminator). A new question type = a new class, **no** migration.
+- Exercise content (`QuestionEntity.Payload`/`Solution`, `ExerciseVersionEntity.Content`, later generator parameters)
+  is stored in MySQL `JSON` columns with polymorphic records (`Shared.Models.Exercises.Questions`, discriminator `type`,
+  ADR 005, LP-110). Always serialize with `ExerciseJson.Options` (`HasJsonColumn()` in Data.Database does that):
+  MySQL returns JSON keys sorted, so `AllowOutOfOrderMetadataProperties` must stay on – the API uses the same setting.
+  A new question type = new payload + solution records, **no** migration. Published versions are never changed.
 - Migrations: `dotnet ef migrations add <Name> -p Data.Database -s Web.Core` (run `dotnet tool restore` once – dotnet-ef is
   pinned in `.config/dotnet-tools.json`). Names in English, PascalCase. Never edit a generated migration by hand without review.
   MySQL does not run DDL transactionally → keep migrations small, never mix schema and data changes.

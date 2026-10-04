@@ -12,7 +12,7 @@ Status values: **Proposed**, **Accepted**, or **Superseded by NNN**.
 | [002](002-dotnet-10-single-process.md) | Backend on .NET 10 / ASP.NET Core as a single process | Accepted |
 | [003](003-blazor-for-all-expo-later.md) | Blazor for all users; Expo later | Superseded by 015 |
 | [004](004-mysql-ef-core-oracle-provider.md) | MySQL 8.4 with EF Core 10 and Oracle's provider (no Pomelo) | Accepted |
-| [005](005-exercise-content-as-json.md) | Exercise content as JSON columns with polymorphic C# types | Proposed |
+| [005](005-exercise-content-as-json.md) | Exercise content as JSON columns with polymorphic C# types | Accepted |
 | [006](006-children-sign-in-via-paired-devices.md) | Children sign in via paired devices without passwords | Proposed |
 | [007](007-tenant-isolation.md) | Tenant isolation using `OrganizationId`, query filters, and service checks | Proposed |
 | [008](008-long-ids-with-client-ids.md) | `long` entity IDs; `Guid ClientId` for attempts and answers | Accepted |

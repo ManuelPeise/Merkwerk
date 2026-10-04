@@ -85,6 +85,53 @@ public sealed class AccountServiceTests(AuthDatabaseFixture database)
     }
 
     [Fact]
+    public async Task IsPasswordResetTokenValidAsync_TokenFromMail_IsValid()
+    {
+        var user = await _context.CreateUserAsync(Password);
+        await _context.AccountsAsync(a => a.RequestPasswordResetAsync(user.Email!, "de", default));
+        var token = _context.Mail.LinkValue(MailTemplate.PasswordReset, "token");
+
+        var valid = await _context.AccountsAsync(a => a.IsPasswordResetTokenValidAsync(user.Email!, token, default));
+
+        Assert.True(valid);
+    }
+
+    [Fact]
+    public async Task IsPasswordResetTokenValidAsync_TokenAlreadyUsed_IsInvalid()
+    {
+        // Arrange
+        var user = await _context.CreateUserAsync(Password);
+        await _context.AccountsAsync(a => a.RequestPasswordResetAsync(user.Email!, "de", default));
+        var token = _context.Mail.LinkValue(MailTemplate.PasswordReset, "token");
+        await _context.AccountsAsync(a => a.ResetPasswordAsync(user.Email!, token, NewPassword, default));
+
+        // Act
+        var valid = await _context.AccountsAsync(a => a.IsPasswordResetTokenValidAsync(user.Email!, token, default));
+
+        // Assert
+        Assert.False(valid);
+    }
+
+    [Fact]
+    public async Task IsPasswordResetTokenValidAsync_UnknownEmailOrGarbageToken_IsInvalid()
+    {
+        // Arrange: a real token, so only the address decides.
+        var user = await _context.CreateUserAsync(Password);
+        await _context.AccountsAsync(a => a.RequestPasswordResetAsync(user.Email!, "de", default));
+        var token = _context.Mail.LinkValue(MailTemplate.PasswordReset, "token");
+
+        // Act
+        var unknownEmail = await _context.AccountsAsync(
+            a => a.IsPasswordResetTokenValidAsync("nobody@example.org", token, default));
+        var garbageToken = await _context.AccountsAsync(
+            a => a.IsPasswordResetTokenValidAsync(user.Email!, "not-a-token", default));
+
+        // Assert
+        Assert.False(unknownEmail);
+        Assert.False(garbageToken);
+    }
+
+    [Fact]
     public async Task ConfirmEmailAsync_TokenFromMail_ConfirmsAddress()
     {
         // Arrange

@@ -111,6 +111,24 @@ internal sealed partial class AccountService : IAccountService
         return AccountResult.Success();
     }
 
+    public async Task<bool> IsPasswordResetTokenValidAsync(string email, string token, CancellationToken cancellationToken)
+    {
+        var user = await _userManager.FindByEmailAsync(email);
+        var decoded = TokenEncoding.DecodeFromUrl(token);
+
+        if (user is null || decoded is null)
+        {
+            return false;
+        }
+
+        // A used token fails here as well: the reset changes the security stamp the token was bound to.
+        return await _userManager.VerifyUserTokenAsync(
+            user,
+            _userManager.Options.Tokens.PasswordResetTokenProvider,
+            UserManager<UserEntity>.ResetPasswordTokenPurpose,
+            decoded);
+    }
+
     public async Task SendEmailConfirmationAsync(long userId, string language, CancellationToken cancellationToken)
     {
         var user = await FindAsync(userId) ?? throw new InvalidOperationException($"User {userId} does not exist.");

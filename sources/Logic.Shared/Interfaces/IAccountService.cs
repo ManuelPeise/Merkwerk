@@ -11,6 +11,12 @@ public interface IAccountService
     /// <summary>Sets a new password with the token from the mail and revokes all sessions of the user.</summary>
     Task<AccountResult> ResetPasswordAsync(string email, string token, string newPassword, CancellationToken cancellationToken);
 
+    /// <summary>
+    /// Whether the reset link can still be used (not used, not expired), so the page can say so before the user types a
+    /// password (LP-166). Unknown addresses answer false like a wrong token.
+    /// </summary>
+    Task<bool> IsPasswordResetTokenValidAsync(string email, string token, CancellationToken cancellationToken);
+
     /// <summary>Sends a confirmation link to the user's address (used when an address must be confirmed, e.g. after a change).</summary>
     Task SendEmailConfirmationAsync(long userId, string language, CancellationToken cancellationToken);
 

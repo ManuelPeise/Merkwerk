@@ -23,6 +23,8 @@ const FormButton: React.FC<IProps> = (props) => {
             disabled={disabled}
             data-testid={uiTestId}
             onClick={onClick}
+            // Labels stay on one line; a header row wraps the button below its heading instead (LP-166).
+            sx={{ whiteSpace: 'nowrap', flexShrink: 0 }}
         >
             {label}
         </Button>

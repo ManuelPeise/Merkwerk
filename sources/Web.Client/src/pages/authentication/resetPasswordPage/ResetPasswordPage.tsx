@@ -1,6 +1,7 @@
 ﻿import React from 'react';
 import { Alert, Button, Stack } from '@mui/material';
 import { Link, useSearchParams } from 'react-router-dom';
+import LoadingIndicator from 'src/components/feedback/LoadingIndicator';
 import FormButton from 'src/components/input/FormButton';
 import FormPasswordField from 'src/components/input/FormPasswordField';
 import AuthCard from 'src/components/layout/AuthCard';
@@ -24,6 +25,9 @@ const isResetPasswordValid = (model: IResetPasswordForm): boolean =>
 
 const resetPasswordCardUiTestId = uiTestId('auth-reset-password-card');
 
+/** checking = asking the API whether the link can still be used (LP-166). */
+type LinkState = 'checking' | 'valid' | 'invalid';
+
 /** /reset-password?email=...&token=... - the link from the reset mail. */
 const ResetPasswordPage: React.FC = () => {
     const { getResource } = useTranslation();
@@ -36,10 +40,32 @@ const ResetPasswordPage: React.FC = () => {
         isResetPasswordValid,
     );
 
+    const [linkState, setLinkState] = React.useState<LinkState>(
+        email === null || token === null ? 'invalid' : 'checking',
+    );
     const [errorKey, setErrorKey] = React.useState<NotificationKey | null>(null);
     const [fieldErrors, setFieldErrors] = React.useState<Record<string, string>>({});
     const [isSubmitting, setIsSubmitting] = React.useState(false);
     const [isDone, setIsDone] = React.useState(false);
+
+    // Used or expired links say so right away instead of after the password was typed (LP-166).
+    React.useEffect(() => {
+        if (email === null || token === null) {
+            return;
+        }
+
+        let isCurrent = true;
+
+        void authenticationApi.verifyResetToken.post({ body: { email, token } }).then((result) => {
+            if (isCurrent) {
+                setLinkState(result.error ? 'invalid' : 'valid');
+            }
+        });
+
+        return () => {
+            isCurrent = false;
+        };
+    }, [email, token]);
 
     const update = (change: Partial<IResetPasswordForm>) => {
         setFieldErrors({});
@@ -87,7 +113,18 @@ const ResetPasswordPage: React.FC = () => {
         </Button>
     );
 
-    if (email === null || token === null) {
+    if (linkState === 'checking') {
+        return (
+            <AuthCard
+                title={getResource('captionResetPassword')}
+                uiTestId={resetPasswordCardUiTestId}
+            >
+                <LoadingIndicator uiTestId={uiTestId('loading-reset-password-page')} />
+            </AuthCard>
+        );
+    }
+
+    if (linkState === 'invalid' || email === null || token === null) {
         return (
             <AuthCard
                 title={getResource('captionResetPassword')}

@@ -22,6 +22,7 @@ public sealed class EndpointPolicyTests
         ["Authentication.Logout"] = Anonymous,
         ["Authentication.ForgotPassword"] = Anonymous,
         ["Authentication.ResetPassword"] = Anonymous,
+        ["Authentication.VerifyResetToken"] = Anonymous,
         ["Authentication.ConfirmEmail"] = Anonymous,
         ["Authentication.Me"] = AuthorizationPolicies.AnySession,
         ["Authentication.ChangePassword"] = AuthorizationPolicies.PasswordChangeAllowed,

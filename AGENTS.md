@@ -173,6 +173,30 @@ touch targets ≥ 64×64 px, icons plus text and friendly feedback; no CDNs, no 
 - Logs contain no personal data (no names, e-mail addresses, tokens, children's answers).
 - Mails only to adults and never with data about children. Logs never contain e-mail addresses; links carry tokens only.
 
+### Permissions (LP-107)
+
+Roles hang on the membership (`MembershipEntity.Role`), never on the user. An adult without a membership gets no session
+(login answers 403 "No membership", refresh ends the session); removing a member revokes all their refresh tokens.
+
+| Permission | Child | Member | Org admin / owner |
+| --- | --- | --- | --- |
+| Solve assigned exercises (from LP-115) | yes | – | – |
+| See the family (adults, children) and its devices | – | yes | yes |
+| Pair devices (pairing code) and unpair them | – | yes | yes |
+| Create and assign exercises, see results (from LP-110) | – | yes | yes |
+| Create, change and delete children | – | no | yes |
+| Invite adults, revoke invitations, remove members, issue start passwords | – | no | yes |
+| Export and delete data (LP-209) | – | no | yes |
+
+- Policies (`Web.Core/Services/Authorization/AuthorizationPolicies.cs`): `Member` (member or admin), `OrgAdmin`,
+  `Learner`, `AnySession` (only `me`), `PasswordChangeAllowed` (only change-password). The default policy is a signed-in
+  adult without a pending start password. The instance admin follows with LP-203.
+- Every action has exactly one `[Authorize(Policy = …)]` or `[AllowAnonymous]` – never `[Authorize]` alone, never
+  `Roles = …`, nothing on the controller class. `Architecture.Tests/EndpointPolicyTests` holds the endpoint → policy
+  table; a new endpoint or a changed policy updates that table and this matrix in the same commit.
+- The policy is only the first gate: every service checks the membership (and the role) in the database again and loads
+  entities only together with the organization (IDs are sequential and guessable). Foreign IDs answer like unknown ones (404).
+
 ## 10. C# conventions
 
 - Code, identifiers, comments, commit messages and documentation in **English**; only UI strings are German (and English).

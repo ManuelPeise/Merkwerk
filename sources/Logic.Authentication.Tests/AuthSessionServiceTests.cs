@@ -29,6 +29,46 @@ public sealed class AuthSessionServiceTests(AuthDatabaseFixture database)
     }
 
     [Fact]
+    public async Task LoginAsync_OrgAdminMembership_ReturnsOrgAdminRole()
+    {
+        var user = await _context.CreateUserAsync(Password, role: OrganizationRole.OrgAdmin);
+
+        var result = await _context.SessionsAsync(s => s.LoginAsync(user.Email!, Password, default));
+
+        Assert.Equal(AuthRoles.OrgAdmin, result.Session!.Role);
+    }
+
+    [Fact]
+    public async Task LoginAsync_NoMembership_ReturnsNoMembershipWithoutSession()
+    {
+        var user = await _context.CreateUserAsync(Password, role: null);
+
+        var result = await _context.SessionsAsync(s => s.LoginAsync(user.Email!, Password, default));
+
+        Assert.Equal(LoginStatus.NoMembership, result.Status);
+        Assert.Null(result.Session);
+    }
+
+    [Fact]
+    public async Task LoginAsync_NoMembershipAndWrongPassword_ReturnsInvalidCredentials()
+    {
+        // The membership check comes after the password check, so it reveals nothing about unknown passwords.
+        var user = await _context.CreateUserAsync(Password, role: null);
+
+        var result = await _context.SessionsAsync(s => s.LoginAsync(user.Email!, "wrong-password", default));
+
+        Assert.Equal(LoginStatus.InvalidCredentials, result.Status);
+    }
+
+    [Fact]
+    public async Task SignInAsync_NoMembership_ReturnsNull()
+    {
+        var user = await _context.CreateUserAsync(Password, role: null);
+
+        Assert.Null(await _context.SessionsAsync(s => s.SignInAsync(user.Id, default)));
+    }
+
+    [Fact]
     public async Task LoginAsync_WrongPassword_ReturnsInvalidCredentials()
     {
         var user = await _context.CreateUserAsync(Password);
@@ -183,6 +223,24 @@ public sealed class AuthSessionServiceTests(AuthDatabaseFixture database)
 
         // Assert
         Assert.Null(refreshed);
+    }
+
+    [Fact]
+    public async Task RefreshAsync_MembershipRemovedMeanwhile_ReturnsNullAndEndsSession()
+    {
+        // Arrange: signed in, then removed from the family.
+        var user = await _context.CreateUserAsync(Password);
+        var login = (await _context.SessionsAsync(s => s.LoginAsync(user.Email!, Password, default))).Session!;
+        await _context.RemoveMembershipsAsync(user.Id);
+
+        // Act
+        var refreshed = await _context.SessionsAsync(s => s.RefreshAsync(login.RefreshToken, default));
+        await _context.AddToNewFamilyAsync(user.Id, OrganizationRole.Member);
+        var afterRejoining = await _context.SessionsAsync(s => s.RefreshAsync(login.RefreshToken, default));
+
+        // Assert: no session, and the chain stays revoked even with a membership again.
+        Assert.Null(refreshed);
+        Assert.Null(afterRejoining);
     }
 
     [Fact]

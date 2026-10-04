@@ -95,6 +95,71 @@ public sealed class LearnerServiceTests(SharedDatabaseFixture database)
         Assert.Equal("Mia", Assert.Single(await ListAsync(familyA)).DisplayName);
     }
 
+    [Fact]
+    public async Task UpdateAndDeleteAsync_ByMember_AreRejected()
+    {
+        // Arrange: the admin created a child; a plain member tries to change it (LP-107).
+        var family = await UseFamilyAsync();
+        var learner = (await CreateAsync(family, new LearnerInput("Mia", 2, "fox"))).Learner!;
+        var (memberId, _) = await _context.CreateAccountAsync();
+        await _context.AddMemberAsync(family.OrganizationId, memberId, OrganizationRole.Member);
+
+        // Act
+        var updated = await _context.RunAsync<ILearnerService, LearnerChangeResult>(s => s.UpdateAsync(
+            family.OrganizationId, memberId, learner.Id, new LearnerInput("Lea", 1, "owl"), default));
+        var deleted = await _context.RunAsync<ILearnerService, LearnerChangeStatus>(s => s.DeleteAsync(
+            family.OrganizationId, memberId, learner.Id, default));
+
+        // Assert
+        Assert.Equal(LearnerChangeStatus.NotFound, updated.Status);
+        Assert.Equal(LearnerChangeStatus.NotFound, deleted);
+        Assert.Equal("Mia", Assert.Single(await ListAsync(family)).DisplayName);
+    }
+
+    [Fact]
+    public async Task ListAsync_ByMember_ReturnsChildren()
+    {
+        var family = await UseFamilyAsync();
+        await CreateAsync(family, new LearnerInput("Mia", 2, "fox"));
+        var (memberId, _) = await _context.CreateAccountAsync();
+        await _context.AddMemberAsync(family.OrganizationId, memberId, OrganizationRole.Member);
+
+        var learners = await _context.RunAsync<ILearnerService, IReadOnlyList<LearnerInfo>?>(s =>
+            s.ListAsync(family.OrganizationId, memberId, default));
+
+        Assert.Single(learners!);
+    }
+
+    [Fact]
+    public async Task DeleteAsync_LearnerOfOtherFamily_NotFound()
+    {
+        // Arrange: a child of family A; the admin of family B guesses its id.
+        var familyA = await UseFamilyAsync();
+        var learner = (await CreateAsync(familyA, new LearnerInput("Mia", 2, "fox"))).Learner!;
+        var familyB = await UseFamilyAsync();
+
+        // Act
+        var deleted = await _context.RunAsync<ILearnerService, LearnerChangeStatus>(s => s.DeleteAsync(
+            familyB.OrganizationId, familyB.OwnerUserId, learner.Id, default));
+
+        // Assert
+        Assert.Equal(LearnerChangeStatus.NotFound, deleted);
+        _context.CurrentUser.OrganizationId = familyA.OrganizationId;
+        Assert.Single(await ListAsync(familyA));
+    }
+
+    [Fact]
+    public async Task ListAsync_AdultOfOtherFamily_ReturnsNull()
+    {
+        var familyA = await UseFamilyAsync();
+        var familyB = await UseFamilyAsync();
+
+        var learners = await _context.RunAsync<ILearnerService, IReadOnlyList<LearnerInfo>?>(s =>
+            s.ListAsync(familyA.OrganizationId, familyB.OwnerUserId, default));
+
+        Assert.Null(learners);
+    }
+
     /// <summary>New family; the "request" works in it from now on.</summary>
     private async Task<Family> UseFamilyAsync()
     {

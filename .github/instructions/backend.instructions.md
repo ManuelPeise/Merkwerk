@@ -11,17 +11,21 @@ Authoritative: [`AGENTS.md`](../../AGENTS.md) and the ADRs in `docs/adr/`. Summa
 
 | Project | Contains | May reference |
 | --- | --- | --- |
-| `Web.Core` | Startup project. `Bundels/` (service registration, pipeline), `Services/ApiControllers/<Module>/` (controller + `Dtos/`), `Services/Cookies/` | `Logic.*` (and `Data.*` for DI registration only) |
-| `Logic.Authentication` | Login, token issuing, refresh-token rotation (`IAuthSessionService`, `TokenService`), `DI/` | `Logic.Shared`, `Data.Accessor` |
-| `Logic.Organizations`, `Logic.Devices` (other `Logic.*`) | Setup, families, invitations, child profiles (LP-105); device pairing and children's sessions (`IDeviceService`, `ILearnerSessionService`, LP-106), `DI/` | `Logic.Shared`, `Logic.Notifications`, `Logic.Authentication`, `Data.Accessor` |
-| `Logic.Shared` | Pure logic shared by modules (graders, generators); no I/O | – |
-| `Data.Database` | Entities, `MerkwerkDbContext`, configurations, interceptors, migrations | – |
-| `Data.Accessor` | Repositories, `IUnitOfWork`, `IUnitOfWorkFactory` – the only way to the database | `Data.Database` |
+| `Web.Core` | Startup project. `Bundles/` (service registration, pipeline, startup migration), `Services/ApiControllers/<Module>/` (controller + `Dtos/`), `Services/Cookies/` | `Logic.*`, `Shared` (and `Data.*` for DI registration only) |
+| `Logic.Authentication` | Login, token issuing, refresh-token rotation (`TokenService`), accounts, `DI/` | `Logic.Shared`, `Logic.Notifications`, `Data.Accessor`, `Shared` |
+| `Logic.Organizations`, `Logic.Devices` (other `Logic.*`) | Setup, families, invitations, child profiles (LP-105); device pairing, children's sessions and the combined refresh/logout `ISessionService` (LP-106), `DI/` | `Logic.Shared`, `Logic.Notifications`, `Logic.Authentication`, `Data.Accessor`, `Shared` |
+| `Logic.Notifications` | Mail templates, SMTP, public links | `Logic.Shared`, `Shared` |
+| `Logic.Shared` | Service interfaces (`Logic.Shared.Interfaces`); later pure graders and generators, no I/O | `Shared` |
+| `Shared` | Enums (`Shared.Enums`) and service models (`Shared.Models.<Module>`) | – |
+| `Data.Database` | Entities (`<Name>Entity`), `MerkwerkDbContext`, configurations, interceptors, migrations | `Shared` |
+| `Data.Accessor` | Repositories, `IUnitOfWork`, `IUnitOfWorkFactory` – the only way to the database | `Data.Database`, `Shared` |
 
 - **Controllers are transport only**: validate → call a `Logic.*` service → return a DTO. No business logic in `Web.Core`.
 - `Logic.*` never references ASP.NET Core (no `HttpContext`, cookies, JwtBearer) and never uses `MerkwerkDbContext`
   directly – only `Data.Accessor`.
 - Entities never leave the server; only DTOs (`sealed record`, in `Services/ApiControllers/<Module>/Dtos/`).
+- Where types live: service interfaces in `Logic.Shared.Interfaces`, enums in `Shared.Enums`, service models in
+  `Shared.Models`; API DTOs stay in `Web.Core` (enforced by `Architecture.Tests`).
 
 ## API
 
@@ -29,8 +33,11 @@ Authoritative: [`AGENTS.md`](../../AGENTS.md) and the ADRs in `docs/adr/`. Summa
   kebab-case. Action methods end in `Async` and take a `CancellationToken`.
 - Errors as `ProblemDetails` (never exception details). Validation via data annotations on DTO **parameters**
   (`[Required] string Email`), which `[ApiController]` turns into `ValidationProblemDetails`.
-- Every endpoint has `[Authorize]` with a policy (`Learner`, `Member`, `OrgAdmin`, `InstanceAdmin`) except explicitly
-  anonymous ones (login, setup, invitation details/accept, device pairing). Document responses with `[ProducesResponseType]`.
+- Every action has exactly one `[Authorize(Policy = …)]` (`Member`, `OrgAdmin`, `Learner`, `AnySession`,
+  `PasswordChangeAllowed`) or `[AllowAnonymous]` (login, setup, invitation details/accept, device endpoints) – never a bare
+  `[Authorize]`, never `Roles = …`. Permission matrix: AGENTS.md §9; `Architecture.Tests/EndpointPolicyTests` must be
+  updated with every new endpoint. Services check membership and role in the database again. Document responses with
+  `[ProducesResponseType]`.
 - Auth cookies only through `AuthCookieWriter` (HttpOnly, SameSite=Strict, Secure outside development).
 - Children's tokens (role `Learner`, `sub` = learner id, claims `learner_id`, `device_id`) pass only the policies
   `Learner` and `AnySession` (me); `CurrentUserId` is `null` for them (LP-106). Device endpoints identify the device by
@@ -45,12 +52,14 @@ Authoritative: [`AGENTS.md`](../../AGENTS.md) and the ADRs in `docs/adr/`. Summa
   `IgnoreQueryFilters()` only in `Administration` and in the named lookups listed in AGENTS.md §5 (LP-105 login/invitations,
   LP-106 anonymous device requests – filtered explicitly by the device's organization).
 - Migrations: `dotnet ef migrations add <Name> -p Data.Database -s Web.Core`; small, schema and data never mixed,
-  in a commit of their own.
+  in a commit of their own. The app applies pending migrations at startup (ADR 016).
 
 ## C# conventions
 
 - File-scoped namespaces, one type per file, namespace = project + folder. Interfaces `I…`, abstract base classes `A…`.
-- `sealed` by default, `record` for DTOs, primary constructors for DI; no service locator, no static state.
+- `sealed` by default, `record` for DTOs. Classes with DI use a constructor that assigns `private readonly` fields
+  (`private readonly IMyService _myService;`) – no primary constructors for DI (records, DTOs and tests may keep them).
+  No service locator, no static state.
 - Options classes with `SectionName`, bound with `ValidateOnStart`. Secrets from user secrets / environment only.
 - NuGet versions only in `sources/Directory.Packages.props` (Central Package Management) – `<PackageReference>` without
   `Version`. Ask before adding a package.

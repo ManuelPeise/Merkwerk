@@ -54,7 +54,9 @@ public sealed class AuthenticationController : ApiControllerBase
                 _cookieWriter.Write(Response, result.Session!);
                 return SessionDto.From(result.Session!);
             case LoginStatus.EmailNotConfirmed:
-                return Problem(statusCode: StatusCodes.Status403Forbidden, title: "E-mail not confirmed");
+                return Problem(statusCode: StatusCodes.Status403Forbidden, title: ProblemTitles.EmailNotConfirmed);
+            case LoginStatus.NoMembership:
+                return Problem(statusCode: StatusCodes.Status403Forbidden, title: ProblemTitles.NoMembership);
             default:
                 // Same answer for unknown user, wrong password and locked account – don't reveal which one it was.
                 return Problem(statusCode: StatusCodes.Status401Unauthorized, title: "Invalid credentials");
@@ -178,8 +180,15 @@ public sealed class AuthenticationController : ApiControllerBase
             return FieldProblem(nameof(request.NewPassword), result);
         }
 
-        _cookieWriter.Write(Response, result.Session!);
-        return SessionDto.From(result.Session!);
+        if (result.Session is null)
+        {
+            // Password changed, but the adult belongs to no family any more (LP-107) – no new session.
+            _cookieWriter.Delete(Response);
+            return Unauthorized();
+        }
+
+        _cookieWriter.Write(Response, result.Session);
+        return SessionDto.From(result.Session);
     }
 
     /// <summary>

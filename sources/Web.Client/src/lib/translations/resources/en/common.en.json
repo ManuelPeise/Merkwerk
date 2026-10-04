@@ -78,6 +78,8 @@
   "notificationNotFound": "This could not be found.",
   "notificationUnexpectedError": "Something went wrong. Please try again.",
   "notificationLoginFailed": "Email or password is incorrect. After too many attempts, signing in is blocked for a short time.",
+  "notificationNoMembership": "You no longer belong to a family. Please ask an adult of the family to invite you again.",
+  "notificationEmailNotConfirmed": "Please confirm your email address first. You will find the link in our email.",
   "notificationResetLinkSent": "If an account exists for this email, we have sent you a link to reset your password.",
   "notificationPasswordChanged": "Your password has been changed. You can sign in now.",
   "notificationEmailConfirmed": "Your email address is confirmed.",

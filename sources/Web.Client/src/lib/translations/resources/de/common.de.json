@@ -78,6 +78,8 @@
   "notificationNotFound": "Das wurde leider nicht gefunden.",
   "notificationUnexpectedError": "Etwas ist schiefgelaufen. Bitte versuche es noch einmal.",
   "notificationLoginFailed": "E-Mail oder Passwort stimmt nicht. Nach zu vielen Versuchen ist die Anmeldung kurz gesperrt.",
+  "notificationNoMembership": "Du gehörst zu keiner Familie mehr. Bitte lass dich von einem Erwachsenen der Familie neu einladen.",
+  "notificationEmailNotConfirmed": "Bitte bestätige zuerst deine E-Mail-Adresse. Den Link findest du in unserer E-Mail.",
   "notificationResetLinkSent": "Wenn es zu dieser E-Mail ein Konto gibt, haben wir dir einen Link zum Zurücksetzen geschickt.",
   "notificationPasswordChanged": "Dein Passwort wurde geändert. Du kannst dich jetzt anmelden.",
   "notificationEmailConfirmed": "Deine E-Mail-Adresse ist bestätigt.",

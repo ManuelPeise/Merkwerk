@@ -1,6 +1,8 @@
+using Data.Accessor.Abstractions;
 using Data.Accessor.DI;
 using Data.Database.Abstractions;
 using Data.Database.Entities.Identity;
+using Data.Database.Entities.Organizations;
 using Logic.Authentication.DI;
 using Logic.Notifications.DI;
 using Logic.Shared.Interfaces;
@@ -9,6 +11,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
+using Shared.Enums;
 using Web.Core.Bundles;
 
 namespace Logic.Authentication.Tests.Infrastructure;
@@ -77,8 +80,14 @@ public sealed class AuthTestContext
         return true;
     });
 
-    /// <summary>Creates an adult with a unique e-mail address and returns it.</summary>
-    public async Task<UserEntity> CreateUserAsync(string password = "correct-horse-battery", bool emailConfirmed = true)
+    /// <summary>
+    /// Creates an adult with a unique e-mail address and returns it. By default the adult gets an own family with the
+    /// given role – without a membership there is no session (LP-107).
+    /// </summary>
+    public async Task<UserEntity> CreateUserAsync(
+        string password = "correct-horse-battery",
+        bool emailConfirmed = true,
+        OrganizationRole? role = OrganizationRole.Member)
     {
         var email = $"{Guid.NewGuid():N}@example.org";
         var user = new UserEntity { UserName = email, Email = email, EmailConfirmed = emailConfirmed, DisplayName = "Anna" };
@@ -90,7 +99,37 @@ public sealed class AuthTestContext
             return true;
         });
 
+        if (role is { } membershipRole)
+        {
+            await AddToNewFamilyAsync(user.Id, membershipRole);
+        }
+
         return user;
+    }
+
+    /// <summary>A new family with the user as its only member.</summary>
+    public async Task AddToNewFamilyAsync(long userId, OrganizationRole role)
+    {
+        await using var scope = Services.CreateAsyncScope();
+        await using var unitOfWork = scope.ServiceProvider.GetRequiredService<IUnitOfWorkFactory>().Create();
+        var organization = new OrganizationEntity { Name = "Familie Test" };
+        unitOfWork.Organizations.Add(organization);
+        await unitOfWork.SaveChangesAsync();
+        unitOfWork.Memberships.Add(new MembershipEntity { OrganizationId = organization.Id, UserId = userId, Role = role });
+        await unitOfWork.SaveChangesAsync();
+    }
+
+    /// <summary>Deletes every membership of the user, like a removal from the family.</summary>
+    public async Task RemoveMembershipsAsync(long userId)
+    {
+        await using var scope = Services.CreateAsyncScope();
+        await using var unitOfWork = scope.ServiceProvider.GetRequiredService<IUnitOfWorkFactory>().Create();
+
+        while (await unitOfWork.Memberships.FindPrimaryForUserAsync(userId, default) is { } membership)
+        {
+            unitOfWork.Memberships.Remove(membership);
+            await unitOfWork.SaveChangesAsync();
+        }
     }
 
     public Task<UserEntity?> FindUserAsync(long id) =>

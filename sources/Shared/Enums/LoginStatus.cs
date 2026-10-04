@@ -12,4 +12,10 @@ public enum LoginStatus
 
     /// <summary>Password correct, but the e-mail address is not confirmed yet.</summary>
     EmailNotConfirmed,
+
+    /// <summary>
+    /// Password correct, but the adult belongs to no family (any more), e.g. after being removed (LP-107). Without a
+    /// membership there is no role, so no session is started.
+    /// </summary>
+    NoMembership,
 }

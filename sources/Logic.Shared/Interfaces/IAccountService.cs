@@ -33,6 +33,9 @@ public interface IAccountService
 
     Task<long?> FindUserIdByEmailAsync(string email, CancellationToken cancellationToken);
 
+    /// <summary>Ends every session of the user (revokes all refresh tokens), e.g. after removal from the family (LP-107).</summary>
+    Task EndSessionsAsync(long userId, CancellationToken cancellationToken);
+
     /// <summary>Name and address of the given users (member lists, invitation checks).</summary>
     Task<IReadOnlyList<AccountInfo>> GetAccountsAsync(IReadOnlyCollection<long> userIds, CancellationToken cancellationToken);
 }

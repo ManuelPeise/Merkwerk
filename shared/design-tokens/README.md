@@ -16,6 +16,10 @@ The React application's active MUI theme is
 component styles implement the design direction directly. The app does not currently import `tokens.json`, and there is
 no generated `tokens.css`, token-to-theme generator, or design-token synchronization test in the repository.
 
+Exception: the subject colors (`color.subject.*`, LP-109) are mirrored as `theme.palette.subject.*`, and
+`Architecture.Tests/SubjectPaletteTests` reads `tokens.json` to check that every color of the fixed subject choice exists
+and has at least 4.5:1 contrast to white.
+
 When changing design values, check the active React theme and this reference file. Keep them aligned when the reference
 values are intended to apply to the web client; do not assume changing `tokens.json` alone changes the application.
 

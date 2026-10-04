@@ -10,6 +10,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\Logic.Authentication\Logic.Authentication.csproj" />
+    <ProjectReference Include="..\Logic.Content\Logic.Content.csproj" />
     <ProjectReference Include="..\Logic.Devices\Logic.Devices.csproj" />
     <ProjectReference Include="..\Logic.Notifications\Logic.Notifications.csproj" />
     <ProjectReference Include="..\Logic.Organizations\Logic.Organizations.csproj" />

@@ -1,18 +1,31 @@
 // The only place that imports @mui/icons-material (AGENTS.md §3). Add icons here, use them by their app name.
+import AbcIconMui from '@mui/icons-material/Abc';
 import AddIconMui from '@mui/icons-material/Add';
+import AutoStoriesIconMui from '@mui/icons-material/AutoStories';
 import BackspaceIconMui from '@mui/icons-material/Backspace';
+import CalculateIconMui from '@mui/icons-material/Calculate';
 import CheckIconMui from '@mui/icons-material/Check';
 import DeleteOutlineIconMui from '@mui/icons-material/DeleteOutlined';
 import EditIconMui from '@mui/icons-material/Edit';
+import ExtensionIconMui from '@mui/icons-material/Extension';
 import FaceIconMui from '@mui/icons-material/Face';
 import GroupsIconMui from '@mui/icons-material/Groups';
+import LanguageIconMui from '@mui/icons-material/Language';
+import LibraryBooksIconMui from '@mui/icons-material/LibraryBooks';
 import LinkOffIconMui from '@mui/icons-material/LinkOff';
 import LockResetIconMui from '@mui/icons-material/LockReset';
 import LogoutIconMui from '@mui/icons-material/Logout';
 import MenuIconMui from '@mui/icons-material/Menu';
+import MusicNoteIconMui from '@mui/icons-material/MusicNote';
+import PaletteIconMui from '@mui/icons-material/Palette';
+import PublicIconMui from '@mui/icons-material/Public';
+import ScienceIconMui from '@mui/icons-material/Science';
+import SportsSoccerIconMui from '@mui/icons-material/SportsSoccer';
+import StarIconMui from '@mui/icons-material/Star';
 import SupervisorAccountIconMui from '@mui/icons-material/SupervisorAccount';
 import SwitchAccountIconMui from '@mui/icons-material/SwitchAccount';
 import TabletAndroidIconMui from '@mui/icons-material/TabletAndroid';
+import TranslateIconMui from '@mui/icons-material/Translate';
 import VisibilityIconMui from '@mui/icons-material/Visibility';
 import VisibilityOffIconMui from '@mui/icons-material/VisibilityOff';
 
@@ -23,6 +36,7 @@ export const AdminIcon = SupervisorAccountIconMui;
 export const SwitchAccountIcon = SwitchAccountIconMui;
 export const FamilyIcon = GroupsIconMui;
 export const DevicesIcon = TabletAndroidIconMui;
+export const SubjectsIcon = LibraryBooksIconMui;
 
 // Landing page
 export const ChildIcon = FaceIconMui;
@@ -42,3 +56,17 @@ export const ResetPasswordIcon = LockResetIconMui;
 
 // Devices page
 export const UnpairIcon = LinkOffIconMui;
+
+// Subjects (LP-109) – keys mapped in src/lib/subjects/subjectStyles.ts
+export const SubjectGermanIcon = AbcIconMui;
+export const SubjectEnglishIcon = TranslateIconMui;
+export const SubjectMathIcon = CalculateIconMui;
+export const SubjectBookIcon = AutoStoriesIconMui;
+export const SubjectMusicIcon = MusicNoteIconMui;
+export const SubjectScienceIcon = ScienceIconMui;
+export const SubjectArtIcon = PaletteIconMui;
+export const SubjectSportIcon = SportsSoccerIconMui;
+export const SubjectGlobeIcon = PublicIconMui;
+export const SubjectLanguageIcon = LanguageIconMui;
+export const SubjectPuzzleIcon = ExtensionIconMui;
+export const SubjectStarIcon = StarIconMui;

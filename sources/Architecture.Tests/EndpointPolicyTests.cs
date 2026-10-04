@@ -44,6 +44,11 @@ public sealed class EndpointPolicyTests
         ["Learners.Update"] = AuthorizationPolicies.OrgAdmin,
         ["Learners.Delete"] = AuthorizationPolicies.OrgAdmin,
 
+        // Subjects are instance-wide; the family's admin maintains them (LP-109, later the instance admin).
+        ["Subjects.List"] = AuthorizationPolicies.Member,
+        ["Subjects.Create"] = AuthorizationPolicies.OrgAdmin,
+        ["Subjects.Update"] = AuthorizationPolicies.OrgAdmin,
+
         // Every adult of the family may pair and unpair devices (decision 04.10.2026).
         ["Devices.PairingCode"] = AuthorizationPolicies.Member,
         ["Devices.List"] = AuthorizationPolicies.Member,

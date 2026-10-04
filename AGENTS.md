@@ -45,6 +45,7 @@ sources/Merkwerk.slnx
              Logic.Notifications    Mails: IMailService (SMTP via MailKit), templates de/en, IPublicLinkBuilder
              Logic.Organizations    First-run setup, families, memberships, invitations, child profiles (LP-105)
              Logic.Devices          Device pairing, paired devices, children's sessions on them (LP-106)
+             Logic.Content          Learning content: subjects (LP-109), from LP-110 exercises, check rules, generators
              Logic.Shared           Service interfaces (Interfaces/), pure logic shared by modules (graders, generators) – no I/O
   03 Data    Data.Database          Entities, MerkwerkDbContext, configurations, interceptors, migrations
              Data.Accessor          Repositories and unit of work – the only way to reach the database
@@ -55,6 +56,7 @@ sources/Merkwerk.slnx
              Logic.Notifications.Tests   Template renderer, links; delivery into Mailpit (Testcontainers, needs Docker)
              Logic.Organizations.Tests   Setup, invitations, members, learners against MySQL (Testcontainers, needs Docker)
              Logic.Devices.Tests         Pairing, devices, children's sessions against MySQL (Testcontainers, needs Docker)
+             Logic.Content.Tests         Subjects (later exercises) against MySQL (Testcontainers, needs Docker)
 ```
 
 | Project | May reference |
@@ -88,7 +90,8 @@ sources/Merkwerk.slnx
 
 ## 4. Modules
 
-Business areas: `Organizations` (setup, memberships, invitations, child profiles – `Logic.Organizations`, LP-105), `Learners`, `Exercises`, `Assignments`, `Practice` (attempts, answers, learning state),
+Business areas: `Organizations` (setup, memberships, invitations, child profiles – `Logic.Organizations`, LP-105), `Content`
+(subjects, later exercises – `Logic.Content`, LP-109), `Learners`, `Exercises`, `Assignments`, `Practice` (attempts, answers, learning state),
 `Progress`, `WordLists`, later `Sharing`, `Administration`. Authentication lives in `Logic.Authentication`
 (`IAuthSessionService`, `TokenService`, options); device pairing and children's sessions live in `Logic.Devices`
 (`IDeviceService`, `ILearnerSessionService`, LP-106) and use `TokenService` for the learner tokens.
@@ -183,6 +186,8 @@ Roles hang on the membership (`MembershipEntity.Role`), never on the user. An ad
 | Solve assigned exercises (from LP-115) | yes | – | – |
 | See the family (adults, children) and its devices | – | yes | yes |
 | Pair devices (pairing code) and unpair them | – | yes | yes |
+| See subjects | – | yes | yes |
+| Create and change subjects (instance-wide; later the instance admin, LP-203) | – | no | yes |
 | Create and assign exercises, see results (from LP-110) | – | yes | yes |
 | Create, change and delete children | – | no | yes |
 | Invite adults, revoke invitations, remove members, issue start passwords | – | no | yes |

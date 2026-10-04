@@ -1,5 +1,27 @@
 import { createTheme } from '@mui/material';
 
+/** Subject colors (LP-109) – the same values as color.subject.* in shared/design-tokens/tokens.json. */
+export interface ISubjectPalette {
+    german: string;
+    english: string;
+    math: string;
+    purple: string;
+    orange: string;
+    magenta: string;
+    slate: string;
+    olive: string;
+}
+
+declare module '@mui/material/styles' {
+    interface Palette {
+        subject: ISubjectPalette;
+    }
+
+    interface PaletteOptions {
+        subject?: ISubjectPalette;
+    }
+}
+
 /**
  * Design direction A "Ruhiger Lernraum" (LP-008).
  * Andika must be self-hosted (no font CDN in the children's client); until the woff2 files are
@@ -16,6 +38,17 @@ export const theme = createTheme({
         background: { default: '#FAF8F4', paper: '#FFFFFF' },
         text: { primary: '#1E2328', secondary: '#5B636B' },
         divider: '#E3DED5',
+        // White icons and text on every subject color have at least 4.5:1 (checked in Architecture.Tests).
+        subject: {
+            german: '#C0504D',
+            english: '#3A75A8',
+            math: '#3B7F49',
+            purple: '#7A4FA3',
+            orange: '#A3560F',
+            magenta: '#A8336C',
+            slate: '#51606E',
+            olive: '#5E6B1E',
+        },
     },
     shape: { borderRadius: 16 },
     typography: {

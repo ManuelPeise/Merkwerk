@@ -65,6 +65,11 @@ public sealed class EndpointPolicyTests
         ["Exercises.Archive"] = AuthorizationPolicies.Member,
         ["Exercises.GeneratePreview"] = AuthorizationPolicies.Member,
 
+        // Every adult of the family assigns exercises and takes them back (LP-114).
+        ["Assignments.List"] = AuthorizationPolicies.Member,
+        ["Assignments.Assign"] = AuthorizationPolicies.Member,
+        ["Assignments.Revoke"] = AuthorizationPolicies.Member,
+
         // Every adult of the family may pair and unpair devices (decision 04.10.2026).
         ["Devices.PairingCode"] = AuthorizationPolicies.Member,
         ["Devices.List"] = AuthorizationPolicies.Member,

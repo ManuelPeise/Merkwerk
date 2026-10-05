@@ -1,3 +1,4 @@
+using Logic.Content.Assignments;
 using Logic.Content.Exercises;
 using Logic.Content.Generators;
 using Logic.Content.Grading;
@@ -11,13 +12,15 @@ namespace Logic.Content.DI;
 public static class ServiceCollectionExtensions
 {
     /// <summary>
-    /// Subjects (LP-109), exercises (LP-110), grading (LP-111) and generators (LP-131). Needs Data.Accessor and an <see cref="IMemberService"/> (Logic.Organizations).
+    /// Subjects (LP-109), exercises (LP-110), grading (LP-111), generators (LP-131) and assignments (LP-114). Needs
+    /// Data.Accessor and an <see cref="IMemberService"/> (Logic.Organizations).
     /// </summary>
     public static IServiceCollection AddMerkwerkContent(this IServiceCollection services)
     {
         services.TryAddSingleton(TimeProvider.System);
         services.AddScoped<ISubjectService, SubjectService>();
         services.AddScoped<IExerciseService, ExerciseService>();
+        services.AddScoped<IAssignmentService, AssignmentService>();
 
         // Graders are stateless; one per question type, picked by GradingService.
         services.AddSingleton<IQuestionGrader, ChoiceGrader>();

@@ -1,6 +1,7 @@
 using System.Linq.Expressions;
 using Data.Database.Abstractions;
 using Data.Database.Converters;
+using Data.Database.Entities.Assignments;
 using Data.Database.Entities.Base;
 using Data.Database.Entities.Devices;
 using Data.Database.Entities.Exercises;
@@ -69,6 +70,8 @@ public class MerkwerkDbContext : IdentityUserContext<UserEntity, long>
 
     public DbSet<ExerciseVersionEntity> ExerciseVersions => Set<ExerciseVersionEntity>();
 
+    public DbSet<AssignmentEntity> Assignments => Set<AssignmentEntity>();
+
     /// <summary>Read by the query filter on every query (EF parameterizes context members).</summary>
     protected long? CurrentOrganizationId => _currentUser.OrganizationId;
 
@@ -78,6 +81,8 @@ public class MerkwerkDbContext : IdentityUserContext<UserEntity, long>
         configurationBuilder.Properties<DateTime?>().HaveConversion<NullableUtcDateTimeConverter>();
         configurationBuilder.Properties<DateTimeOffset>().HaveConversion<UtcDateTimeOffsetConverter>();
         configurationBuilder.Properties<DateTimeOffset?>().HaveConversion<NullableUtcDateTimeOffsetConverter>();
+        configurationBuilder.Properties<DateOnly>().HaveConversion<DateOnlyConverter>().HaveColumnType("date");
+        configurationBuilder.Properties<DateOnly?>().HaveConversion<NullableDateOnlyConverter>().HaveColumnType("date");
     }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)

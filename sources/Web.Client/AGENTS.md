@@ -51,7 +51,7 @@ src/
     <name>Page/            One folder per route: <Name>Page.tsx, plus components/ and types/ if needed
     authentication/        All auth pages, each in its own <name>Page/ folder (login, setup, invitation, …)
   components/
-    input/                 Form fields (FormFieldContainer, FormTextField, FormPinField, FormCheckbox, …), buttons, ChoiceTile
+    input/                 Form fields (FormFieldContainer, FormTextField, FormDateField, FormPinField, FormCheckbox, …), buttons, ChoiceTile
     layout/                PublicLayout, AdminLayout, KidsLayout, AuthCard, HeaderBar, NavigationDrawer
       components/          Parts used only by layouts (LanguageSwitch)
     kids/                  Children's UI: AvatarImage, ProfileTile, NumberKeypad, DotArray, TimesTableMatrix
@@ -63,16 +63,18 @@ src/
     typography/            Text building blocks (Caption)
   hooks/                   Reusable hooks (useXyz.ts): useAuthentication, useTranslation, useForm, useReducer,
                            useSetupStatus, useSetupCompletion, useDeviceStatus, useIsOrgAdmin,
-                           useExerciseEditor (state and actions of the exercise editor, LP-112)
+                           useExerciseEditor (state and actions of the exercise editor, LP-112),
+                           useExerciseAssignments (assignments of one exercise and the assign form, LP-114)
   lib/
     api/                   apiClient, StatelessApi, toApiError, getFieldErrors + one folder per backend module
                            (<module>Api.ts, <module>Types.ts): authentication, setup, invitations, members,
-                           learners, groups, devices, subjects, exercises
+                           learners, groups, devices, subjects, exercises, assignments
     auth/                  roles.ts (role constants), authValidation.ts (field checks for auth forms)
     subjects/              subjectStyles.ts: fixed choice of subject colors, icons, languages (mirrors SubjectRules.cs)
     exercises/             Editor model of questions (editorQuestion.ts), conversion to/from the API shape
                            (editorQuestions.ts, cloze syntax "Der [Hund|Dackel] bellt."), limits and checks
                            (exerciseRules.ts, mirrors ExerciseRules.cs/QuestionValidator.cs), question type names
+    assignments/           dueDates.ts: due dates as "yyyy-MM-dd" local days (date input, API) and their display
     theme/                 MUI theme (design direction A, LP-008), incl. palette.subject.* (subject colors)
     translations/          i18n.ts, i18next.d.ts, translationKeys.ts, resources/<lang>/<namespace>.<lang>.json
     utils.ts               Small pure helpers (validation, …)

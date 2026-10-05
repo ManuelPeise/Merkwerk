@@ -14,7 +14,7 @@ import {
 import { Link, useNavigate } from 'react-router-dom';
 import ExerciseStateChip from 'src/components/exercises/ExerciseStateChip';
 import LoadingIndicator from 'src/components/feedback/LoadingIndicator';
-import { ArchiveIcon, RestoreIcon } from 'src/components/icons/AppIcons';
+import { ArchiveIcon, AssignIcon, RestoreIcon } from 'src/components/icons/AppIcons';
 import FormButton from 'src/components/input/FormButton';
 import FormCheckbox from 'src/components/input/FormCheckbox';
 import SubjectBadge from 'src/components/subjects/SubjectBadge';
@@ -26,8 +26,12 @@ import type { ISubject } from 'src/lib/api/subjects/subjectsTypes';
 import { uiTestId, uiTestIdOf } from 'src/lib/testing/uiTestId';
 import type { NotificationKey } from 'src/lib/translations/translationKeys';
 import { toExerciseEditor } from 'src/navigation/routes';
+import AssignmentsDialog from 'src/pages/exercisesPage/components/AssignmentsDialog';
 
-/** /admin/exercises - the family's exercises (LP-112). Every adult creates, edits, publishes and archives them. */
+/**
+ * /admin/exercises - the family's exercises (LP-112). Every adult creates, edits, publishes and archives them, and assigns
+ * published ones to children and groups (LP-114).
+ */
 const ExercisesPage: React.FC = () => {
     const { getResource } = useTranslation();
     const navigate = useNavigate();
@@ -37,6 +41,7 @@ const ExercisesPage: React.FC = () => {
     const [showArchived, setShowArchived] = React.useState(false);
     const [errorKey, setErrorKey] = React.useState<NotificationKey | null>(null);
     const [busyId, setBusyId] = React.useState<number | null>(null);
+    const [assigning, setAssigning] = React.useState<IExerciseSummary | null>(null);
 
     React.useEffect(() => {
         const controller = new AbortController();
@@ -120,6 +125,7 @@ const ExercisesPage: React.FC = () => {
                         {visible.map((exercise) => {
                             const subject = subjectOf(exercise.subjectId);
                             const isArchived = exercise.state === 'archived';
+                            const canAssign = exercise.state === 'published';
 
                             return (
                                 <ListItem
@@ -130,24 +136,40 @@ const ExercisesPage: React.FC = () => {
                                         String(exercise.id),
                                     )}
                                     secondaryAction={
-                                        <IconButton
-                                            disabled={busyId === exercise.id}
-                                            aria-label={getResource(
-                                                isArchived
-                                                    ? 'labelRestoreExercise'
-                                                    : 'labelArchiveExercise',
-                                                { title: exercise.title },
+                                        <Box sx={{ display: 'flex', gap: 0.5 }}>
+                                            {canAssign && (
+                                                <IconButton
+                                                    aria-label={getResource('labelAssignExercise', {
+                                                        title: exercise.title,
+                                                    })}
+                                                    data-testid={uiTestIdOf(
+                                                        uiTestId('exercises-assign'),
+                                                        String(exercise.id),
+                                                    )}
+                                                    onClick={() => setAssigning(exercise)}
+                                                >
+                                                    <AssignIcon />
+                                                </IconButton>
                                             )}
-                                            onClick={() => void handleArchive(exercise)}
-                                        >
-                                            {isArchived ? <RestoreIcon /> : <ArchiveIcon />}
-                                        </IconButton>
+                                            <IconButton
+                                                disabled={busyId === exercise.id}
+                                                aria-label={getResource(
+                                                    isArchived
+                                                        ? 'labelRestoreExercise'
+                                                        : 'labelArchiveExercise',
+                                                    { title: exercise.title },
+                                                )}
+                                                onClick={() => void handleArchive(exercise)}
+                                            >
+                                                {isArchived ? <RestoreIcon /> : <ArchiveIcon />}
+                                            </IconButton>
+                                        </Box>
                                     }
                                 >
                                     <ListItemButton
                                         component={Link}
                                         to={toExerciseEditor(exercise.id)}
-                                        sx={{ pr: 8 }}
+                                        sx={{ pr: canAssign ? 14 : 8 }}
                                     >
                                         <ListItemText
                                             disableTypography
@@ -201,6 +223,15 @@ const ExercisesPage: React.FC = () => {
                         })}
                     </List>
                 </Card>
+            )}
+
+            {assigning && (
+                <AssignmentsDialog
+                    open
+                    exercise={assigning}
+                    uiTestId={uiTestId('exercises-assign-dialog')}
+                    onClose={() => setAssigning(null)}
+                />
             )}
         </Stack>
     );

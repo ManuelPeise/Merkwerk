@@ -45,7 +45,7 @@ sources/Merkwerk.slnx
              Logic.Notifications    Mails: IMailService (SMTP via MailKit), templates de/en, IPublicLinkBuilder
              Logic.Organizations    First-run setup, families, memberships, invitations, child profiles (LP-105)
              Logic.Devices          Device pairing, paired devices, children's sessions on them (LP-106)
-             Logic.Content          Learning content: subjects (LP-109), from LP-110 exercises, check rules, generators
+             Logic.Content          Learning content: subjects (LP-109), exercises (LP-110), check rules, generators, assignments (LP-114)
              Logic.Shared           Service interfaces (Interfaces/), pure logic shared by modules (graders, generators) – no I/O
   03 Data    Data.Database          Entities, MerkwerkDbContext, configurations, interceptors, migrations
              Data.Accessor          Repositories and unit of work – the only way to reach the database

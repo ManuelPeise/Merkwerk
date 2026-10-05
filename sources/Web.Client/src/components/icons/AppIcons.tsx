@@ -6,6 +6,7 @@ import ArrowBackIconMui from '@mui/icons-material/ArrowBack';
 import ArrowDownwardIconMui from '@mui/icons-material/ArrowDownward';
 import ArrowUpwardIconMui from '@mui/icons-material/ArrowUpward';
 import AssignmentIconMui from '@mui/icons-material/Assignment';
+import AssignmentIndIconMui from '@mui/icons-material/AssignmentInd';
 import AutoStoriesIconMui from '@mui/icons-material/AutoStories';
 import BackspaceIconMui from '@mui/icons-material/Backspace';
 import CalculateIconMui from '@mui/icons-material/Calculate';
@@ -69,6 +70,7 @@ export const MoveDownIcon = ArrowDownwardIconMui;
 export const ArchiveIcon = ArchiveIconMui;
 export const RestoreIcon = UnarchiveIconMui;
 export const RefreshIcon = RefreshIconMui;
+export const AssignIcon = AssignmentIndIconMui;
 
 // Devices page
 export const UnpairIcon = LinkOffIconMui;

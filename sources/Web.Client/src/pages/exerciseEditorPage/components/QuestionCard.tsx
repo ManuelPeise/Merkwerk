@@ -93,7 +93,11 @@ const QuestionCard: React.FC<IProps> = (props) => {
             <CardContent>
                 <Stack spacing={2}>
                     <Box sx={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', gap: 1 }}>
-                        <Typography variant="h3" sx={{ flexGrow: 1 }}>
+                        <Typography
+                            variant="h2"
+                            component="h3"
+                            sx={{ flexGrow: 1, fontSize: '1.25rem' }}
+                        >
                             {getResource('captionQuestionNumber', {
                                 number,
                                 type: getResource(questionTypeLabels[question.type]),

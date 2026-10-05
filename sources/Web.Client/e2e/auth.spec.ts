@@ -10,13 +10,17 @@ test.describe('auth smoke', () => {
         await expect(page).toHaveURL(/\/login$/);
         await expectUniqueTestIds(page);
 
-        await page.getByLabel(t('labelEmail')).fill(owner.email);
-        await page.getByLabel(t('labelPassword')).fill('wrong-password');
+        await page.getByRole('textbox', { name: t('labelEmail'), exact: true }).fill(owner.email);
+        await page
+            .getByRole('textbox', { name: t('labelPassword'), exact: true })
+            .fill('wrong-password');
         await page.getByRole('button', { name: t('labelLogin') }).click();
 
         await expect(page.getByText(t('notificationLoginFailed'))).toBeVisible();
 
-        await page.getByLabel(t('labelPassword')).fill(owner.password);
+        await page
+            .getByRole('textbox', { name: t('labelPassword'), exact: true })
+            .fill(owner.password);
         await page.getByRole('button', { name: t('labelLogin') }).click();
 
         await expect(page).toHaveURL(/\/admin$/);

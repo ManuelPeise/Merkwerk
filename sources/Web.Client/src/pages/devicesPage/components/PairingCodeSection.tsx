@@ -111,6 +111,7 @@ const PairingCodeSection: React.FC = () => {
                                 <Typography
                                     component="p"
                                     variant="h2"
+                                    data-testid={uiTestId('devices-pairing-code-value')}
                                     sx={{
                                         fontVariantNumeric: 'tabular-nums',
                                         letterSpacing: '0.2em',

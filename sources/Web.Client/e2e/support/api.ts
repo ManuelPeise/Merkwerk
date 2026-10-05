@@ -57,6 +57,29 @@ export const initializeInstance = async (
     }
 };
 
+interface IEntityWithId {
+    id: number;
+}
+
+/** Deletes every learner and group of the signed-in family, so repeated runs stay below the family limits. */
+export const deleteFamilyData = async (request: APIRequestContext): Promise<void> => {
+    for (const area of ['groups', 'learners']) {
+        const response = await request.get(`${apiPath}/${area}/list`);
+
+        if (!response.ok()) {
+            throw new Error(`GET /${area}/list failed with HTTP ${response.status()}`);
+        }
+
+        for (const { id } of await readJson<IEntityWithId[]>(response)) {
+            const deleted = await postJson(request, `/${area}/delete`, { id });
+
+            if (!deleted.ok()) {
+                throw new Error(`POST /${area}/delete failed with HTTP ${deleted.status()}`);
+            }
+        }
+    }
+};
+
 export const loginAsAdult = async (
     request: APIRequestContext,
     credentials: ILoginCredentials,

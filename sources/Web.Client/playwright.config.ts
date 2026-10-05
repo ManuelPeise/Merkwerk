@@ -2,6 +2,8 @@ import { defineConfig, devices } from '@playwright/test';
 
 export default defineConfig({
     testDir: 'e2e',
+    // Sets up the instance once (first-run setup with the E2E owner) before any worker starts.
+    globalSetup: './e2e/support/globalSetup.ts',
     testMatch: '**/*.spec.ts',
     timeout: 30_000,
     fullyParallel: false,
@@ -9,6 +11,8 @@ export default defineConfig({
     use: {
         baseURL: 'http://localhost:65350',
         testIdAttribute: 'data-testid',
+        // The tests use the German texts (e2e/support/i18n.ts); the UI follows the browser language.
+        locale: 'de-DE',
         trace: 'on-first-retry',
         video: 'retain-on-failure',
         screenshot: 'only-on-failure',
@@ -16,11 +20,11 @@ export default defineConfig({
     projects: [
         {
             name: 'chromium-desktop',
-            use: { ...devices['Desktop Chrome'] },
+            use: { ...devices['Desktop Chrome'], locale: 'de-DE' },
         },
         {
             name: 'chromium-pixel-7',
-            use: { ...devices['Pixel 7'] },
+            use: { ...devices['Pixel 7'], locale: 'de-DE' },
         },
     ],
     webServer: {

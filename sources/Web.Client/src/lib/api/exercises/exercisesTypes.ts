@@ -41,11 +41,7 @@ export interface IFlashcardPayload {
 }
 
 export type QuestionPayload =
-    | IChoicePayload
-    | ITextPayload
-    | IClozePayload
-    | IMatchPayload
-    | IFlashcardPayload;
+    IChoicePayload | ITextPayload | IClozePayload | IMatchPayload | IFlashcardPayload;
 
 export interface IChoiceSolution {
     type: 'choice';
@@ -80,11 +76,7 @@ export interface IFlashcardSolution {
 }
 
 export type QuestionSolution =
-    | IChoiceSolution
-    | ITextSolution
-    | IClozeSolution
-    | IMatchSolution
-    | IFlashcardSolution;
+    IChoiceSolution | ITextSolution | IClozeSolution | IMatchSolution | IFlashcardSolution;
 
 export interface IQuestion {
     payload: QuestionPayload;

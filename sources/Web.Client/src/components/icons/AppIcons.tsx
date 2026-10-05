@@ -1,6 +1,11 @@
 ﻿// The only place that imports @mui/icons-material (AGENTS.md Â§3). Add icons here, use them by their app name.
 import AbcIconMui from '@mui/icons-material/Abc';
 import AddIconMui from '@mui/icons-material/Add';
+import ArchiveIconMui from '@mui/icons-material/Archive';
+import ArrowBackIconMui from '@mui/icons-material/ArrowBack';
+import ArrowDownwardIconMui from '@mui/icons-material/ArrowDownward';
+import ArrowUpwardIconMui from '@mui/icons-material/ArrowUpward';
+import AssignmentIconMui from '@mui/icons-material/Assignment';
 import AutoStoriesIconMui from '@mui/icons-material/AutoStories';
 import BackspaceIconMui from '@mui/icons-material/Backspace';
 import CalculateIconMui from '@mui/icons-material/Calculate';
@@ -19,6 +24,7 @@ import MenuIconMui from '@mui/icons-material/Menu';
 import MusicNoteIconMui from '@mui/icons-material/MusicNote';
 import PaletteIconMui from '@mui/icons-material/Palette';
 import PublicIconMui from '@mui/icons-material/Public';
+import RefreshIconMui from '@mui/icons-material/Refresh';
 import ScienceIconMui from '@mui/icons-material/Science';
 import SportsSoccerIconMui from '@mui/icons-material/SportsSoccer';
 import StarIconMui from '@mui/icons-material/Star';
@@ -26,6 +32,7 @@ import SupervisorAccountIconMui from '@mui/icons-material/SupervisorAccount';
 import SwitchAccountIconMui from '@mui/icons-material/SwitchAccount';
 import TabletAndroidIconMui from '@mui/icons-material/TabletAndroid';
 import TranslateIconMui from '@mui/icons-material/Translate';
+import UnarchiveIconMui from '@mui/icons-material/Unarchive';
 import VisibilityIconMui from '@mui/icons-material/Visibility';
 import VisibilityOffIconMui from '@mui/icons-material/VisibilityOff';
 
@@ -37,6 +44,8 @@ export const SwitchAccountIcon = SwitchAccountIconMui;
 export const FamilyIcon = GroupsIconMui;
 export const DevicesIcon = TabletAndroidIconMui;
 export const SubjectsIcon = LibraryBooksIconMui;
+export const ExercisesIcon = AssignmentIconMui;
+export const BackIcon = ArrowBackIconMui;
 
 // Landing page
 export const ChildIcon = FaceIconMui;
@@ -53,6 +62,13 @@ export const AddIcon = AddIconMui;
 export const EditIcon = EditIconMui;
 export const DeleteIcon = DeleteOutlineIconMui;
 export const ResetPasswordIcon = LockResetIconMui;
+
+// Exercises (LP-112)
+export const MoveUpIcon = ArrowUpwardIconMui;
+export const MoveDownIcon = ArrowDownwardIconMui;
+export const ArchiveIcon = ArchiveIconMui;
+export const RestoreIcon = UnarchiveIconMui;
+export const RefreshIcon = RefreshIconMui;
 
 // Devices page
 export const UnpairIcon = LinkOffIconMui;

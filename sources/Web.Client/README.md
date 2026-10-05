@@ -54,6 +54,15 @@ Playwright tests are in `e2e/` and run against the local stack. Start prerequisi
 3. Mailpit on `http://localhost:8025`
 4. UI dev server (Playwright starts this automatically via `webServer` if not running)
 
+The tests need a **fresh database**: a global setup creates the E2E owner on first run (and stops with a clear message
+if the instance was already set up by hand). The browser language is set to German (`de-DE`), because the tests use the
+German texts.
+
+```powershell
+cd sources
+dotnet ef database drop -p Data.Database -s Web.Core --force   # then restart Web.Core (it migrates at startup)
+```
+
 Run smoke tests:
 
 ```powershell

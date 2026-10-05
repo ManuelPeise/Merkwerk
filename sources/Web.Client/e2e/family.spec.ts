@@ -10,7 +10,7 @@ test.describe('family smoke', () => {
         void admin;
 
         const childOneName = uniqueName('Kind-Eins');
-        const childOneEditedName = uniqueName('Kind-Eins-Bearbeitet');
+        const childOneEditedName = uniqueName('Kind-Neu');
         const childTwoName = uniqueName('Kind-Zwei');
         const groupName = uniqueName('Gruppe');
 
@@ -36,8 +36,10 @@ test.describe('family smoke', () => {
 
         await page.getByRole('button', { name: t('labelAddGroup') }).click();
         await page.getByLabel(t('labelGroupName')).fill(groupName);
-        await page.getByLabel(childOneEditedName).click();
-        await page.getByLabel(childTwoName).click();
+        // Scoped to the dialog: the list rows behind it have "<name> bearbeiten/löschen" buttons.
+        const groupDialog = page.getByRole('dialog');
+        await groupDialog.getByRole('checkbox', { name: childOneEditedName }).click();
+        await groupDialog.getByRole('checkbox', { name: childTwoName }).click();
         await page.getByRole('button', { name: t('labelSave') }).click();
 
         const groupItem = page
@@ -50,7 +52,10 @@ test.describe('family smoke', () => {
         await page
             .getByRole('button', { name: t('labelDeleteChild', { name: childTwoName }) })
             .click();
-        await page.getByRole('button', { name: t('labelDelete') }).click();
+        await page
+            .getByRole('dialog')
+            .getByRole('button', { name: t('labelDelete'), exact: true })
+            .click();
 
         await expect(page.getByText(childTwoName)).toHaveCount(0);
         await expect(groupItem).toContainText(childOneEditedName);

@@ -57,17 +57,22 @@ src/
     kids/                  Children's UI: AvatarImage, ProfileTile, NumberKeypad, DotArray, TimesTableMatrix
     feedback/              LoadingIndicator, ConfirmDialog (shared by admin pages), …
     subjects/              SubjectBadge – the only way a subject is shown (color + icon + name), adults and children
+    exercises/             ExerciseStateChip (draft / published vN / archived) – list and editor (LP-112)
     providers/             Context providers and their contexts (authentication, setup) – context in its own .ts file
     icons/                 AppIcons – the only place that imports @mui/icons-material
     typography/            Text building blocks (Caption)
   hooks/                   Reusable hooks (useXyz.ts): useAuthentication, useTranslation, useForm, useReducer,
-                           useSetupStatus, useSetupCompletion, useDeviceStatus, useIsOrgAdmin
+                           useSetupStatus, useSetupCompletion, useDeviceStatus, useIsOrgAdmin,
+                           useExerciseEditor (state and actions of the exercise editor, LP-112)
   lib/
     api/                   apiClient, StatelessApi, toApiError, getFieldErrors + one folder per backend module
                            (<module>Api.ts, <module>Types.ts): authentication, setup, invitations, members,
-                           learners, groups, devices, subjects
+                           learners, groups, devices, subjects, exercises
     auth/                  roles.ts (role constants), authValidation.ts (field checks for auth forms)
     subjects/              subjectStyles.ts: fixed choice of subject colors, icons, languages (mirrors SubjectRules.cs)
+    exercises/             Editor model of questions (editorQuestion.ts), conversion to/from the API shape
+                           (editorQuestions.ts, cloze syntax "Der [Hund|Dackel] bellt."), limits and checks
+                           (exerciseRules.ts, mirrors ExerciseRules.cs/QuestionValidator.cs), question type names
     theme/                 MUI theme (design direction A, LP-008), incl. palette.subject.* (subject colors)
     translations/          i18n.ts, i18next.d.ts, translationKeys.ts, resources/<lang>/<namespace>.<lang>.json
     utils.ts               Small pure helpers (validation, …)
